@@ -37,6 +37,7 @@
                 <version>${project.parent.version}</version>
             </plugin>
         </plugins>
+        <finalName>workshop-main-server</finalName>
     </build>
 
 </project>
