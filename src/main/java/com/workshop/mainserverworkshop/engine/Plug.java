@@ -6,21 +6,21 @@ public class Plug {
     private String plugName;
     private int indexInList;
     private int port;
-    private PlugsMediator devicesMediator;
+    private PlugsMediator plugsMediator;
 
-    public Plug(Process i_Process, int i_port, String i_PlugName, PlugsMediator i_DevicesMediator)
+    public Plug(Process i_Process, int i_port, String i_PlugName, PlugsMediator i_PlugsMediator)
     {
         process = i_Process;
         plugName = i_PlugName;
         port = i_port;
-        devicesMediator = i_DevicesMediator;
+        plugsMediator = i_PlugsMediator;
         status = false;
     }
 
     public String off()
     {
         status = false;
-        return devicesMediator.sendTurnOffRequestToPlug(port);
+        return plugsMediator.sendTurnOffRequestToPlug(port);
     }
 
     public Process getProcess() {

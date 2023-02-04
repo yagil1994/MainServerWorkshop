@@ -19,27 +19,30 @@ public class OnOffScreen  {
     public OnOffScreen()
     {
         gson = new Gson();
-        plugsMediator = new PlugsMediator();
+        plugsMediator =  PlugsMediator.getInstance();
     }
 
-    @GetMapping("/workshop/on_off_screen")
+    @GetMapping("/workshop/on_off_screen/getAppliancesStatus")
     public ResponseEntity<String> GeAppliancesStatus()
     {
         JsonObject body = new JsonObject();
         int i = 1;
         List<Plug> plugs = plugsMediator.getPlugsList();
+        if(plugs.isEmpty())
+        {
+            body.addProperty("result: ", "no plugs are connected yet!");
+        }
         for (Plug plug: plugs) {
-            body.addProperty("appliance"+i, plugs.get(i).getOnOffStatus());
+            body.addProperty(plug.getPlugName()+i,"status is: "+ plug.getOnOffStatus() + " Is in port: " + plug.getPort());
             i++;
         }
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
-    @GetMapping("/workshop/change_mode")
+    @GetMapping("/workshop/on_off_screen/change_mode")
     public ResponseEntity<String> changeApplianceMode(@RequestParam String applianceIndex){
         JsonObject body = new JsonObject();
-        Integer indexToFlip = Integer.parseInt(applianceIndex);
-
+        int indexToFlip = Integer.parseInt(applianceIndex);
         boolean lastState = changeMode(indexToFlip);
         body.addProperty("result", "appliance number "+ indexToFlip + " was before: " + lastState + " and it's " + !lastState);
         plugsMediator.getPlugAccordingToIndex(indexToFlip).updateStatus(!lastState);
