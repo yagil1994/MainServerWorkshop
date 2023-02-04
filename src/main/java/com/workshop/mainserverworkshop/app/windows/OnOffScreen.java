@@ -7,20 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 @RestController
 public class OnOffScreen  {
     private List<Boolean> appliances;
     private Gson gson ;
-    private LinkedList<Process> processes;
-
 
     public OnOffScreen()
     {
@@ -35,7 +28,6 @@ public class OnOffScreen  {
         appliances.set(6, false);
         appliances.set(7, false);
         appliances.set(8, false);
-        processes = new LinkedList<>();
     }
 
     @GetMapping("/workshop/on_off_screen")
@@ -47,17 +39,6 @@ public class OnOffScreen  {
             body.addProperty("appliance"+i, appliances.indexOf(appliance));
             i++;
         }
-        //todo remember to change the location of the jar in the next file according to your pc
-        ProcessBuilder builder = new ProcessBuilder("java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar","--sever.port=8832");
-
-        try {
-            processes.add(builder.start());
-            System.out.println("success");
-        }
-        catch (Exception ignore){
-            System.out.println("failed");
-        }
-
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
@@ -81,18 +62,5 @@ public class OnOffScreen  {
         return state;
     }
 
-    @GetMapping("/workshop/close_app")
-    public void closeApp() //move it
-    {
-        LinkedList<Process> tmpList = processes;
-        System.out.println("amount of processes I am going to kill: " +processes.size() );
-        for (Process process: processes) {
-            process.destroy();
-            process.destroyForcibly();
-            tmpList.remove(process);
-        }
-        processes = tmpList;
-        System.out.println("running processes now: " +processes.size());
-    }
 }
 
