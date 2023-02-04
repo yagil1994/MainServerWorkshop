@@ -28,8 +28,12 @@ public class OnOffScreen  {
         JsonObject body = new JsonObject();
         int i = 1;
         List<Plug> plugs = plugsMediator.getPlugsList();
+        if(plugs.isEmpty())
+        {
+            body.addProperty("result: ", "no plugs are connected yet!");
+        }
         for (Plug plug: plugs) {
-            body.addProperty("appliance"+i, plug.getOnOffStatus());
+            body.addProperty(plug.getPlugName()+i,"status is: "+ plug.getOnOffStatus());
             i++;
         }
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));

@@ -9,21 +9,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 public class PlugsMediator {
     private static PlugsMediator instance = null;
-    private List<Plug> PlugsList;
+    private List<Plug> plugsList;
     private final Gson gson;
     private final OkHttpClient httpClient;
     private boolean sleepModeOn;
-    private LinkedList<Plug> PlugsThatSignedUpForSleepMode;
+    private List<Plug> plugsThatSignedUpForSleepMode;
 
     private PlugsMediator(){
-        PlugsList = new LinkedList<>();
-        PlugsThatSignedUpForSleepMode = new LinkedList<>();
+        plugsList = new ArrayList<>();
+        plugsThatSignedUpForSleepMode = new ArrayList<>();
         sleepModeOn = false;
         gson = new Gson();
         httpClient = new OkHttpClient();
@@ -53,16 +53,17 @@ public class PlugsMediator {
     @GetMapping("/workshop/plugMediator/close_app")
     public void closeApp()
     {
-        List<Plug> tmpList = PlugsList;
-        System.out.println("amount of processes I am going to kill: " + PlugsList.size() );
-        for (Plug plug: PlugsList) {
+        List<Plug> tmpList = plugsList;
+        System.out.println("amount of processes I am going to kill: " + plugsList.size() );
+        for (Plug plug: plugsList) {
             Process process = plug.getProcess();
             process.destroy();
             process.destroyForcibly();
-            tmpList.remove(process);
+            tmpList.remove(plug);
         }
-        PlugsList = tmpList;
-        System.out.println("running processes now: " + PlugsList.size());
+
+        plugsList = tmpList;
+        System.out.println("running processes now: " + plugsList.size());
     }
 
     public String sendTurnOffRequestToPlug(int port)
@@ -87,9 +88,8 @@ public class PlugsMediator {
 
     public Plug getPlugAccordingToIndex(int index)
     {
-        return PlugsList.get(index);
+        return plugsList.get(index);
     }
 
-    public  List<Plug> getPlugsList(){return PlugsList;}
-
+    public  List<Plug> getPlugsList(){return plugsList;}
 }
