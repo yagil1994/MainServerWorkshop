@@ -45,6 +45,16 @@ public class OnOffScreen  {
         }
 
         ProcessBuilder builder = new ProcessBuilder("java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--sever.port=8832");
+
+//        Runnable processRunner = () ->
+//        {
+//            try {
+//                builder.start();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        };
+//        new Thread(processRunner).start();
         try {
             processes.add(builder.start());
             System.out.println("success");
@@ -79,9 +89,15 @@ public class OnOffScreen  {
     @GetMapping("/workshop/close_app")
     public void closeApp() //move it
     {
+        LinkedList<Process> tmpList = processes;
+        System.out.println("amount of processes I am going to kill: " +processes.size() );
         for (Process process: processes) {
             process.destroy();
+            process.destroyForcibly();
+            tmpList.remove(process);
         }
+        processes = tmpList;
+        System.out.println("running processes now: " +processes.size());
     }
 }
 
