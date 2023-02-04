@@ -5,14 +5,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 
 @RestController
-public class OnOffScreen {
+public class OnOffScreen  {
     private List<Boolean> appliances;
     private Gson gson ;
 
@@ -41,6 +40,15 @@ public class OnOffScreen {
             i++;
         }
 
+        ProcessBuilder builder = new ProcessBuilder("java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--sever.port=8802");
+        try {
+            builder.start();
+            System.out.println("success");
+        }
+        catch (Exception ignore){
+            System.out.println("failed");
+        }
+
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
@@ -63,7 +71,5 @@ public class OnOffScreen {
 
         return state;
     }
-
-
 }
 
