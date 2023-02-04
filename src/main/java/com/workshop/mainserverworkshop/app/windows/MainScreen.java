@@ -42,4 +42,23 @@ public class MainScreen {
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
+
+    @GetMapping("/workshop/plugMediator/close_app")
+    public ResponseEntity<String> closeApp()
+    {
+        JsonObject body = new JsonObject();
+        System.out.println("amount of processes I am going to kill: " + plugsMediator.getPlugsList().size() );
+        for (Plug plug: plugsMediator.getPlugsList()) {
+            Process process = plug.getProcess();
+            process.destroy();
+            process.destroyForcibly();
+        }
+
+        plugsMediator.getPlugsList().removeAll(plugsMediator.getPlugsList());
+        System.out.println("running processes now: " + plugsMediator.getPlugsList().size());
+
+        body.addProperty("result: ","all processes have been removed!");
+        port = 1920;
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+    }
 }

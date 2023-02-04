@@ -36,33 +36,12 @@ public class PlugsMediator {
         return instance;
     }
 
-    @GetMapping("/workshop/plugMediator/plug_off")
-    public ResponseEntity<String> plug_off(@RequestParam String i_Plug_index_in_list){
-        JsonObject body = new JsonObject();
-        int plugIndex = Integer.parseInt(i_Plug_index_in_list);
-        Plug plug = getPlugAccordingToIndex(plugIndex);
-        String plugName = plug.getPlugName() + plugIndex;
-        body.addProperty("Main serer side: ", plugName + " is going to be off soon.. ");
-        String responseFromPlug = plug.off();
-        body.addProperty("Plug response: ", responseFromPlug);
-
-        body.addProperty("Plug response: ", sendTurnOffRequestToPlug(plug.getPort()));
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
-    }
-
-    @GetMapping("/workshop/plugMediator/close_app")
-    public void closeApp()
+    public Plug getPlugAccordingToIndex(int index)
     {
-        System.out.println("amount of processes I am going to kill: " + getPlugsList().size() );
-        for (Plug plug: getPlugsList()) {
-            Process process = plug.getProcess();
-            process.destroy();
-            process.destroyForcibly();
-        }
-
-        getPlugsList().removeAll( getPlugsList());
-        System.out.println("running processes now: " + getPlugsList().size());
+        return getPlugsList().get(index);
     }
+
+    public  List<Plug> getPlugsList(){return getInstance().plugsList;}
 
     public String sendTurnOffRequestToPlug(int port)
     {
@@ -84,10 +63,17 @@ public class PlugsMediator {
         return getResponse;
     }
 
-    public Plug getPlugAccordingToIndex(int index)
-    {
-        return plugsList.get(index);
-    }
+    @GetMapping("/workshop/plugMediator/plug_off")
+    public ResponseEntity<String> plug_off(@RequestParam String i_Plug_index_in_list){
+        JsonObject body = new JsonObject();
+        int plugIndex = Integer.parseInt(i_Plug_index_in_list);
+        Plug plug = getPlugAccordingToIndex(plugIndex);
+        String plugName = plug.getPlugName() + plugIndex;
+        body.addProperty("Main serer side: ", plugName + " is going to be off soon.. ");
+        String responseFromPlug = plug.off();
+        body.addProperty("Plug response: ", responseFromPlug);
 
-    public  List<Plug> getPlugsList(){return getInstance().plugsList;}
+        body.addProperty("Plug response: ", sendTurnOffRequestToPlug(plug.getPort()));
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+    }
 }
