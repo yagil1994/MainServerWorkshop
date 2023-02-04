@@ -14,14 +14,14 @@ import java.util.List;
 
 @RestController
 public class PlugsMediator {
+    private static PlugsMediator instance = null;
     private List<Plug> PlugsList;
-    private Gson gson;
-    private OkHttpClient httpClient;
+    private final Gson gson;
+    private final OkHttpClient httpClient;
     private boolean sleepModeOn;
     private LinkedList<Plug> PlugsThatSignedUpForSleepMode;
 
-    public PlugsMediator()
-    {
+    private PlugsMediator(){
         PlugsList = new LinkedList<>();
         PlugsThatSignedUpForSleepMode = new LinkedList<>();
         sleepModeOn = false;
@@ -29,21 +29,28 @@ public class PlugsMediator {
         httpClient = new OkHttpClient();
     }
 
-    @GetMapping("/workshop/plug_off")
+    public static PlugsMediator getInstance() {
+        if (instance == null) {
+            instance = new PlugsMediator();
+        }
+        return instance;
+    }
+
+    @GetMapping("/workshop/plugMediator/plug_off")
     public ResponseEntity<String> plug_off(@RequestParam String i_Plug_index_in_list){
         JsonObject body = new JsonObject();
-//        int plugIndex = Integer.parseInt(i_Plug_index_in_list);
-//        Plug plug = getPlugAccordingToIndex(plugIndex);
-//        String plugName = plug.getPlugName() + plugIndex;
-//        body.addProperty("Main serer side: ", plugName + " is going to be off soon.. ");
-//        String responseFromPlug = plug.off();
-        //body.addProperty("Plug response: ", responseFromPlug);
+        int plugIndex = Integer.parseInt(i_Plug_index_in_list);
+        Plug plug = getPlugAccordingToIndex(plugIndex);
+        String plugName = plug.getPlugName() + plugIndex;
+        body.addProperty("Main serer side: ", plugName + " is going to be off soon.. ");
+        String responseFromPlug = plug.off();
+        body.addProperty("Plug response: ", responseFromPlug);
 
-        body.addProperty("Plug response: ", sendTurnOffRequestToPlug(1996));
+        body.addProperty("Plug response: ", sendTurnOffRequestToPlug(plug.getPort()));
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
-    @GetMapping("/workshop/close_app")
+    @GetMapping("/workshop/plugMediator/close_app")
     public void closeApp()
     {
         List<Plug> tmpList = PlugsList;
@@ -83,20 +90,6 @@ public class PlugsMediator {
         return PlugsList.get(index);
     }
 
-//    @GetMapping("/workshop/on_off_screen")
-//    public ResponseEntity<String> GeAppliancesStatus()
-//    {
-//        //todo remember to change the location of the jar in the next file according to your pc
-//        ProcessBuilder builder = new ProcessBuilder("java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar","--sever.port=8832");
-//
-//        try {
-//            processesLinkedList.add(builder.start());
-//            System.out.println("success");
-//        }
-//        catch (Exception ignore){
-//            System.out.println("failed");
-//        }
-//    }
     public  List<Plug> getPlugsList(){return PlugsList;}
 
 }
