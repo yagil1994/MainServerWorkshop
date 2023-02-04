@@ -10,18 +10,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 
 @RestController
-public class DevicesMediator {
-    private LinkedList<Plug> PlugsLinkedList;
+public class PlugsMediator {
+    private List<Plug> PlugsList;
     private Gson gson;
     private OkHttpClient httpClient;
     private boolean sleepModeOn;
     private LinkedList<Plug> PlugsThatSignedUpForSleepMode;
 
-    public DevicesMediator()
+    public PlugsMediator()
     {
-        PlugsLinkedList = new LinkedList<>();
+        PlugsList = new LinkedList<>();
         PlugsThatSignedUpForSleepMode = new LinkedList<>();
         sleepModeOn = false;
         gson = new Gson();
@@ -38,26 +39,26 @@ public class DevicesMediator {
 //        String responseFromPlug = plug.off();
         //body.addProperty("Plug response: ", responseFromPlug);
 
-        body.addProperty("Plug response: ", sendTurOffRequestToPlug(1996));
+        body.addProperty("Plug response: ", sendTurnOffRequestToPlug(1996));
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
     @GetMapping("/workshop/close_app")
     public void closeApp()
     {
-        LinkedList<Plug> tmpList = PlugsLinkedList;
-        System.out.println("amount of processes I am going to kill: " + PlugsLinkedList.size() );
-        for (Plug plug: PlugsLinkedList) {
+        List<Plug> tmpList = PlugsList;
+        System.out.println("amount of processes I am going to kill: " + PlugsList.size() );
+        for (Plug plug: PlugsList) {
             Process process = plug.getProcess();
             process.destroy();
             process.destroyForcibly();
             tmpList.remove(process);
         }
-        PlugsLinkedList = tmpList;
-        System.out.println("running processes now: " + PlugsLinkedList.size());
+        PlugsList = tmpList;
+        System.out.println("running processes now: " + PlugsList.size());
     }
 
-    public String sendTurOffRequestToPlug(int port)
+    public String sendTurnOffRequestToPlug(int port)
     {
         String getResponse = null;
         String endPoint = "http://localhost:" + port + "/workshop/plug/off";
@@ -77,9 +78,9 @@ public class DevicesMediator {
         return getResponse;
     }
 
-    private Plug getPlugAccordingToIndex(int index)
+    public Plug getPlugAccordingToIndex(int index)
     {
-        return PlugsLinkedList.get(index);
+        return PlugsList.get(index);
     }
 
 //    @GetMapping("/workshop/on_off_screen")
@@ -96,5 +97,6 @@ public class DevicesMediator {
 //            System.out.println("failed");
 //        }
 //    }
+    public  List<Plug> getPlugsList(){return PlugsList;}
 
 }
