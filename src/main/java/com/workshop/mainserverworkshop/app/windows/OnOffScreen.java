@@ -7,6 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,18 +47,9 @@ public class OnOffScreen  {
             body.addProperty("appliance"+i, appliances.indexOf(appliance));
             i++;
         }
+        //todo remember to change the location of the jar in the next file according to your pc
+        ProcessBuilder builder = new ProcessBuilder("java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar","--sever.port=8832");
 
-        ProcessBuilder builder = new ProcessBuilder("java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--sever.port=8832");
-
-//        Runnable processRunner = () ->
-//        {
-//            try {
-//                builder.start();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        };
-//        new Thread(processRunner).start();
         try {
             processes.add(builder.start());
             System.out.println("success");
