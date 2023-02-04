@@ -8,12 +8,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 @RestController
 public class OnOffScreen  {
     private List<Boolean> appliances;
     private Gson gson ;
+    private LinkedList<Process> processes;
+
 
     public OnOffScreen()
     {
@@ -28,6 +31,7 @@ public class OnOffScreen  {
         appliances.set(6, false);
         appliances.set(7, false);
         appliances.set(8, false);
+        processes = new LinkedList<>();
     }
 
     @GetMapping("/workshop/on_off_screen")
@@ -40,9 +44,9 @@ public class OnOffScreen  {
             i++;
         }
 
-        ProcessBuilder builder = new ProcessBuilder("java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--sever.port=8802");
+        ProcessBuilder builder = new ProcessBuilder("java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--sever.port=8832");
         try {
-            builder.start();
+            processes.add(builder.start());
             System.out.println("success");
         }
         catch (Exception ignore){
@@ -70,6 +74,14 @@ public class OnOffScreen  {
         appliances.set(indexToFlip, !state);
 
         return state;
+    }
+
+    @GetMapping("/workshop/close_app")
+    public void closeApp() //move it
+    {
+        for (Process process: processes) {
+            process.destroy();
+        }
     }
 }
 
