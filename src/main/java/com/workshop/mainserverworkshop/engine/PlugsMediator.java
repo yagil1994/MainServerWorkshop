@@ -53,17 +53,15 @@ public class PlugsMediator {
     @GetMapping("/workshop/plugMediator/close_app")
     public void closeApp()
     {
-        List<Plug> tmpList = plugsList;
-        System.out.println("amount of processes I am going to kill: " + plugsList.size() );
-        for (Plug plug: plugsList) {
+        System.out.println("amount of processes I am going to kill: " + getPlugsList().size() );
+        for (Plug plug: getPlugsList()) {
             Process process = plug.getProcess();
             process.destroy();
             process.destroyForcibly();
-            tmpList.remove(plug);
         }
 
-        plugsList = tmpList;
-        System.out.println("running processes now: " + plugsList.size());
+        getPlugsList().removeAll( getPlugsList());
+        System.out.println("running processes now: " + getPlugsList().size());
     }
 
     public String sendTurnOffRequestToPlug(int port)
@@ -91,5 +89,5 @@ public class PlugsMediator {
         return plugsList.get(index);
     }
 
-    public  List<Plug> getPlugsList(){return plugsList;}
+    public  List<Plug> getPlugsList(){return getInstance().plugsList;}
 }
