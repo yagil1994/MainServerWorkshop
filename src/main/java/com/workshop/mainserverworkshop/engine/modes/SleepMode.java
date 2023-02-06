@@ -5,8 +5,6 @@ public class SleepMode extends java.util.EventObject {
 
     public SleepMode(Object source, String message) {
         super(source);
-
-
         this.message = message;
     }
 

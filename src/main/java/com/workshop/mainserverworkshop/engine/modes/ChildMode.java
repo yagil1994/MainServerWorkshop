@@ -7,9 +7,14 @@ import java.net.URL;
 
 import org.json.JSONObject;
 
-public class ChildMode {
+public class ChildMode extends java.util.EventObject{
     private static final String API_KEY = "AAIzaSyAFaXCh8Xzc20Enjb06QUNV2o1mwaM0o2Q";
+    private final String message;
     private static final int RADIUS = 5; // meters
+    public ChildMode(Object source, String message) {
+        super(source);
+        this.message = message;
+    }
 
     public static void main(String[] args) {
         double lat1, lng1, lat2, lng2;
@@ -127,5 +132,9 @@ public class ChildMode {
         }
 
         return -1;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }
