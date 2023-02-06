@@ -1,6 +1,5 @@
-package com.workshop.mainserverworkshop.mediators;
-import com.google.gson.Gson;
-import com.workshop.mainserverworkshop.engine.Plug;
+package com.workshop.mainserverworkshop.engine;
+import com.workshop.mainserverworkshop.engine.modes.SleepMode;
 import okhttp3.*;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
@@ -11,16 +10,14 @@ import java.util.List;
 public class Plugs_Mediator { //this mediator send http requests to the plugs(the main server behaves here as client)
     private static Plugs_Mediator instance = null;
     private List<Plug> plugsList;
-    private final Gson gson;
     private final OkHttpClient httpClient;
     private boolean sleepModeOn;
-    private List<Plug> plugsThatSignedUpForSleepMode;
+    private List<ISleepModeListener> plugsThatSignedUpForSleepMode;
 
     private Plugs_Mediator(){
         plugsList = new ArrayList<>();
         plugsThatSignedUpForSleepMode = new ArrayList<>();
         sleepModeOn = false;
-        gson = new Gson();
         httpClient = new OkHttpClient();
     }
 
@@ -37,6 +34,19 @@ public class Plugs_Mediator { //this mediator send http requests to the plugs(th
     }
 
     public  List<Plug> getPlugsList(){return getInstance().plugsList;}
+
+    public void addSleepListener(ISleepModeListener sleepListener) {
+        plugsThatSignedUpForSleepMode.add(sleepListener);
+    }
+
+    public void removeSleepListener(ISleepModeListener sleepListener) {
+        plugsThatSignedUpForSleepMode.remove(sleepListener);
+    }
+
+    public void fireEvent(SleepMode sleepEvent) {
+        plugsThatSignedUpForSleepMode.forEach(sleepListener -> sleepListener.handleSleepMode(sleepEvent));
+    }
+    //*****************************************************************************//
 
     public String sendTurnOnOrOffRequestToPlug(int port,boolean turnOn)
     {

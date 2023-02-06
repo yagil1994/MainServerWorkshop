@@ -26,15 +26,13 @@ public class OnOffScreen  {
     public ResponseEntity<String> GetPlugsStatus()
     {
         JsonObject body = new JsonObject();
-        int i = 1;
         List<Plug> plugs = ui_mediator.getPlugs_mediator().getPlugsList();
         if(plugs.isEmpty())
         {
             body.addProperty("result: ", "no plugs are connected yet!");
         }
         for (Plug plug: plugs) {
-            body.addProperty(plug.getPlugName()+i,"status is: "+ plug.getOnOffStatus() + " Is in port: " + plug.getPort());
-            i++;
+            body.addProperty(plug.getPlugName()+ plug.getPlugIndex(),"status is: "+ plug.getOnOffStatus() + " Is in port: " + plug.getPort());
         }
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
