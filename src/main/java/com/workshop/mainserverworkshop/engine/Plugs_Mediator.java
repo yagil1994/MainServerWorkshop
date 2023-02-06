@@ -46,6 +46,8 @@ public class Plugs_Mediator { //this mediator send http requests to the plugs(th
     public void fireEvent(SleepMode sleepEvent) {
         plugsThatSignedUpForSleepMode.forEach(sleepListener -> sleepListener.handleSleepMode(sleepEvent));
     }
+
+    public List<ISleepModeListener> getPlugsThatSignedUpForSleepMode(){return plugsThatSignedUpForSleepMode;}
     //*****************************************************************************//
 
     public String sendTurnOnOrOffRequestToPlug(int port,boolean turnOn)

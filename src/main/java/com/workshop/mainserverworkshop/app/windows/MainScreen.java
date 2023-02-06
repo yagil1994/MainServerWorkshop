@@ -1,6 +1,7 @@
 package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.workshop.mainserverworkshop.engine.ISleepModeListener;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.SleepMode;
 import com.workshop.mainserverworkshop.mediators.UI_Mediator;
@@ -9,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -80,31 +82,22 @@ public class MainScreen {
 
         this.ui_mediator.getPlugs_mediator().getPlugsList().
                 stream().
-                filter((p)->
-                        indexesList.contains(p.getPlugIndex())).
+                filter((t)->
+                        indexesList.contains(t.getPlugIndex())).
                 toList().
                 forEach((t) -> body.addProperty(t.getPlugName() + t.getPlugIndex()," is registered to sleep mode now"));
-
-        body.addProperty("All the plugs that registered are: ","");
-
-        this.ui_mediator.getPlugs_mediator().getPlugsList().
-                stream().
-                toList().
-                forEach((t) -> body.addProperty(t.getPlugName() + t.getPlugIndex()," is registered "));
-
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
-    private void registerPlugsToSleepMode(List<Integer> indexesList)
+    @GetMapping("/workshop/mainScreen/checkRegisteredPlugsToSleepMode")
+    public ResponseEntity<String> checkRegisteredPlugsToSleepMode()
     {
-        this.ui_mediator.getPlugs_mediator().getPlugsList().
-                stream().
-                    filter((p)->
-                        indexesList.contains(p.getPlugIndex())).
-                                 toList().
-                                      forEach((t) -> this.ui_mediator.getPlugs_mediator().addSleepListener(t));
+        JsonObject body = new JsonObject();
+        getPlugsThatRegisteredForSleepMode().
+                forEach((t) -> body.addProperty((t).getPlugName() + (t).getPlugIndex()," is registered "));
 
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
     @GetMapping("/workshop/mainScreen/clickedOnSleepButton")
@@ -114,11 +107,32 @@ public class MainScreen {
         removePlugsToSleepMode();
     }
 
+    private void registerPlugsToSleepMode(List<Integer> indexesList)
+    {
+        this.ui_mediator.getPlugs_mediator().getPlugsList().
+                stream().
+                filter((p)->
+                        indexesList.contains(p.getPlugIndex())).
+                toList().
+                forEach((t) -> this.ui_mediator.getPlugs_mediator().addSleepListener(t));
+
+    }
+
     private void removePlugsToSleepMode()
     {
         this.ui_mediator.getPlugs_mediator().getPlugsList().
                 stream().
                 toList().
                 forEach((t) -> this.ui_mediator.getPlugs_mediator().removeSleepListener(t));
+    }
+
+    public List<Plug> getPlugsThatRegisteredForSleepMode()
+    {
+        List<Plug> plugList = new ArrayList<>();
+        for (ISleepModeListener listener: this.ui_mediator.getPlugs_mediator().getPlugsThatSignedUpForSleepMode()) {
+            plugList.add((Plug)listener);
+        }
+
+        return plugList;
     }
 }
