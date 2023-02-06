@@ -1,22 +1,26 @@
 package com.workshop.mainserverworkshop.engine;
+import com.workshop.mainserverworkshop.engine.modes.SleepMode;
 
-import com.workshop.mainserverworkshop.mediators.Plugs_Mediator;
-
-public class Plug {
+public class Plug implements ISleepModeListener{
     private Process process;
     private boolean status;
     private String plugName;
-    private int indexInList;
     private int port;
+    private int plugIndex;
     private Plugs_Mediator plugsMediator;
 
-    public Plug(Process i_Process, int i_port, String i_PlugName, Plugs_Mediator i_PlugsMediator)
+    public Plug(Process i_Process, int i_port, String i_PlugName, Plugs_Mediator i_PlugsMediator,int i_PlugIndex)
     {
         process = i_Process;
         plugName = i_PlugName;
         port = i_port;
         plugsMediator = i_PlugsMediator;
         status = false;
+        plugIndex = i_PlugIndex;
+    }
+
+    public int getPlugIndex() {
+        return plugIndex;
     }
 
     public String off()
@@ -62,5 +66,10 @@ public class Plug {
        updateStatus(!status);
 
         return !status;
+    }
+
+    @Override
+    public void handleSleepMode(SleepMode sleepEvent) {
+        off();
     }
 }
