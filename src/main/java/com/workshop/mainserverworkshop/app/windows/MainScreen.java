@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -103,7 +102,7 @@ public class MainScreen {
     @GetMapping("/workshop/mainScreen/clickedOnSleepButton")
     public void clickedOnSleepButton()
     {
-        this.ui_mediator.getPlugs_mediator().fireEvent(new SleepMode(this.ui_mediator.getPlugs_mediator(), "fell asleep..."));
+        this.ui_mediator.getPlugs_mediator().fireEventSleep(new SleepMode(this.ui_mediator.getPlugs_mediator(), "fell asleep..."));
         removePlugsToSleepMode();
     }
 
