@@ -2,7 +2,7 @@ package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.workshop.mainserverworkshop.engine.Plug;
-import com.workshop.mainserverworkshop.engine.PlugsMediator;
+import com.workshop.mainserverworkshop.mediators.Plugs_Mediator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class MainScreen {
-    private PlugsMediator plugsMediator;
+    private Plugs_Mediator plugsMediator;
     private Gson gson;
    private int port;
     public MainScreen()
     {
-        plugsMediator = PlugsMediator.getInstance();
+        plugsMediator = Plugs_Mediator.getInstance();
         port = 1920;
         gson = new Gson();
     }
