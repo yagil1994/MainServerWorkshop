@@ -103,7 +103,7 @@ public class MainScreen {
     @GetMapping("/workshop/mainScreen/clickedOnSleepButton")
     public void clickedOnSleepButton()
     {
-        this.ui_mediator.getPlugs_mediator().fireEvent(new SleepMode(this.ui_mediator.getPlugs_mediator(), "fell asleep..."));
+        this.ui_mediator.getPlugs_mediator().fireEventSleep(new SleepMode(this.ui_mediator.getPlugs_mediator(), "fell asleep..."));
         removePlugsToSleepMode();
     }
 

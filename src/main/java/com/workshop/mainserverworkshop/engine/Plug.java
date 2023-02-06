@@ -57,10 +57,6 @@ public class Plug implements ISleepModeListener{
         return status ? "on" :"off";
     }
 
-    public boolean isOn() {
-        return status;
-    }
-
     public boolean flipModeAndReturnPreviousMode()
     {
        updateStatus(!status);

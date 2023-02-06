@@ -43,7 +43,7 @@ public class Plugs_Mediator { //this mediator send http requests to the plugs(th
         plugsThatSignedUpForSleepMode.remove(sleepListener);
     }
 
-    public void fireEvent(SleepMode sleepEvent) {
+    public void fireEventSleep(SleepMode sleepEvent) {
         plugsThatSignedUpForSleepMode.forEach(sleepListener -> sleepListener.handleSleepMode(sleepEvent));
     }
 
