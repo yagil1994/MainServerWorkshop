@@ -2,7 +2,7 @@ package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.workshop.mainserverworkshop.engine.Plug;
-import com.workshop.mainserverworkshop.mediators.Plugs_Mediator;
+import com.workshop.mainserverworkshop.mediators.UI_Mediator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class MainScreen {
-    private Plugs_Mediator plugsMediator;
+    private UI_Mediator ui_mediator;
     private Gson gson;
    private int port;
     public MainScreen()
     {
-        plugsMediator = Plugs_Mediator.getInstance();
+        ui_mediator = UI_Mediator.getInstance();
         port = 1920;
         gson = new Gson();
     }
@@ -36,7 +36,7 @@ public class MainScreen {
             System.out.println(ex.getStackTrace());
         }
 
-        plugsMediator.getPlugsList().add(new Plug(process,port,i_PlugName, plugsMediator));
+        ui_mediator.getPlugs_mediator().getPlugsList().add(new Plug(process,port,i_PlugName,  ui_mediator.getPlugs_mediator()));
         body.addProperty("result:", "new plug added in port: "+ port);
         port++;
 
@@ -47,15 +47,15 @@ public class MainScreen {
     public ResponseEntity<String> closeApp()
     {
         JsonObject body = new JsonObject();
-        System.out.println("amount of processes I am going to kill: " + plugsMediator.getPlugsList().size() );
-        for (Plug plug: plugsMediator.getPlugsList()) {
+        System.out.println("amount of processes I am going to kill: " +  ui_mediator.getPlugs_mediator().getPlugsList().size() );
+        for (Plug plug:  ui_mediator.getPlugs_mediator().getPlugsList()) {
             Process process = plug.getProcess();
             process.destroy();
             process.destroyForcibly();
         }
 
-        plugsMediator.getPlugsList().removeAll(plugsMediator.getPlugsList());
-        System.out.println("running processes now: " + plugsMediator.getPlugsList().size());
+        ui_mediator.getPlugs_mediator().getPlugsList().removeAll( ui_mediator.getPlugs_mediator().getPlugsList());
+        System.out.println("running processes now: " +  ui_mediator.getPlugs_mediator().getPlugsList().size());
 
         body.addProperty("result: ","all processes have been removed!");
         port = 1920;
