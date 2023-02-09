@@ -1,9 +1,10 @@
 package com.workshop.mainserverworkshop.engine.modes;
 
-public class SleepMode extends java.util.EventObject {
+public class GenericMode extends java.util.EventObject{
+
     private final String message;
 
-    public SleepMode(Object source, String message) {
+    public GenericMode(Object source, String message) {
         super(source);
         this.message = message;
     }
@@ -11,4 +12,5 @@ public class SleepMode extends java.util.EventObject {
     public String getMessage() {
         return message;
     }
+
 }

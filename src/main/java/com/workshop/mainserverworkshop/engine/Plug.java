@@ -1,7 +1,7 @@
 package com.workshop.mainserverworkshop.engine;
-import com.workshop.mainserverworkshop.engine.modes.SleepMode;
+import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 
-public class Plug implements ISleepModeListener{
+public class Plug implements IModeListener {
     private Process process;
     private boolean status;
     private String plugName;
@@ -65,7 +65,5 @@ public class Plug implements ISleepModeListener{
     }
 
     @Override
-    public void handleSleepMode(SleepMode sleepEvent) {
-        off();
-    }
+    public void handleMode(GenericMode eventMode) {off();}
 }

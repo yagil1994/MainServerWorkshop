@@ -1,5 +1,5 @@
 package com.workshop.mainserverworkshop.engine;
-import com.workshop.mainserverworkshop.engine.modes.SleepMode;
+import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import okhttp3.*;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
@@ -7,17 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-public class Plugs_Mediator { //this mediator send http requests to the plugs(the main server behaves here as client)
+public class Plugs_Mediator { //this mediator sends http requests to the plugs(the main server behaves here as client)
+    public final int SAFE_MODE_LIST = 0;
+    public final int SLEEP_MODE_LIST = 1;
     private static Plugs_Mediator instance = null;
-    private List<Plug> plugsList;
+    private final List<Plug> plugsList;
     private final OkHttpClient httpClient;
-    private boolean sleepModeOn;
-    private List<ISleepModeListener> plugsThatSignedUpForSleepMode;
+    private boolean sleepModeOn, safeModeOn;
+    private List<List<IModeListener>> signedUpPlugsForModesList;
 
     private Plugs_Mediator(){
         plugsList = new ArrayList<>();
-        plugsThatSignedUpForSleepMode = new ArrayList<>();
-        sleepModeOn = false;
+        signedUpPlugsForModesList = new ArrayList<>();
+        signedUpPlugsForModesList.add(new ArrayList<>());   //for safe list
+        signedUpPlugsForModesList.add(new ArrayList<>());   //for sleep list
+        safeModeOn = sleepModeOn = false;
         httpClient = new OkHttpClient();
     }
 
@@ -35,19 +39,20 @@ public class Plugs_Mediator { //this mediator send http requests to the plugs(th
 
     public  List<Plug> getPlugsList(){return getInstance().plugsList;}
 
-    public void addSleepListener(ISleepModeListener sleepListener) {
-        plugsThatSignedUpForSleepMode.add(sleepListener);
+
+    public void addModeListener(IModeListener modeListener, int modeType) {
+        signedUpPlugsForModesList.get(modeType).add(modeListener);}
+
+    public void removeModeListener(IModeListener modeListener, int modeType) {
+        signedUpPlugsForModesList.get(modeType).remove(modeListener);}
+
+    public void fireEventMode(GenericMode eventMode, int modeType) {
+        signedUpPlugsForModesList.get(modeType).forEach(genericEvent -> genericEvent.handleMode(eventMode));
     }
 
-    public void removeSleepListener(ISleepModeListener sleepListener) {
-        plugsThatSignedUpForSleepMode.remove(sleepListener);
+    public List<IModeListener> getPlugsThatSignedUpForSafeMode(int modeType){
+        return signedUpPlugsForModesList.get(modeType);
     }
-
-    public void fireEventSleep(SleepMode sleepEvent) {
-        plugsThatSignedUpForSleepMode.forEach(sleepListener -> sleepListener.handleSleepMode(sleepEvent));
-    }
-
-    public List<ISleepModeListener> getPlugsThatSignedUpForSleepMode(){return plugsThatSignedUpForSleepMode;}
     //*****************************************************************************//
 
     public String sendTurnOnOrOffRequestToPlug(int port,boolean turnOn)
