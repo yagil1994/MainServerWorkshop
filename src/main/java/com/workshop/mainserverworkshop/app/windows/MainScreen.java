@@ -26,12 +26,12 @@ public class MainScreen {
     }
 
     @GetMapping("/workshop/mainScreen/on_off_screen")
-    public ResponseEntity<String> addNewPlug(@RequestParam String i_PlugName)
+    public ResponseEntity<String> addNewPlug(@RequestParam String i_PlugName, int i_ValidElectricityConsumption, int i_Deviation)
     {
         JsonObject body = new JsonObject();
         Process process = null;
         //String[] command = new String[]{"java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--server.port=" + port};
-        String[] command = new String[]{"java", "-jar", "D:\\workshop\\workshopPlag\\target\\plug-server.jar", "--server.port=" + port};
+        String[] command = new String[]{"java", "-jar", "D:\\workshop\\workshopPlug\\target\\plug-server.jar", "--server.port=" + port};
         ProcessBuilder pb = new ProcessBuilder(command);
         try {
             process =  pb.start();
@@ -40,7 +40,7 @@ public class MainScreen {
             System.out.println(ex.getStackTrace());
         }
         int currentPlusListAmount =   ui_mediator.getPlugs_mediator().getPlugsList().size();
-        ui_mediator.getPlugs_mediator().getPlugsList().add(new Plug(process,port,i_PlugName,  ui_mediator.getPlugs_mediator(), currentPlusListAmount ));
+        ui_mediator.getPlugs_mediator().getPlugsList().add(new Plug(process,port,i_PlugName,  ui_mediator.getPlugs_mediator(), currentPlusListAmount ,i_ValidElectricityConsumption, i_Deviation));
         body.addProperty("result:", "new plug added in port: "+ port);
         port++;
 

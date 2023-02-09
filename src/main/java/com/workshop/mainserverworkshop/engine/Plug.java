@@ -8,8 +8,11 @@ public class Plug implements IModeListener {
     private int port;
     private int plugIndex;
     private Plugs_Mediator plugsMediator;
+    private int validElectricityConsumption;
+    private int deviation;
+    private ElectricityStorage storage;
 
-    public Plug(Process i_Process, int i_port, String i_PlugName, Plugs_Mediator i_PlugsMediator,int i_PlugIndex)
+    public Plug(Process i_Process, int i_port, String i_PlugName, Plugs_Mediator i_PlugsMediator,int i_PlugIndex, int i_ValidElectricityConsumption, int i_Deviation)
     {
         process = i_Process;
         plugName = i_PlugName;
@@ -17,6 +20,9 @@ public class Plug implements IModeListener {
         plugsMediator = i_PlugsMediator;
         status = false;
         plugIndex = i_PlugIndex;
+        validElectricityConsumption = i_ValidElectricityConsumption;
+        deviation = i_Deviation;
+        storage = new ElectricityStorage();
     }
 
     public int getPlugIndex() {

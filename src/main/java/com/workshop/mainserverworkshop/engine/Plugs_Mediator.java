@@ -39,7 +39,6 @@ public class Plugs_Mediator { //this mediator sends http requests to the plugs(t
 
     public  List<Plug> getPlugsList(){return getInstance().plugsList;}
 
-
     public void addModeListener(IModeListener modeListener, int modeType) {
         signedUpPlugsForModesList.get(modeType).add(modeListener);}
 
