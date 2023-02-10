@@ -2,7 +2,7 @@ package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.workshop.mainserverworkshop.engine.Plug;
-import com.workshop.mainserverworkshop.mediators.UI_Mediator;
+import com.workshop.mainserverworkshop.mediators.UIMediator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,20 +13,20 @@ import java.util.List;
 
 @RestController
 public class OnOffScreen  {
-    private UI_Mediator ui_mediator;
+    private UIMediator uiMediator;
     private Gson gson ;
 
     public OnOffScreen()
     {
         gson = new Gson();
-        ui_mediator = UI_Mediator.getInstance();;
+        uiMediator = UIMediator.getInstance();
     }
 
     @GetMapping("/workshop/on_off_screen/getAppliancesStatus")
     public ResponseEntity<String> GetPlugsStatus()
     {
         JsonObject body = new JsonObject();
-        List<Plug> plugs = ui_mediator.getPlugs_mediator().getPlugsList();
+        List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
         if(plugs.isEmpty())
         {
             body.addProperty("result: ", "no plugs are connected yet!");
@@ -41,7 +41,7 @@ public class OnOffScreen  {
     public ResponseEntity<String> flipPlugMode(@RequestParam String i_Plug_index_in_list){
         JsonObject body = new JsonObject();
         int plugIndex = Integer.parseInt(i_Plug_index_in_list);
-        Plug plug =  ui_mediator.getPlugs_mediator().getPlugAccordingToIndex(plugIndex);
+        Plug plug =  uiMediator.getPlugsMediator().getPlugAccordingToIndex(plugIndex);
         boolean wasOn = plug.flipModeAndReturnPreviousMode();
         String translateTrueToOnOrFalseToOff = wasOn? "on" : "off";
         String OppositeTranslateTrueToOnOrFalseToOff = !wasOn? "on" : "off";

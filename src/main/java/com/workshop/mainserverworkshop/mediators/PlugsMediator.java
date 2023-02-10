@@ -1,5 +1,7 @@
-package com.workshop.mainserverworkshop.engine;
+package com.workshop.mainserverworkshop.mediators;
+import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
+import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import okhttp3.*;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
@@ -7,27 +9,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-public class Plugs_Mediator { //this mediator sends http requests to the plugs(the main server behaves here as client)
+public class PlugsMediator { //this mediator sends http requests to the plugs(the main server behaves here as client)
     public final int SAFE_MODE_LIST = 0;
     public final int SLEEP_MODE_LIST = 1;
-    private static Plugs_Mediator instance = null;
+    private static PlugsMediator instance = null;
     private final List<Plug> plugsList;
     private final OkHttpClient httpClient;
-    private boolean sleepModeOn, safeModeOn;
     private List<List<IModeListener>> signedUpPlugsForModesList;
 
-    private Plugs_Mediator(){
+    private PlugsMediator(){
         plugsList = new ArrayList<>();
         signedUpPlugsForModesList = new ArrayList<>();
         signedUpPlugsForModesList.add(new ArrayList<>());   //for safe list
         signedUpPlugsForModesList.add(new ArrayList<>());   //for sleep list
-        safeModeOn = sleepModeOn = false;
         httpClient = new OkHttpClient();
     }
 
-    public static Plugs_Mediator getInstance() {
+    public static PlugsMediator getInstance() {
         if (instance == null) {
-            instance = new Plugs_Mediator();
+            instance = new PlugsMediator();
         }
         return instance;
     }
