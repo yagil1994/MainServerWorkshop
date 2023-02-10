@@ -31,14 +31,11 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
         return instance;
     }
-
     public Plug getPlugAccordingToIndex(int index)
     {
         return getPlugsList().get(index);
     }
-
     public  List<Plug> getPlugsList(){return getInstance().plugsList;}
-
     public void addModeListener(IModeListener modeListener, int modeType) {
         signedUpPlugsForModesList.get(modeType).add(modeListener);}
 
@@ -52,8 +49,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     public List<IModeListener> getPlugsThatSignedUpForSafeMode(int modeType){
         return signedUpPlugsForModesList.get(modeType);
     }
-    //*****************************************************************************//
-
+    //*****************************************************************************/
     public String sendTurnOnOrOffRequestToPlug(int port,boolean turnOn)
     {
         String getResponse;
