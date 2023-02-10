@@ -1,33 +1,45 @@
 package com.workshop.mainserverworkshop.engine;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DecimalFormat;
+import java.util.Random;
 
 public class ElectricityStorage {
-    private int lastConsumption;
-    private final List<Integer> monthConsumption;
+    private int minElectricityVolt, maxElectricityVolt;
+    private float electricityUsageTillNow;
 
-    public ElectricityStorage() {
-       monthConsumption = new ArrayList(12);
-       lastConsumption = 0;
+    public ElectricityStorage(int minElectricityVoltInput, int maxElectricityVoltInput) {
+        minElectricityVolt = minElectricityVoltInput;
+        maxElectricityVolt = maxElectricityVoltInput;
+        electricityUsageTillNow = 0f;
     }
 
-    public int GetLastConsumption() {
-        return lastConsumption;
+    public float[] SimulateAnnualElectricityStatisticsAndGetMonthList() {
+        float[] electricityConsumption = new float[12];
+        Random random = new Random();
+        for (int i = 0; i < electricityConsumption.length; i++) { //(Wattage × Hours Used Per Day) ÷ 1000 = Daily Kilowatt-hour (kWh) consumption
+            int randomVolt = random.nextInt(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
+            int randomNumberOfUsageInDay = random.nextInt(25);
+            electricityConsumption[i] = ((randomVolt * randomNumberOfUsageInDay) / 1000f) * 30;
+        }
+        for (int i = 0; i < electricityConsumption.length; i++) {
+            System.out.println("Month " + (i + 1) + ": " + electricityConsumption[i] + " kWh");
+        }
+
+        return electricityConsumption;
     }
 
-    public void GetLastConsumption(int lastConsumption) {
-        this.lastConsumption = lastConsumption;
+    public void UpdateElectricityUsageAndGetUpdatedValue()
+    {
+        Random random = new Random();
+        int randomVolt = random.nextInt(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
+        int randomNumberOfUsageInDay = random.nextInt(25);
+        float add = (((randomVolt * randomNumberOfUsageInDay) / 1000f)/86);
+
+        synchronized (this){
+            electricityUsageTillNow += add;
+        }
     }
-
-    public int GetMonthConsumption(Month month) {return monthConsumption.get(month.getValue());}
-
-    public int AddToMonthConsumption(Month month, int ConsumptionToAdd) {
-        return monthConsumption.set(month.getValue(),monthConsumption.get(month.getValue()) + ConsumptionToAdd);}
-
-    public boolean IsLastConsumptionValid(int validElectricityConsumption, int deviation) {
-        int min = validElectricityConsumption + deviation;
-        int max = validElectricityConsumption - deviation;
-        return ((lastConsumption < max) && (lastConsumption > min));
+    public float getElectricityUsageTillNow(){
+        DecimalFormat df = new DecimalFormat("#.####");
+        return Float.parseFloat(df.format(electricityUsageTillNow));
     }
 }

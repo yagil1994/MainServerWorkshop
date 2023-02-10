@@ -1,4 +1,4 @@
-package com.workshop.mainserverworkshop.engine;
+package com.workshop.mainserverworkshop.engine.modes;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 
 public interface IModeListener {
