@@ -49,6 +49,7 @@ public class StatisticsScreen {
     public ResponseEntity<String> GetStatisticsForAllDevicesTogether()
     {
         List<IndexAndStatisticsContainer> indexAndStatisticsList = new ArrayList<>();
+
         for (Plug plug:  uiMediator.getPlugsMediator().getPlugsList()) {
             indexAndStatisticsList.add(new IndexAndStatisticsContainer(String.valueOf(plug.getPlugIndex()),String.valueOf(plug.GetElectricityConsumptionTillNow())));
         }
