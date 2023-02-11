@@ -29,13 +29,13 @@ public class MainScreen {
 
     @GetMapping("/workshop/mainScreen/on_off_screen")
     public ResponseEntity<String> addNewPlug(@RequestParam String i_PlugName, @RequestParam String i_minElectricityVolt, @RequestParam String i_maxElectricityVolt) {
-        int MinElectricityVolt = Integer.parseInt(i_minElectricityVolt);
-        int MaxElectricityVolt = Integer.parseInt(i_maxElectricityVolt);
+        int minElectricityVolt = Integer.parseInt(i_minElectricityVolt);
+        int maxElectricityVolt = Integer.parseInt(i_maxElectricityVolt);
 
         JsonObject body = new JsonObject();
         Process process = null;
-        String[] command = new String[]{"java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--server.port=" + port};
-        //String[] command = new String[]{"java", "-jar", "D:\\workshop\\workshopPlug\\target\\plug-server.jar", "--server.port=" + port};
+        //String[] command = new String[]{"java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--server.port=" + port};
+        String[] command = new String[]{"java", "-jar", "D:\\workshop\\workshopPlug\\target\\plug-server.jar", "--server.port=" + port};
         ProcessBuilder pb = new ProcessBuilder(command);
         try {
             process = pb.start();
@@ -44,9 +44,16 @@ public class MainScreen {
         }
 
         int currentPlugsListAmount = uiMediator.getPlugsMediator().getPlugsList().size();
-        uiMediator.getPlugsMediator().getPlugsList().add(new Plug(process, port, i_PlugName, uiMediator.getPlugsMediator(), currentPlugsListAmount, MinElectricityVolt, MaxElectricityVolt));
-        body.addProperty("result:", "new plug added in port: " + port);
-        port++;
+        //uiMediator.getPlugsMediator().getPlugsList().add(new Plug(process, port, i_PlugName, uiMediator.getPlugsMediator(), currentPlugsListAmount, minElectricityVolt, maxElectricityVolt));
+        boolean plugAdded = uiMediator.getPlugsMediator().AddNewPlug(process,port,i_PlugName, minElectricityVolt, maxElectricityVolt);
+        if(plugAdded){
+            body.addProperty("result:", "new plug added in port: " + port);
+            port++;
+        }
+        else {
+            body.addProperty("result:", "fail to add new plug. reached to maximum plugs");
+        }
+
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -159,6 +166,22 @@ public class MainScreen {
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(""));
     }
 
+    @DeleteMapping("/workshop/mainScreen/RemovePlugFromSleepMode")
+    public ResponseEntity<String> RemovePlugFromSleepMode(@RequestParam String i_PlugIndex) {
+        int plugIndex = Integer.parseInt(i_PlugIndex);
+        removePlugFromMode(plugIndex, uiMediator.getPlugsMediator().SLEEP_MODE_LIST);
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(""));
+    }
+
+    @DeleteMapping("/workshop/mainScreen/RemovePlugFromSafeMode")
+    public ResponseEntity<String> RemovePlugFromSafeMode(@RequestParam String i_PlugIndex) {
+        int plugIndex = Integer.parseInt(i_PlugIndex);
+        removePlugFromMode(plugIndex, uiMediator.getPlugsMediator().SLEEP_MODE_LIST);
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(""));
+    }
+
     private void registerPlugsToMode(List<Integer> indexesList, int modeType) {
         this.uiMediator.getPlugsMediator().getPlugsList().
                 stream().
@@ -174,6 +197,11 @@ public class MainScreen {
                 stream().
                 toList().
                 forEach((t) -> this.uiMediator.getPlugsMediator().removeModeListener(t, modeType));
+    }
+
+    private void removePlugFromMode(int plugIndex, int modeType){
+        Plug plug = uiMediator.getPlugsMediator().getPlugAccordingToIndex(plugIndex);
+        uiMediator.getPlugsMediator().removeModeListener(plug, modeType);
     }
 
     public List<Plug> getPlugsThatRegisteredForMode(int modeType) {
