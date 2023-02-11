@@ -34,14 +34,16 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
     public boolean AddNewPlug(Process i_Process,int i_Port, String i_PlugName,int i_MinElectricityVolt,int i_MaxElectricityVolt)
     {
+        boolean res = false;
         int index = findFirstAvailableIndexForNewPlug();
         if(index != -1){
             indexesFreeList.set(index, false);
             Plug newPlug = new Plug(i_Process, i_Port, i_PlugName, this, index, i_MinElectricityVolt, i_MaxElectricityVolt);
-            plugsList.add(newPlug);
-            return true;
+            plugsList.add(index,newPlug);
+            res = true;
         }
-        else return false;
+
+        return res;
     }
 
     private int findFirstAvailableIndexForNewPlug()

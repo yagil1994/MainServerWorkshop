@@ -1,6 +1,5 @@
 package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.mediators.UIMediator;
 import org.springframework.http.HttpStatus;
@@ -10,12 +9,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Timer;
-
 @RestController
 public class StatisticsScreen {
-    private Gson gson;
-    private UIMediator uiMediator;
+    private final Gson gson;
+    private final UIMediator uiMediator;
 
     public StatisticsScreen()
     {
@@ -42,5 +39,4 @@ public class StatisticsScreen {
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(electricityConsumptionTillNow));
     }
-
 }

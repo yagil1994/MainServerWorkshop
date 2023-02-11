@@ -17,8 +17,8 @@ import java.util.List;
 
 @RestController
 public class MainScreen {
-    private UIMediator uiMediator;
-    private Gson gson;
+    private final UIMediator uiMediator;
+    private final Gson gson;
     private int port;
 
     public MainScreen() {
@@ -34,26 +34,23 @@ public class MainScreen {
 
         JsonObject body = new JsonObject();
         Process process = null;
-        //String[] command = new String[]{"java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--server.port=" + port};
-        String[] command = new String[]{"java", "-jar", "D:\\workshop\\workshopPlug\\target\\plug-server.jar", "--server.port=" + port};
+        String[] command = new String[]{"java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--server.port=" + port};
+        //String[] command = new String[]{"java", "-jar", "D:\\workshop\\workshopPlug\\target\\plug-server.jar", "--server.port=" + port};
         ProcessBuilder pb = new ProcessBuilder(command);
         try {
             process = pb.start();
         } catch (Exception ex) {
-            System.out.println(ex.getStackTrace());
+            System.out.println(Arrays.toString(ex.getStackTrace()));
         }
 
-        int currentPlugsListAmount = uiMediator.getPlugsMediator().getPlugsList().size();
-        //uiMediator.getPlugsMediator().getPlugsList().add(new Plug(process, port, i_PlugName, uiMediator.getPlugsMediator(), currentPlugsListAmount, minElectricityVolt, maxElectricityVolt));
         boolean plugAdded = uiMediator.getPlugsMediator().AddNewPlug(process,port,i_PlugName, minElectricityVolt, maxElectricityVolt);
         if(plugAdded){
             body.addProperty("result:", "new plug added in port: " + port);
             port++;
         }
         else {
-            body.addProperty("result:", "fail to add new plug. reached to maximum plugs");
+            body.addProperty("result:", "failed to add new plug. reached to maximum plugs");
         }
-
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
