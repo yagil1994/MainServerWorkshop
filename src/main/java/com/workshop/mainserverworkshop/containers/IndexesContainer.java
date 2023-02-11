@@ -1,4 +1,4 @@
-package com.workshop.mainserverworkshop.app.windows;
+package com.workshop.mainserverworkshop.containers;
 
 public class IndexesContainer {
     String[] jsonArguments;

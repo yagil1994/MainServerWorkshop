@@ -2,6 +2,9 @@ package com.workshop.mainserverworkshop.app.windows;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.workshop.mainserverworkshop.containers.ConnectedPlugsDetailsContainer;
+import com.workshop.mainserverworkshop.containers.IndexesContainer;
+import com.workshop.mainserverworkshop.containers.PlugInfoContainer;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
@@ -28,7 +31,7 @@ public class MainScreen {
     }
 
     @GetMapping("/workshop/mainScreen/on_off_screen")
-    public ResponseEntity<String> addNewPlug(@RequestParam String i_PlugName, @RequestParam String i_minElectricityVolt, @RequestParam String i_maxElectricityVolt) {
+    public ResponseEntity<String> addNewPlug(@RequestParam String title, @RequestParam String type, @RequestParam String i_minElectricityVolt, @RequestParam String i_maxElectricityVolt) {
         int minElectricityVolt = Integer.parseInt(i_minElectricityVolt);
         int maxElectricityVolt = Integer.parseInt(i_maxElectricityVolt);
 
@@ -43,12 +46,11 @@ public class MainScreen {
             System.out.println(Arrays.toString(ex.getStackTrace()));
         }
 
-        boolean plugAdded = uiMediator.getPlugsMediator().AddNewPlug(process,port,i_PlugName, minElectricityVolt, maxElectricityVolt);
-        if(plugAdded){
+        boolean plugAdded = uiMediator.getPlugsMediator().AddNewPlug(process, port, title, type, minElectricityVolt, maxElectricityVolt);
+        if (plugAdded) {
             body.addProperty("result:", "new plug added in port: " + port);
             port++;
-        }
-        else {
+        } else {
             body.addProperty("result:", "failed to add new plug. reached to maximum plugs");
         }
 
@@ -73,7 +75,7 @@ public class MainScreen {
     @PostMapping("/workshop/mainScreen/RegisterToSleepMode")
     public ResponseEntity<String> RegisterToSleepMode(@RequestBody String jsonArguments) {
         IndexesContainer StringsOfIndexesOfPlugsThatSignedUpForSleepMode = gson.fromJson(jsonArguments, IndexesContainer.class);
-        int[] IndexesOfPlugsThatSignedUpForSleepMode = Arrays.stream(StringsOfIndexesOfPlugsThatSignedUpForSleepMode.jsonArguments)
+        int[] IndexesOfPlugsThatSignedUpForSleepMode = Arrays.stream(StringsOfIndexesOfPlugsThatSignedUpForSleepMode.getJsonArguments())
                 .mapToInt(Integer::parseInt)
                 .toArray();
 
@@ -88,7 +90,7 @@ public class MainScreen {
                 filter((t) ->
                         indexesList.contains(t.getPlugIndex())).
                 toList().
-                forEach((t) -> body.addProperty(t.getPlugName() + t.getPlugIndex(), " is registered to sleep mode now"));
+                forEach((t) -> body.addProperty(t.getPlugType() + t.getPlugIndex(), " is registered to sleep mode now"));
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -97,7 +99,7 @@ public class MainScreen {
     public ResponseEntity<String> checkRegisteredPlugsToSleepMode() {
         JsonObject body = new JsonObject();
         getPlugsThatRegisteredForMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST).
-                forEach((t) -> body.addProperty((t).getPlugName() + (t).getPlugIndex(), " is registered "));
+                forEach((t) -> body.addProperty((t).getPlugType() + (t).getPlugIndex(), " is registered "));
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -106,7 +108,21 @@ public class MainScreen {
     public ResponseEntity<String> checkRegisteredPlugsToSafeMode() {
         JsonObject body = new JsonObject();
         getPlugsThatRegisteredForMode(uiMediator.getPlugsMediator().SAFE_MODE_LIST).
-                forEach((t) -> body.addProperty((t).getPlugName() + (t).getPlugIndex(), " is registered "));
+                forEach((t) -> body.addProperty((t).getPlugType() + (t).getPlugIndex(), " is registered "));
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+    }
+
+    @GetMapping("/workshop/mainScreen/getPlugInfo")
+    public ResponseEntity<String> GetPlugInfo(@RequestParam String i_PlugIndex) {
+        JsonObject body = new JsonObject();
+        int plugIndex = Integer.parseInt(i_PlugIndex);
+        Plug plug = uiMediator.getPlugsMediator().getPlugAccordingToIndex(plugIndex);
+        body.addProperty("title:", plug.getPlugTitle());
+        body.addProperty("type:", plug.getPlugType());
+        body.addProperty("min electricity volt:", plug.getMinElectricityVolt());
+        body.addProperty("max electricity volt:", plug.getMaxElectricityVolt());
+        body.addProperty("index", plugIndex);
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -128,7 +144,7 @@ public class MainScreen {
     @PostMapping("/workshop/mainScreen/RegisterToSafeMode")
     public ResponseEntity<String> RegisterToSafeMode(@RequestBody String jsonArguments) {
         IndexesContainer StringsOfIndexesOfPlugsThatSignedUpForSafeMode = gson.fromJson(jsonArguments, IndexesContainer.class);
-        int[] IndexesOfPlugsThatSignedUpForSafeMode = Arrays.stream(StringsOfIndexesOfPlugsThatSignedUpForSafeMode.jsonArguments)
+        int[] IndexesOfPlugsThatSignedUpForSafeMode = Arrays.stream(StringsOfIndexesOfPlugsThatSignedUpForSafeMode.getJsonArguments())
                 .mapToInt(Integer::parseInt)
                 .toArray();
 
@@ -143,7 +159,7 @@ public class MainScreen {
                 filter((t) ->
                         indexesList.contains(t.getPlugIndex())).
                 toList().
-                forEach((t) -> body.addProperty(t.getPlugName() + t.getPlugIndex(), " is registered to safe mode now"));
+                forEach((t) -> body.addProperty(t.getPlugType() + t.getPlugIndex(), " is registered to safe mode now"));
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -153,6 +169,22 @@ public class MainScreen {
         int randomActivePlugIndex = uiMediator.getPlugsMediator().GetRandomActivePlugIndex();
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(randomActivePlugIndex));
+    }
+
+    @GetMapping("/workshop/mainScreen/GetTotalConnectedPlugsFromMainScreen")
+    public ResponseEntity<String> GetTotalConnectedPlugsFromMainScreen() {
+        JsonObject body = new JsonObject();
+        List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
+        List<ConnectedPlugsDetailsContainer> connectedPlugsDetailsContainer = new ArrayList<>();
+        if(plugs.isEmpty())
+        {
+            body.addProperty("result: ", "no plugs are connected yet!");
+        }
+        for (Plug plug: plugs) {
+            connectedPlugsDetailsContainer.add(new ConnectedPlugsDetailsContainer(plug.getPlugTitle(),String.valueOf(plug.getPlugIndex())));
+        }
+
+        return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(connectedPlugsDetailsContainer));
     }
 
     @DeleteMapping("/workshop/mainScreen/RemoveExistPlug")
@@ -196,7 +228,7 @@ public class MainScreen {
                 forEach((t) -> this.uiMediator.getPlugsMediator().removeModeListener(t, modeType));
     }
 
-    private void removePlugFromMode(int plugIndex, int modeType){
+    private void removePlugFromMode(int plugIndex, int modeType) {
         Plug plug = uiMediator.getPlugsMediator().getPlugAccordingToIndex(plugIndex);
         uiMediator.getPlugsMediator().removeModeListener(plug, modeType);
     }

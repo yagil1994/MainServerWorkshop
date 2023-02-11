@@ -5,7 +5,6 @@ import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import okhttp3.*;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +31,13 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         for(int i = 0; i < MAX_PLUGS; i++){indexesFreeList.add(true);}
     }
 
-    public boolean AddNewPlug(Process i_Process,int i_Port, String i_PlugName,int i_MinElectricityVolt,int i_MaxElectricityVolt)
+    public boolean AddNewPlug(Process i_Process,int i_Port,String i_PlugTitle, String i_PlugType,int i_MinElectricityVolt,int i_MaxElectricityVolt)
     {
         boolean res = false;
         int index = findFirstAvailableIndexForNewPlug();
         if(index != -1){
             indexesFreeList.set(index, false);
-            Plug newPlug = new Plug(i_Process, i_Port, i_PlugName, this, index, i_MinElectricityVolt, i_MaxElectricityVolt);
+            Plug newPlug = new Plug(i_Process, i_Port,i_PlugTitle, i_PlugType, this, index, i_MinElectricityVolt, i_MaxElectricityVolt);
             plugsList.add(index,newPlug);
             res = true;
         }
