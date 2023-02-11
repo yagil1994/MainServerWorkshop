@@ -100,4 +100,13 @@ public class Plug implements IModeListener {
     public void handleMode(GenericMode eventMode) {
         off();
     }
+
+    public void stopTimer(){
+        electricityConsumptionTimer.cancel();
+    }
+
+    public void KillProcess()
+    {
+        process.destroy();
+    }
 }

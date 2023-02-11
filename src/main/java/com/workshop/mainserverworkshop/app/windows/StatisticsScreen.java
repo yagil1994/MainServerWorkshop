@@ -42,4 +42,5 @@ public class StatisticsScreen {
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(electricityConsumptionTillNow));
     }
+
 }

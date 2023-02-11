@@ -1,12 +1,15 @@
 package com.workshop.mainserverworkshop.mediators;
+
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import okhttp3.*;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @RestController
 public class PlugsMediator { //this mediator sends http requests to the plugs(the main server behaves here as client)
@@ -14,15 +17,28 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     public final int SLEEP_MODE_LIST = 1;
     private static PlugsMediator instance = null;
     private final List<Plug> plugsList;
+    private final List<Boolean> indexesFreeList;
     private final OkHttpClient httpClient;
-    private List<List<IModeListener>> signedUpPlugsForModesList;
+    private final List<List<IModeListener>> signedUpPlugsForModesList;
 
-    private PlugsMediator(){
+    private PlugsMediator() {
         plugsList = new ArrayList<>();
         signedUpPlugsForModesList = new ArrayList<>();
         signedUpPlugsForModesList.add(new ArrayList<>());   //for safe list
         signedUpPlugsForModesList.add(new ArrayList<>());   //for sleep list
         httpClient = new OkHttpClient();
+        indexesFreeList = new ArrayList<>();
+    }
+
+    public void AddNewPlug(Process process,int port, String i_PlugName,int MinElectricityVolt,int MaxElectricityVolt)
+    {
+
+    }
+
+    private int findFirstAvailableIndexForNewPlug()
+    {
+        int i = 0;
+        for(int )
     }
 
     public static PlugsMediator getInstance() {
@@ -31,27 +47,60 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
         return instance;
     }
-    public Plug getPlugAccordingToIndex(int index)
-    {
+
+    public Plug getPlugAccordingToIndex(int index) {
         return getPlugsList().get(index);
     }
-    public  List<Plug> getPlugsList(){return getInstance().plugsList;}
+
+    public List<Plug> getPlugsList() {
+        return getInstance().plugsList;
+    }
+
     public void addModeListener(IModeListener modeListener, int modeType) {
-        signedUpPlugsForModesList.get(modeType).add(modeListener);}
+        signedUpPlugsForModesList.get(modeType).add(modeListener);
+    }
 
     public void removeModeListener(IModeListener modeListener, int modeType) {
-        signedUpPlugsForModesList.get(modeType).remove(modeListener);}
+        signedUpPlugsForModesList.get(modeType).remove(modeListener);
+    }
+
+    private void removePlugFromAllModeLists(int plugIndex)
+    {
+       Plug plug = PlugsMediator.getInstance().getPlugAccordingToIndex(plugIndex);
+        signedUpPlugsForModesList.forEach(list -> {
+            list.remove(plug);
+        });
+    }
 
     public void fireEventMode(GenericMode eventMode, int modeType) {
         signedUpPlugsForModesList.get(modeType).forEach(genericEvent -> genericEvent.handleMode(eventMode));
     }
 
-    public List<IModeListener> getPlugsThatSignedUpForSafeMode(int modeType){
+    public List<IModeListener> getPlugsThatSignedUpForMode(int modeType) {
         return signedUpPlugsForModesList.get(modeType);
     }
-    //*****************************************************************************/
-    public String sendTurnOnOrOffRequestToPlug(int port,boolean turnOn)
+
+    public int GetRandomActivePlugIndex() //returns -1 is not found any
     {
+        List<Integer> activePlugsIndexesList = this.plugsList.stream()
+                .filter((t) -> t.getOnOffStatus().equals("on"))
+                .map(Plug::getPlugIndex).toList();
+
+        return !activePlugsIndexesList.isEmpty() ?
+                activePlugsIndexesList.get(new Random().nextInt(activePlugsIndexesList.size()))
+                : -1;
+    }
+
+    public void RemovePlug(int plugIndex) {
+        //todo: when we work with the real plug we need to update it accordingly
+        Plug plug = getPlugAccordingToIndex(plugIndex);
+        plug.stopTimer();
+        plug.KillProcess();
+        removePlugFromAllModeLists(plugIndex);
+        plugsList.remove(plug);
+    }
+    //*****************************************************************************/
+    public String sendTurnOnOrOffRequestToPlug(int port, boolean turnOn) {
         String getResponse;
         String endPoint = "http://localhost:" + port + "/workshop/plug/turnOnOrOff";
         HttpUrl.Builder urlBuilder = HttpUrl.parse(endPoint).newBuilder();
