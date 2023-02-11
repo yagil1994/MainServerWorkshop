@@ -15,6 +15,7 @@ import java.util.Random;
 public class PlugsMediator { //this mediator sends http requests to the plugs(the main server behaves here as client)
     public final int SAFE_MODE_LIST = 0;
     public final int SLEEP_MODE_LIST = 1;
+    private final int MAX_PLUGS = 9;
     private static PlugsMediator instance = null;
     private final List<Plug> plugsList;
     private final List<Boolean> indexesFreeList;
@@ -22,23 +23,37 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     private final List<List<IModeListener>> signedUpPlugsForModesList;
 
     private PlugsMediator() {
-        plugsList = new ArrayList<>();
+        plugsList = new ArrayList<>(MAX_PLUGS);
         signedUpPlugsForModesList = new ArrayList<>();
         signedUpPlugsForModesList.add(new ArrayList<>());   //for safe list
         signedUpPlugsForModesList.add(new ArrayList<>());   //for sleep list
         httpClient = new OkHttpClient();
-        indexesFreeList = new ArrayList<>();
+        indexesFreeList = new ArrayList<>(MAX_PLUGS);
+        for(int i = 0; i < MAX_PLUGS; i++){indexesFreeList.add(true);}
     }
 
-    public void AddNewPlug(Process process,int port, String i_PlugName,int MinElectricityVolt,int MaxElectricityVolt)
+    public boolean AddNewPlug(Process i_Process,int i_Port, String i_PlugName,int i_MinElectricityVolt,int i_MaxElectricityVolt)
     {
-
+        int index = findFirstAvailableIndexForNewPlug();
+        if(index != -1){
+            indexesFreeList.set(index, false);
+            Plug newPlug = new Plug(i_Process, i_Port, i_PlugName, this, index, i_MinElectricityVolt, i_MaxElectricityVolt);
+            plugsList.add(newPlug);
+            return true;
+        }
+        else return false;
     }
 
     private int findFirstAvailableIndexForNewPlug()
     {
-        int i = 0;
-        for(int )
+        int i, res = -1;
+        for(i = 0; i < indexesFreeList.size(); i++){
+            if(indexesFreeList.get(i)){
+                res = i;
+                break;
+            }
+        }
+        return res;
     }
 
     public static PlugsMediator getInstance() {
@@ -97,6 +112,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         plug.stopTimer();
         plug.KillProcess();
         removePlugFromAllModeLists(plugIndex);
+        indexesFreeList.set(plugIndex, true);
         plugsList.remove(plug);
     }
     //*****************************************************************************/
