@@ -11,12 +11,12 @@ public class Plug implements IModeListener {
     private Process process;
     private boolean status;
     private String plugType, plugTitle;
-    private int port, plugIndex, minElectricityVolt, maxElectricityVolt;
+    private int port, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt;
     private PlugsMediator plugsMediator;
     private ElectricityStorage electricityStorage;
     private Timer electricityConsumptionTimer;
 
-    public Plug(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator, int i_PlugIndex, int i_minElectricityVolt, int i_maxElectricityVolt) {
+    public Plug(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt) {
         process = i_Process;
         plugType = i_PlugType;
         plugTitle = i_PlugTitle;
@@ -25,7 +25,8 @@ public class Plug implements IModeListener {
         port = i_port;
         plugsMediator = i_PlugsMediator;
         status = false;
-        plugIndex = i_PlugIndex;
+        internalPlugIndex = i_InternalIndex;
+        UiIndex = i_UiIndex;
         electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt);
         electricityConsumptionTimer = new Timer();
         consumeElectricity();
@@ -59,9 +60,12 @@ public class Plug implements IModeListener {
        return electricityStorage.getElectricityUsageTillNow();
     }
 
-    public int getPlugIndex() {
-        return plugIndex;
+    public int getInternalPlugIndex() {
+        return internalPlugIndex;
     }
+
+    public int getUiIndex() {return UiIndex;}
+    public void updateUiIndex(int newUiIndex) {UiIndex = newUiIndex;}
 
     public float[] SimulateAnnualElectricityConsumption()
     {
@@ -90,10 +94,6 @@ public class Plug implements IModeListener {
 
     public String getPlugTitle() {
         return plugTitle;
-    }
-
-    public int getPort() {
-        return port;
     }
 
     public void updateStatus(boolean newStatus) {

@@ -36,22 +36,22 @@ public class OnOffScreen  {
             body.addProperty("result: ", "no plugs are connected yet!");
         }
         for (Plug plug: plugs) {
-            plugInfoContainerList.add(new PlugInfoContainer(plug.getPlugTitle(),plug.getPlugType(), plug.getOnOffStatus(), String.valueOf(plug.getPlugIndex())));
+            plugInfoContainerList.add(new PlugInfoContainer(plug.getPlugTitle(),plug.getPlugType(), plug.getOnOffStatus(), String.valueOf(plug.getInternalPlugIndex())));
         }
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plugInfoContainerList));
     }
 
     @GetMapping("/workshop/plugMediator/flipPlugModeAccordingToIndex")
-    public ResponseEntity<String> flipPlugMode(@RequestParam String i_Plug_index_in_list){
+    public ResponseEntity<String> flipPlugMode(@RequestParam String i_UiIndex){
         JsonObject body = new JsonObject();
-        int plugIndex = Integer.parseInt(i_Plug_index_in_list);
-        Plug plug =  uiMediator.getPlugsMediator().getPlugAccordingToIndex(plugIndex);
+        int UiIndex = Integer.parseInt(i_UiIndex);
+        Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
         boolean wasOn = plug.flipModeAndReturnPreviousMode();
         String translateTrueToOnOrFalseToOff = wasOn? "on" : "off";
         String OppositeTranslateTrueToOnOrFalseToOff = !wasOn? "on" : "off";
-        String plugName = plug.getPlugType() + plugIndex;
-        body.addProperty("Main serer side: ", plugName + " is going to change plug mode soon.. ");
-        body.addProperty("Main serer side",plugName + "  mode was before: " + translateTrueToOnOrFalseToOff + " and it's " + OppositeTranslateTrueToOnOrFalseToOff);
+        String title = plug.getPlugTitle();
+        body.addProperty("Main serer side: ", title + " is going to change plug mode soon.. ");
+        body.addProperty("Main serer side",title + "  mode was before: " + translateTrueToOnOrFalseToOff + " and it's " + OppositeTranslateTrueToOnOrFalseToOff);
         String responseFromPlug = wasOn ? plug.off() : plug.on();
         body.addProperty("Plug response: ", responseFromPlug);
 
