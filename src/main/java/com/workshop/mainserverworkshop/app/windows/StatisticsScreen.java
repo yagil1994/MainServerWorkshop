@@ -42,6 +42,7 @@ public class StatisticsScreen {
         Plug plug =  uiMediator.getPlugsMediator().getPlugAccordingToIndex(plugIndex);
         float electricityConsumptionTillNow = plug.GetElectricityConsumptionTillNow();
 
+
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(electricityConsumptionTillNow));
     }
 
