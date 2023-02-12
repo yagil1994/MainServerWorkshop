@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.workshop.mainserverworkshop.containers.ConnectedPlugsDetailsContainer;
 import com.workshop.mainserverworkshop.containers.IndexesContainer;
-import com.workshop.mainserverworkshop.containers.PlugInfoContainer;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
