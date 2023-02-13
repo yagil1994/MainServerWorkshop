@@ -65,10 +65,9 @@ public class Plug implements IModeListener {
     }
 
     public int getUiIndex() {return UiIndex;}
-    public void updateUiIndex(int newUiIndex) {UiIndex = newUiIndex;}
+    public void updateUiIndex(int i_NewUiIndex) {UiIndex = i_NewUiIndex;}
 
-    public float[] SimulateAnnualElectricityConsumption()
-    {
+    public float[] SimulateAnnualElectricityConsumption() {
         return electricityStorage.SimulateAnnualElectricityStatisticsAndGetMonthList();
     }
 
@@ -111,7 +110,7 @@ public class Plug implements IModeListener {
     }
 
     @Override
-    public void handleMode(GenericMode eventMode) {
+    public void handleMode(GenericMode i_EventMode) {
         off();
     }
 

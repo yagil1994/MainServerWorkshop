@@ -32,7 +32,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         for(int i = 0; i < MAX_PLUGS; i++){indexesFreeList.add(true);}
     }
 
-    public boolean AddNewPlug(Process i_Process,int i_Port,String i_PlugTitle,int i_UiIndex, String i_PlugType,int i_MinElectricityVolt,int i_MaxElectricityVolt)
+    public boolean AddNewPlug(Process i_Process, int i_Port, String i_PlugTitle, int i_UiIndex, String i_PlugType, int i_MinElectricityVolt, int i_MaxElectricityVolt)
     {
         boolean res = false;
         int availableInternalIndex = findFirstAvailableInternalIndexForNewPlug();
@@ -84,26 +84,26 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return getInstance().plugsList;
     }
 
-    public void addModeListener(IModeListener modeListener, int modeType) {
-        signedUpPlugsForModesList.get(modeType).add(modeListener);
+    public void addModeListener(IModeListener i_ModeListener, int i_ModeType) {
+        signedUpPlugsForModesList.get(i_ModeType).add(i_ModeListener);
     }
 
-    public void removeModeListener(IModeListener modeListener, int modeType) {
-        signedUpPlugsForModesList.get(modeType).remove(modeListener);
+    public void removeModeListener(IModeListener i_ModeListener, int i_ModeType) {
+        signedUpPlugsForModesList.get(i_ModeType).remove(i_ModeListener);
     }
 
-    private void removePlugFromAllModeLists(int plugInternalIndex)
+    private void removePlugFromAllModeLists(int i_PlugInternalIndex)
     {
-       Plug plug = PlugsMediator.getInstance().getPlugAccordingToInternalIndex(plugInternalIndex);
+       Plug plug = PlugsMediator.getInstance().getPlugAccordingToInternalIndex(i_PlugInternalIndex);
         signedUpPlugsForModesList.forEach(list -> list.remove(plug));
     }
 
-    public void fireEventMode(GenericMode eventMode, int modeType) {
-        signedUpPlugsForModesList.get(modeType).forEach(genericEvent -> genericEvent.handleMode(eventMode));
+    public void fireEventMode(GenericMode i_EventMode, int i_ModeType) {
+        signedUpPlugsForModesList.get(i_ModeType).forEach(genericEvent -> genericEvent.handleMode(i_EventMode));
     }
 
-    public List<IModeListener> getPlugsThatSignedUpForMode(int modeType) {
-        return signedUpPlugsForModesList.get(modeType);
+    public List<IModeListener> getPlugsThatSignedUpForMode(int i_ModeType) {
+        return signedUpPlugsForModesList.get(i_ModeType);
     }
 
     public int GetRandomActivePlugIndex() //returns -1 is not found any
@@ -126,9 +126,9 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
     }
 
-    public void RemovePlug(int UiIndex) {
+    public void RemovePlug(int i_UiIndex) {
         //todo: when we work with the real plug we need to update it accordingly
-        Plug plug = GetPlugAccordingToUiIndex(UiIndex);
+        Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
         plug.stopTimer();
         plug.KillProcess();
         int internalIndex = plug.getInternalPlugIndex();
@@ -137,12 +137,24 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         plugsList.remove(plug);
         RefreshUiIndexes();
     }
+
+    public boolean CheckIfPlugTitleAlreadyExist(String i_PlugTitle){
+        boolean res = false;
+        for (Plug plug : plugsList) {
+            if (plug.getPlugTitle().equals(i_PlugTitle)) {
+                res = true;
+                break;
+            }
+        }
+
+        return res;
+    }
     //*****************************************************************************/
-    public String sendTurnOnOrOffRequestToPlug(int port, boolean turnOn) {
+    public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {
         String getResponse;
-        String endPoint = "http://localhost:" + port + "/workshop/plug/turnOnOrOff";
+        String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
         HttpUrl.Builder urlBuilder = HttpUrl.parse(endPoint).newBuilder();
-        urlBuilder.addQueryParameter("TrueOrFalse", String.valueOf(turnOn));
+        urlBuilder.addQueryParameter("TrueOrFalse", String.valueOf(i_TurnOn));
         Request request = new Request.Builder()
                 .url(urlBuilder.build().toString())
                 .get()
