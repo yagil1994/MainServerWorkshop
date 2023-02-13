@@ -27,11 +27,11 @@ public class MainScreen {
         gson = new Gson();
     }
 
-    @GetMapping("/workshop/mainScreen/on_off_screen")
+    @GetMapping("/workshop/mainScreen/addNewPlug")
     public ResponseEntity<String> addNewPlug(@RequestParam String i_Title, @RequestParam String i_Type,
-                                             @RequestParam String i_minElectricityVolt, @RequestParam String i_maxElectricityVolt, @RequestParam String i_UiIndex) {
-        int minElectricityVolt = Integer.parseInt(i_minElectricityVolt);
-        int maxElectricityVolt = Integer.parseInt(i_maxElectricityVolt);
+                                             @RequestParam String i_MinElectricityVolt, @RequestParam String i_MaxElectricityVolt, @RequestParam String i_UiIndex) {
+        int minElectricityVolt = Integer.parseInt(i_MinElectricityVolt);
+        int maxElectricityVolt = Integer.parseInt(i_MaxElectricityVolt);
         int UiIndex = Integer.parseInt(i_UiIndex);
 
         JsonObject body = new JsonObject();
