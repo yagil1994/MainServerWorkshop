@@ -38,7 +38,8 @@ public class MainScreen {
         Process process = null;
         HttpStatus responseStatus = HttpStatus.OK;
         //String[] command = new String[]{"java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--server.port=" + port};
-        String[] command = new String[]{"java", "-jar", "D:\\workshop\\workshopPlug\\target\\plug-server.jar", "--server.port=" + port};
+        //String[] command = new String[]{"java", "-jar", "D:\\workshop\\workshopPlug\\target\\plug-server.jar", "--server.port=" + port};
+        String[] command = new String[]{"java", "-jar", "C:\\plug-server.jar", "--server.port=" + port};
         ProcessBuilder pb = new ProcessBuilder(command);
         try {
             process = pb.start();
