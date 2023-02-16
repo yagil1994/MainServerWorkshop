@@ -6,9 +6,9 @@ public class ElectricityStorage {
     private int minElectricityVolt, maxElectricityVolt;
     private float electricityUsageTillNow;
 
-    public ElectricityStorage(int minElectricityVoltInput, int maxElectricityVoltInput) {
-        minElectricityVolt = minElectricityVoltInput;
-        maxElectricityVolt = maxElectricityVoltInput;
+    public ElectricityStorage(int i_MinElectricityVoltInput, int i_MxElectricityVoltInput) {
+        minElectricityVolt = i_MinElectricityVoltInput;
+        maxElectricityVolt = i_MxElectricityVoltInput;
         electricityUsageTillNow = 0f;
     }
 
