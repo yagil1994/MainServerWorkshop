@@ -50,6 +50,10 @@ public class MainScreen {
             body.addProperty("result:", "failed to add new plug. title already exist");
             responseStatus=HttpStatus.BAD_REQUEST;
         }
+        else if(uiMediator.getPlugsMediator().CheckIfPlugUiIndexAlreadyExist(UiIndex)){
+            body.addProperty("result:", "failed to add new plug. index already exist");
+            responseStatus=HttpStatus.BAD_REQUEST;
+        }
         else {
             boolean plugAdded = uiMediator.getPlugsMediator().AddNewPlug(process, port, i_Title, UiIndex, i_Type, minElectricityVolt, maxElectricityVolt);
             if (plugAdded) {
@@ -131,7 +135,7 @@ public class MainScreen {
         body.addProperty("max electricity volt:", plug.getMaxElectricityVolt());
         body.addProperty("index:", UiIndex);
         body.addProperty("status:", plug.getOnOffStatus());
-        body.addProperty("internal index:", plug.getInternalPlugIndex());
+        //body.addProperty("internal index:", plug.getInternalPlugIndex());
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -191,7 +195,7 @@ public class MainScreen {
         }
         for (Plug plug: plugs) {
             connectedPlugsDetailsContainer.add(new ConnectedPlugsDetailsContainer(plug.getPlugTitle(),String.valueOf(plug.getUiIndex()),
-                    plug.getOnOffStatus(),String.valueOf(plug.getInternalPlugIndex()),plug.getPlugType()));
+                    plug.getOnOffStatus()/*,String.valueOf(plug.getInternalPlugIndex())*/,plug.getPlugType()));
         }
 
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(connectedPlugsDetailsContainer));
@@ -204,7 +208,6 @@ public class MainScreen {
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(""));
     }
-
 
     @DeleteMapping("/workshop/mainScreen/RemovePlugFromSleepMode")
     public ResponseEntity<String> RemovePlugFromSleepMode(@RequestParam String i_UIndex) {

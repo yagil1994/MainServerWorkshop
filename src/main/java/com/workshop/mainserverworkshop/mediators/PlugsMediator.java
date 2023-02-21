@@ -149,6 +149,18 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
         return res;
     }
+
+    public boolean CheckIfPlugUiIndexAlreadyExist(int i_PlugUiIndex){
+        boolean res = false;
+        for (Plug plug : plugsList) {
+            if (plug.getUiIndex() == i_PlugUiIndex) {
+                res = true;
+                break;
+            }
+        }
+
+        return res;
+    }
     //*****************************************************************************/
     public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {
         String getResponse;
