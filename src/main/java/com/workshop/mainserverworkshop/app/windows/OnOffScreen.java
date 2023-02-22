@@ -57,5 +57,13 @@ public class OnOffScreen  {
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
+
+    @GetMapping("/workshop/on_off_screen/getPlugStatus")
+    public ResponseEntity<String> GetPlugStatus(@RequestParam String i_UiIndex){
+        int plugIndex = Integer.parseInt(i_UiIndex);
+        Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getOnOffStatus()));
+    }
 }
 

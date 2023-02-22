@@ -65,7 +65,7 @@ public class StatisticsScreen {
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(electricityConsumptionTillNow));
     }
 
-    @GetMapping("/workshop/statisticsScreen/GetStatisticsForAllDevicesTogether")
+    @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionForAllDevicesTogether")
     public ResponseEntity<String> GetStatisticsForAllDevicesTogether()
     {
         List<IndexAndStatisticsContainer> indexAndStatisticsList = new ArrayList<>();
