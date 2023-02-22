@@ -68,7 +68,7 @@ public class MainScreen {
         return ResponseEntity.status(responseStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
-    @GetMapping("/workshop/mainScreen/close_app")   //todo cant remove all and add new plugs
+    @GetMapping("/workshop/mainScreen/close_app")
     public ResponseEntity<String> closeApp() {
         JsonObject body = new JsonObject();
         List<Integer> uiIndexes = new ArrayList<>();
@@ -151,14 +151,14 @@ public class MainScreen {
     public void clickedOnSleepButton() {
         int currentMode = uiMediator.getPlugsMediator().SLEEP_MODE_LIST;
         this.uiMediator.getPlugsMediator().fireEventMode(new GenericMode(this.uiMediator.getPlugsMediator(), "fell asleep..."), currentMode);
-        //removeAllPlugsFromMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST);//todo maybe not on this case?
+        //removeAllPlugsFromMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST);//yes or maybe not on this case?
     }
 
     @GetMapping("/workshop/mainScreen/clickedOnExitAreaButton")
     public void clickedOnExitAreaButton() {
         int currentMode = uiMediator.getPlugsMediator().SAFE_MODE_LIST;
         this.uiMediator.getPlugsMediator().fireEventMode(new GenericMode(this.uiMediator.getPlugsMediator(), "exit area..."), currentMode);
-        //removeAllPlugsFromMode(uiMediator.getPlugsMediator().SAFE_MODE_LIST); //todo maybe not on this case?
+        //removeAllPlugsFromMode(uiMediator.getPlugsMediator().SAFE_MODE_LIST); //yes or maybe not on this case?
     }
 
     @PostMapping("/workshop/mainScreen/RegisterToSafeMode")
