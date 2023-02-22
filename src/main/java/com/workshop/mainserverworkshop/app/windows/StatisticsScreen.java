@@ -23,14 +23,36 @@ public class StatisticsScreen {
         uiMediator = UIMediator.getInstance();
     }
 
-    @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricity")
-    public ResponseEntity<String> SimulateAnnualElectricity(@RequestParam String i_UiIndex)
+    @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForPlug")
+    public ResponseEntity<String> SimulateAnnualElectricityForPlug(@RequestParam String i_UiIndex)
     {
         int UiIndex = Integer.parseInt(i_UiIndex);
         Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
         float[] monthsConsumption = plug.SimulateAnnualElectricityConsumption();
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
+    }
+
+    @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
+    public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs()
+    {
+        int i = 0, connectedPlugs = uiMediator.getPlugsMediator().getPlugsList().size();
+        float[][]monthsConsumption = new float[connectedPlugs][12];
+        for(Plug plug:uiMediator.getPlugsMediator().getPlugsList()){
+            monthsConsumption[i] = plug.SimulateAnnualElectricityConsumption();
+            i++;
+        }
+
+        float[] res = new float[12];
+        for(int month = 0; month < 12; month++){
+            float monthSum = 0;
+            for(int p = 0; p < connectedPlugs; p++){
+                monthSum+=monthsConsumption[p][month];
+            }
+            res[month] = monthSum;
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
     }
 
     @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionTillNow")
