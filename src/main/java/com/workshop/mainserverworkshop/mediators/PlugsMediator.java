@@ -126,16 +126,19 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
     }
 
-    public void RemovePlug(int i_UiIndex) {
+    public void RemovePlug(int i_UiIndex, boolean i_WithRefreshUiIndexes) {
         //todo: when we work with the real plug we need to update it accordingly
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
+        int internalIndex = plug.getInternalPlugIndex();
         plug.stopTimer();
         plug.KillProcess();
-        int internalIndex = plug.getInternalPlugIndex();
         removePlugFromAllModeLists(internalIndex);
         indexesFreeList.set(internalIndex, true);
-        plugsList.remove(plug);
-        RefreshUiIndexes();
+
+        if(i_WithRefreshUiIndexes){
+            plugsList.remove(plug);
+            RefreshUiIndexes();
+        }
     }
 
     public boolean CheckIfPlugTitleAlreadyExist(String i_PlugTitle){

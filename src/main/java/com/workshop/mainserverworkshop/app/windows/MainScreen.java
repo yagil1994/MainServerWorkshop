@@ -71,10 +71,17 @@ public class MainScreen {
     @GetMapping("/workshop/mainScreen/close_app")
     public ResponseEntity<String> closeApp() {
         JsonObject body = new JsonObject();
+        List<Integer> uiIndexes = new ArrayList<>();
         for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
-            Process process = plug.getProcess();
-            process.destroy();
-            process.destroyForcibly();
+            uiIndexes.add(plug.getUiIndex());
+
+            //Process process = plug.getProcess();
+            //process.destroy();
+            //process.destroyForcibly();
+        }
+
+        for (int index : uiIndexes) {
+            uiMediator.getPlugsMediator().RemovePlug(index, false);
         }
 
         uiMediator.getPlugsMediator().getPlugsList().removeAll(uiMediator.getPlugsMediator().getPlugsList());
@@ -101,7 +108,7 @@ public class MainScreen {
                 filter((t) ->
                         indexesList.contains(t.getUiIndex())).
                 toList().
-                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"ui index: " + t.getUiIndex() + " internal index: " + t.getInternalPlugIndex() + " is registered to safe mode now"));
+                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"ui index: " + t.getUiIndex() +/* " internal index: " + t.getInternalPlugIndex() +*/ " is registered to safe mode now"));
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -110,7 +117,7 @@ public class MainScreen {
     public ResponseEntity<String> checkRegisteredPlugsToSleepMode() {
         JsonObject body = new JsonObject();
         getPlugsThatRegisteredForMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST).
-                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"ui index: " + t.getUiIndex() + " internal index: " + t.getInternalPlugIndex() + " is registered to safe mode now"));
+                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"index: " + t.getUiIndex() +/* " internal index: " + t.getInternalPlugIndex() + */" is registered to safe mode now"));
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -119,7 +126,7 @@ public class MainScreen {
     public ResponseEntity<String> checkRegisteredPlugsToSafeMode() {
         JsonObject body = new JsonObject();
         getPlugsThatRegisteredForMode(uiMediator.getPlugsMediator().SAFE_MODE_LIST).
-                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"ui index: " + t.getUiIndex() + " internal index: " + t.getInternalPlugIndex() + " is registered to safe mode now"));
+                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"index: " + t.getUiIndex() + /*" internal index: " + t.getInternalPlugIndex() + */" is registered to safe mode now"));
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -144,14 +151,14 @@ public class MainScreen {
     public void clickedOnSleepButton() {
         int currentMode = uiMediator.getPlugsMediator().SLEEP_MODE_LIST;
         this.uiMediator.getPlugsMediator().fireEventMode(new GenericMode(this.uiMediator.getPlugsMediator(), "fell asleep..."), currentMode);
-        removeAllPlugsFromMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST);
+        //removeAllPlugsFromMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST);//yes or maybe not on this case?
     }
 
     @GetMapping("/workshop/mainScreen/clickedOnExitAreaButton")
     public void clickedOnExitAreaButton() {
         int currentMode = uiMediator.getPlugsMediator().SAFE_MODE_LIST;
         this.uiMediator.getPlugsMediator().fireEventMode(new GenericMode(this.uiMediator.getPlugsMediator(), "exit area..."), currentMode);
-        removeAllPlugsFromMode(uiMediator.getPlugsMediator().SAFE_MODE_LIST); //todo maybe not on this case?
+        //removeAllPlugsFromMode(uiMediator.getPlugsMediator().SAFE_MODE_LIST); //yes or maybe not on this case?
     }
 
     @PostMapping("/workshop/mainScreen/RegisterToSafeMode")
@@ -172,7 +179,7 @@ public class MainScreen {
                 filter((t) ->
                         indexesList.contains(t.getUiIndex())).
                 toList().
-                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"ui index: " + t.getUiIndex() + " internal index: " + t.getInternalPlugIndex() + " is registered to safe mode now"));
+                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"ui index: " + t.getUiIndex() +/* " internal index: " + t.getInternalPlugIndex() +*/ " is registered to safe mode now"));
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
@@ -204,9 +211,9 @@ public class MainScreen {
     @DeleteMapping("/workshop/mainScreen/RemoveExistPlug")
     public ResponseEntity<String> RemoveExistPlug(@RequestParam String i_UIndex) {
         int UiIndex = Integer.parseInt(i_UIndex);
-        this.uiMediator.getPlugsMediator().RemovePlug(UiIndex);
+        uiMediator.getPlugsMediator().RemovePlug(UiIndex, true);
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(""));
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ i_UIndex + " removed"));
     }
 
     @DeleteMapping("/workshop/mainScreen/RemovePlugFromSleepMode")
