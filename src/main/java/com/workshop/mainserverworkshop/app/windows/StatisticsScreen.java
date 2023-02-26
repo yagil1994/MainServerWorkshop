@@ -1,6 +1,6 @@
 package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
-import com.workshop.mainserverworkshop.containers.IndexAndStatisticsContainer;
+import com.workshop.mainserverworkshop.containers.IndexAndElectricityConsumptionContainer;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.mediators.UIMediator;
 import org.springframework.http.HttpStatus;
@@ -66,12 +66,12 @@ public class StatisticsScreen {
     }
 
     @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionForAllDevicesTogether")
-    public ResponseEntity<String> GetStatisticsForAllDevicesTogether()
+    public ResponseEntity<String> GetElectricityConsumptionForAllDevicesTogether()
     {
-        List<IndexAndStatisticsContainer> indexAndStatisticsList = new ArrayList<>();
+        List<IndexAndElectricityConsumptionContainer> indexAndStatisticsList = new ArrayList<>();
 
         for (Plug plug:  uiMediator.getPlugsMediator().getPlugsList()) {
-            indexAndStatisticsList.add(new IndexAndStatisticsContainer(String.valueOf(plug.getInternalPlugIndex()),String.valueOf(plug.GetElectricityConsumptionTillNow())));
+            indexAndStatisticsList.add(new IndexAndElectricityConsumptionContainer(String.valueOf(plug.getInternalPlugIndex()),String.valueOf(plug.GetElectricityConsumptionTillNow())));
         }
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(indexAndStatisticsList));
