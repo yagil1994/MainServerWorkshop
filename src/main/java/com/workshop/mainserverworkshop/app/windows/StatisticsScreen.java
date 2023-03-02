@@ -49,6 +49,7 @@ public class StatisticsScreen {
             for(int p = 0; p < connectedPlugs; p++){
                 monthSum+=monthsConsumption[p][month];
             }
+
             res[month] = monthSum;
         }
 

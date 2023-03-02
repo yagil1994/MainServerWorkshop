@@ -74,10 +74,6 @@ public class MainScreen {
         List<Integer> uiIndexes = new ArrayList<>();
         for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
             uiIndexes.add(plug.getUiIndex());
-
-            //Process process = plug.getProcess();
-            //process.destroy();
-            //process.destroyForcibly();
         }
 
         for (int index : uiIndexes) {

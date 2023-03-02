@@ -1,7 +1,6 @@
 package com.workshop.mainserverworkshop.containers;
 
 public class ConnectedPlugsDetailsContainer {
-
     private String title, index, status,type;
     //private String internalIndex;
 
