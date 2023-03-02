@@ -1,20 +1,18 @@
 package com.workshop.mainserverworkshop.engine;
-
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.mediators.PlugsMediator;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Plug implements IModeListener {
     private Process process;
-    private boolean status;
+    private boolean status, overTimeFlag;
     private String plugType, plugTitle;
     private int port, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt;
     private PlugsMediator plugsMediator;
     private ElectricityStorage electricityStorage;
-    private Timer electricityConsumptionTimer;
+    private Timer electricityConsumptionTimer, overTimeTimer;
 
     public Plug(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt) {
         process = i_Process;
@@ -25,10 +23,12 @@ public class Plug implements IModeListener {
         port = i_port;
         plugsMediator = i_PlugsMediator;
         status = false;
+        overTimeFlag = false;
         internalPlugIndex = i_InternalIndex;
         UiIndex = i_UiIndex;
         electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt);
         electricityConsumptionTimer = new Timer();
+        overTimeTimer = new Timer();
         consumeElectricity();
     }
 
@@ -73,14 +73,27 @@ public class Plug implements IModeListener {
 
     public String off() {
         status = false;
+        overTimeTimer.cancel();
+        overTimeFlag = false;
 
         return plugsMediator.sendTurnOnOrOffRequestToPlug(port, false);
     }
 
     public String on() {
         status = true;
+        overTimeTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                overTimeTimer.cancel();
+                overTimeFlag = true;
+            }
+        }, 5000);
 
         return plugsMediator.sendTurnOnOrOffRequestToPlug(port, true);
+    }
+
+    public boolean isOverTimeFlag() {
+        return overTimeFlag;
     }
 
     public Process getProcess() {

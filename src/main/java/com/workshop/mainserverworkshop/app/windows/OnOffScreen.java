@@ -1,6 +1,7 @@
 package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.workshop.mainserverworkshop.containers.IndexesContainer;
 import com.workshop.mainserverworkshop.containers.PlugInfoContainer;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.mediators.UIMediator;
@@ -64,6 +65,32 @@ public class OnOffScreen  {
         Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getOnOffStatus()));
+    }
+
+    @GetMapping("/workshop/on_off_screen/getInfoAboutOverTimeElectricityConsumers")
+    public ResponseEntity<String> GetInfoAboutOverTimeElectricityConsumers(){
+        List<String> indexes = new ArrayList<>();
+       this.uiMediator.getPlugsMediator().getPlugsList().forEach((p) ->{
+           if(checkIfThisPlugIsInOverTimeConsumption(p))
+           {
+               indexes.add(String.valueOf(p.getUiIndex()));
+           }
+               });
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(indexes));
+    }
+
+    private boolean checkIfThisPlugIsInOverTimeConsumption(Plug plug)
+    {
+        return plug.isOverTimeFlag() &&
+                (plug.getPlugType().equalsIgnoreCase("a.c") ||
+                        plug.getPlugType().equalsIgnoreCase("ac") ||
+                        plug.getPlugType().equalsIgnoreCase("aircondition") ||
+                        plug.getPlugType().equalsIgnoreCase("air condition") ||
+                        plug.getPlugType().equalsIgnoreCase("tv")||
+                        plug.getPlugType().equalsIgnoreCase("t.v")||
+                        plug.getPlugType().equalsIgnoreCase("television")
+                );
     }
 }
 
