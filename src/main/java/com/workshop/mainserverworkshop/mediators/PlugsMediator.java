@@ -67,18 +67,20 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
     public Plug GetPlugAccordingToUiIndex(int i_UiIndex) {
         AtomicReference<Plug> res = new AtomicReference<>();
-        getPlugsList().forEach( p ->{
-            if(p.getUiIndex() == i_UiIndex){
+        boolean found = false;
+        for (Plug p : getPlugsList()) {
+            if (p.getUiIndex() == i_UiIndex) {
                 res.set(p);
+                found = true;
+                break;
             }
-        });
-
-        return res.get();
+        }
+        return found ? res.get() : null;
     }
 
-    public Plug getPlugAccordingToInternalIndex(int i_InternalIndex) {
-        return getPlugsList().get(i_InternalIndex);
-    }
+//    public Plug getPlugAccordingToInternalIndex(int i_InternalIndex) {
+//        return getPlugsList().get(i_InternalIndex);
+//    }
 
     public List<Plug> getPlugsList() {
         return getInstance().plugsList;
@@ -92,10 +94,10 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         signedUpPlugsForModesList.get(i_ModeType).remove(i_ModeListener);
     }
 
-    private void removePlugFromAllModeLists(int i_PlugInternalIndex)
+    private void removePlugFromAllModeLists(Plug i_Plug)
     {
-       Plug plug = PlugsMediator.getInstance().getPlugAccordingToInternalIndex(i_PlugInternalIndex);
-        signedUpPlugsForModesList.forEach(list -> list.remove(plug));
+       //Plug plug = PlugsMediator.getInstance().getPlugAccordingToInternalIndex(i_PlugInternalIndex);
+        signedUpPlugsForModesList.forEach(list -> list.remove(i_Plug));
     }
 
     public void fireEventMode(GenericMode i_EventMode, int i_ModeType) {
@@ -132,7 +134,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         int internalIndex = plug.getInternalPlugIndex();
         plug.stopTimer();
         plug.KillProcess();
-        removePlugFromAllModeLists(internalIndex);
+        removePlugFromAllModeLists(plug);
         indexesFreeList.set(internalIndex, true);
 
         if(i_WithRefreshUiIndexes){

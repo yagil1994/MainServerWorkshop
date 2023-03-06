@@ -44,27 +44,41 @@ public class OnOffScreen  {
 
     @GetMapping("/workshop/plugMediator/flipPlugModeAccordingToIndex")
     public ResponseEntity<String> flipPlugMode(@RequestParam String i_UiIndex){
+        HttpStatus httpStatus = HttpStatus.OK;
         JsonObject body = new JsonObject();
         int UiIndex = Integer.parseInt(i_UiIndex);
         Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-        boolean wasOn = plug.flipModeAndReturnPreviousMode();
-        String translateTrueToOnOrFalseToOff = wasOn? "on" : "off";
-        String OppositeTranslateTrueToOnOrFalseToOff = !wasOn? "on" : "off";
-        String title = plug.getPlugTitle();
-        body.addProperty("Main serer side: ", title + " is going to change plug mode soon.. ");
-        body.addProperty("Main serer side",title + "  mode was before: " + translateTrueToOnOrFalseToOff + " and it's " + OppositeTranslateTrueToOnOrFalseToOff);
-        String responseFromPlug = wasOn ? plug.off() : plug.on();
-        body.addProperty("Plug response: ", responseFromPlug);
+        if(plug == null){
+            httpStatus = HttpStatus.BAD_REQUEST;
+            body.addProperty("Error: ", "Index doesn't exist");
+        }
+        else {
+            boolean wasOn = plug.flipModeAndReturnPreviousMode();
+            String translateTrueToOnOrFalseToOff = wasOn? "on" : "off";
+            String OppositeTranslateTrueToOnOrFalseToOff = !wasOn? "on" : "off";
+            String title = plug.getPlugTitle();
+            body.addProperty("Main serer side: ", title + " is going to change plug mode soon.. ");
+            body.addProperty("Main serer side",title + "  mode was before: " + translateTrueToOnOrFalseToOff + " and it's " + OppositeTranslateTrueToOnOrFalseToOff);
+            String responseFromPlug = wasOn ? plug.off() : plug.on();
+            body.addProperty("Plug response: ", responseFromPlug);
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+        return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
     @GetMapping("/workshop/on_off_screen/getPlugStatus")
     public ResponseEntity<String> GetPlugStatus(@RequestParam String i_UiIndex){
+        ResponseEntity<String> response;
         int plugIndex = Integer.parseInt(i_UiIndex);
         Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
+        if(plug == null){
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getOnOffStatus()));
+        }
+        else {
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getOnOffStatus()));
+        return response;
     }
 
     @GetMapping("/workshop/on_off_screen/getInfoAboutOverTimeElectricityConsumers")
