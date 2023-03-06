@@ -26,11 +26,18 @@ public class StatisticsScreen {
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForPlug")
     public ResponseEntity<String> SimulateAnnualElectricityForPlug(@RequestParam String i_UiIndex)
     {
+        ResponseEntity<String> response;
         int UiIndex = Integer.parseInt(i_UiIndex);
         Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-        float[] monthsConsumption = plug.SimulateAnnualElectricityConsumption();
+        if(plug == null){
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
+        else {
+            float[] monthsConsumption = plug.SimulateAnnualElectricityConsumption();
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
+        return response;
     }
 
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
@@ -59,11 +66,18 @@ public class StatisticsScreen {
     @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionTillNow")
     public ResponseEntity<String> GetElectricityUsageTillNow(@RequestParam String i_UiIndex)
     {
+        ResponseEntity<String> response;
         int plugIndex = Integer.parseInt(i_UiIndex);
         Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
-        float electricityConsumptionTillNow = plug.GetElectricityConsumptionTillNow();
+        if(plug == null){
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
+        else {
+            float electricityConsumptionTillNow = plug.GetElectricityConsumptionTillNow();
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(electricityConsumptionTillNow));
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(electricityConsumptionTillNow));
+        return response;
     }
 
     @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionForAllDevicesTogether")

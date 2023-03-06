@@ -134,16 +134,32 @@ public class MainScreen {
 
     @GetMapping("/workshop/mainScreen/RegisterPlugToSafeMode")
     public ResponseEntity<String> RegisterPlugToSafeMode(@RequestParam String i_UiIndex){
+        ResponseEntity<String> response;
         int UiIndex = Integer.parseInt(i_UiIndex);
-        registerPlugToMode(UiIndex,uiMediator.getPlugsMediator().SAFE_MODE_LIST);
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ UiIndex + " registered to safe mode"));
+        if(uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex) == null){
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
+        else {
+            registerPlugToMode(UiIndex,uiMediator.getPlugsMediator().SAFE_MODE_LIST);
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ UiIndex + " registered to safe mode"));
+        }
+
+        return response;
     }
 
     @GetMapping("/workshop/mainScreen/RegisterPlugToSleepMode")
     public ResponseEntity<String> RegisterPlugToSleepMode(@RequestParam String i_UiIndex){
+        ResponseEntity<String> response;
         int UiIndex = Integer.parseInt(i_UiIndex);
-        registerPlugToMode(UiIndex,uiMediator.getPlugsMediator().SLEEP_MODE_LIST);
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ UiIndex + " registered to sleep mode"));
+        if(uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex) == null){
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
+        else {
+            registerPlugToMode(UiIndex,uiMediator.getPlugsMediator().SAFE_MODE_LIST);
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ UiIndex + " registered to sleep mode"));
+        }
+
+        return response;
     }
 
     @GetMapping("/workshop/mainScreen/checkRegisteredPlugsToSleepMode")
@@ -166,36 +182,59 @@ public class MainScreen {
 
     @GetMapping("/workshop/mainScreen/checkIfPlugRegisteredToSleepMode")
     public ResponseEntity<String> checkIfPlugRegisteredToSleepMode(@RequestParam String i_UiIndex) {
+        ResponseEntity<String> response;
+        HttpStatus httpStatus = HttpStatus.OK;
         int UiIndex = Integer.parseInt(i_UiIndex);
         Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-        boolean res =getPlugsThatRegisteredForMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST).contains(plug);
+        if(plug == null){
+            httpStatus = HttpStatus.BAD_REQUEST;
+            response = ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body("Index doesn't exist");
+        }
+        else {
+            boolean res = getPlugsThatRegisteredForMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST).contains(plug);
+            response = ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+        return response;
     }
 
     @GetMapping("/workshop/mainScreen/checkIfPlugRegisteredToSafeMode")
     public ResponseEntity<String> checkIfPlugRegisteredToSafeMode(@RequestParam String i_UiIndex) {
+        ResponseEntity<String> response;
         int UiIndex = Integer.parseInt(i_UiIndex);
         Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-        boolean res =getPlugsThatRegisteredForMode(uiMediator.getPlugsMediator().SAFE_MODE_LIST).contains(plug);
+        if(plug != null){
+            boolean res = getPlugsThatRegisteredForMode(uiMediator.getPlugsMediator().SAFE_MODE_LIST).contains(plug);
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+        }
+        else {
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+        return response;
     }
 
     @GetMapping("/workshop/mainScreen/getPlugInfo")
     public ResponseEntity<String> GetPlugInfo(@RequestParam String i_UiIndex) {
+        HttpStatus httpStatus = HttpStatus.OK;
         JsonObject body = new JsonObject();
         int UiIndex = Integer.parseInt(i_UiIndex);
         Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-        body.addProperty("title:", plug.getPlugTitle());
-        body.addProperty("type:", plug.getPlugType());
-        body.addProperty("min electricity volt:", plug.getMinElectricityVolt());
-        body.addProperty("max electricity volt:", plug.getMaxElectricityVolt());
-        body.addProperty("index:", UiIndex);
-        body.addProperty("status:", plug.getOnOffStatus());
-        //body.addProperty("internal index:", plug.getInternalPlugIndex());
+        if(plug == null){
+            httpStatus = HttpStatus.BAD_REQUEST;
+            body.addProperty("Error: ","Index doesn't exist");
+        }
+        else {
+            body.addProperty("title:", plug.getPlugTitle());
+            body.addProperty("type:", plug.getPlugType());
+            body.addProperty("min electricity volt:", plug.getMinElectricityVolt());
+            body.addProperty("max electricity volt:", plug.getMaxElectricityVolt());
+            body.addProperty("index:", UiIndex);
+            body.addProperty("status:", plug.getOnOffStatus());
+            //body.addProperty("internal index:", plug.getInternalPlugIndex());
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+        return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
     @GetMapping("/workshop/mainScreen/clickedOnSleepButton")
@@ -238,26 +277,46 @@ public class MainScreen {
 
     @DeleteMapping("/workshop/mainScreen/RemoveExistPlug")
     public ResponseEntity<String> RemoveExistPlug(@RequestParam String i_UiIndex) {
+        ResponseEntity<String> response;
         int UiIndex = Integer.parseInt(i_UiIndex);
-        uiMediator.getPlugsMediator().RemovePlug(UiIndex, true);
+        Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
+        if(plug == null){
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
+        else {
+            uiMediator.getPlugsMediator().RemovePlug(UiIndex, true);
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getPlugTitle() + " on index "+ i_UiIndex + " removed"));
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ i_UiIndex + " removed"));
+        return response;
     }
 
     @DeleteMapping("/workshop/mainScreen/RemovePlugFromSleepMode")
     public ResponseEntity<String> RemovePlugFromSleepMode(@RequestParam String i_UiIndex) {
+        ResponseEntity<String> response;
         int plugIndex = Integer.parseInt(i_UiIndex);
-        removePlugFromMode(plugIndex, uiMediator.getPlugsMediator().SLEEP_MODE_LIST);
+        if(removePlugFromMode(plugIndex, uiMediator.getPlugsMediator().SLEEP_MODE_LIST)){
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug " + i_UiIndex + " removed from sleep mode"));
+        }
+        else {
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug " + i_UiIndex + " removed from sleep mode"));
+        return response;
     }
 
     @DeleteMapping("/workshop/mainScreen/RemovePlugFromSafeMode")
     public ResponseEntity<String> RemovePlugFromSafeMode(@RequestParam String i_UiIndex) {
+        ResponseEntity<String> response;
         int plugIndex = Integer.parseInt(i_UiIndex);
-        removePlugFromMode(plugIndex, uiMediator.getPlugsMediator().SLEEP_MODE_LIST);
+        if(removePlugFromMode(plugIndex, uiMediator.getPlugsMediator().SAFE_MODE_LIST)){
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ i_UiIndex + "removed from safe mode"));
+        }
+        else {
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ i_UiIndex + "removed from safe mode"));
+        return response;
     }
 
     private void registerPlugsToMode(List<Integer> i_IndexesList, int i_ModeType) {
@@ -284,9 +343,17 @@ public class MainScreen {
                 forEach((t) -> this.uiMediator.getPlugsMediator().removeModeListener(t, i_ModeType));
     }
 
-    private void removePlugFromMode(int i_UIndex, int i_ModeType) {
+    private Boolean removePlugFromMode(int i_UIndex, int i_ModeType) {
+        boolean succeed = true;
         Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(i_UIndex);
-        uiMediator.getPlugsMediator().removeModeListener(plug, i_ModeType);
+        if(plug == null){
+            succeed = false;
+        }
+        else {
+            uiMediator.getPlugsMediator().removeModeListener(plug, i_ModeType);
+        }
+
+        return succeed;
     }
 
     public List<Plug> getPlugsThatRegisteredForMode(int i_ModeType) {
