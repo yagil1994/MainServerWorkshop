@@ -71,7 +71,7 @@ public class OnOffScreen  {
         ResponseEntity<String> response;
         int plugIndex = Integer.parseInt(i_UiIndex);
         Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
-        if(plug == null){
+        if(plug != null){
             response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getOnOffStatus()));
         }
         else {
