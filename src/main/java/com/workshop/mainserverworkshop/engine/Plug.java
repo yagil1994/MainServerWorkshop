@@ -81,13 +81,14 @@ public class Plug implements IModeListener {
 
     public String on() {
         status = true;
+        overTimeTimer = new Timer();
         overTimeTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 overTimeTimer.cancel();
                 overTimeFlag = true;
             }
-        }, 5000);
+        }, 5000, 5000);
 
         return plugsMediator.sendTurnOnOrOffRequestToPlug(port, true);
     }
