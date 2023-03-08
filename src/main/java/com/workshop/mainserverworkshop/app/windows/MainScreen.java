@@ -155,7 +155,7 @@ public class MainScreen {
             response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
         }
         else {
-            registerPlugToMode(UiIndex,uiMediator.getPlugsMediator().SAFE_MODE_LIST);
+            registerPlugToMode(UiIndex,uiMediator.getPlugsMediator().SLEEP_MODE_LIST);
             response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ UiIndex + " registered to sleep mode"));
         }
 
@@ -166,7 +166,7 @@ public class MainScreen {
     public ResponseEntity<String> checkRegisteredPlugsToSleepMode() {
         JsonObject body = new JsonObject();
         getPlugsThatRegisteredForMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST).
-                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"index: " + t.getUiIndex() +/* " internal index: " + t.getInternalPlugIndex() + */" is registered to safe mode now"));
+                forEach((t) -> body.addProperty(t.getPlugTitle() + t.getInternalPlugIndex(),"index: " + t.getUiIndex() +/* " internal index: " + t.getInternalPlugIndex() + */" is registered to sleep mode now"));
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
