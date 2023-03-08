@@ -130,6 +130,7 @@ public class OnOffScreen  {
                         plug.getPlugType().equalsIgnoreCase("tv")||
                         plug.getPlugType().equalsIgnoreCase("t.v")||
                         plug.getPlugType().equalsIgnoreCase("television")
+
                 );
     }
 }
