@@ -1,6 +1,7 @@
 package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.workshop.mainserverworkshop.containers.ConnectedPlugsDetailsContainer;
 import com.workshop.mainserverworkshop.containers.IndexesContainer;
 import com.workshop.mainserverworkshop.containers.PlugInfoContainer;
 import com.workshop.mainserverworkshop.engine.Plug;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -94,6 +96,29 @@ public class OnOffScreen  {
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(indexes));
     }
 
+    @GetMapping("/workshop/on_off_screen/getAllOnPlugs")
+    public ResponseEntity<String> GetAllOnPlugs()
+    {
+        JsonObject body = new JsonObject();
+        List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
+        List<String> onPlugsIndexes = new ArrayList<>();
+        IndexesContainer indexesContainer = new IndexesContainer();
+        if(plugs.isEmpty())
+        {
+            body.addProperty("result: ", "no plugs are connected yet!");
+        }
+        for (Plug plug: plugs) {
+            if(plug.getOnOffStatus().equals("on")){
+                onPlugsIndexes.add(String.valueOf(plug.getUiIndex()));
+            }
+        }
+
+        String[] array = new String[onPlugsIndexes.size()];
+        indexesContainer.setJsonArguments(onPlugsIndexes.toArray(array));
+
+        return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(array));
+    }
+
     private boolean checkIfThisPlugIsInOverTimeConsumption(Plug plug)
     {
         return plug.isOverTimeFlag() &&
@@ -101,6 +126,7 @@ public class OnOffScreen  {
                         plug.getPlugType().equalsIgnoreCase("ac") ||
                         plug.getPlugType().equalsIgnoreCase("aircondition") ||
                         plug.getPlugType().equalsIgnoreCase("air condition") ||
+                                plug.getPlugType().equalsIgnoreCase("airConditioner") ||
                         plug.getPlugType().equalsIgnoreCase("tv")||
                         plug.getPlugType().equalsIgnoreCase("t.v")||
                         plug.getPlugType().equalsIgnoreCase("television")

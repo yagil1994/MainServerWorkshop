@@ -166,7 +166,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
         return res;
     }
-    //*****************************************************************************/
+    //************************* Requests to the plug *************************/
     public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {
         String getResponse;
         String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
@@ -187,4 +187,8 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
         return getResponse;
     }
+
+
+
+
 }
