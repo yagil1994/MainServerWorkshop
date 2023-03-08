@@ -110,6 +110,7 @@ public class OnOffScreen  {
         for (Plug plug: plugs) {
             if(plug.getOnOffStatus().equals("on")){
                 onPlugsIndexes.add(String.valueOf(plug.getUiIndex()));
+
             }
         }
 
@@ -130,7 +131,6 @@ public class OnOffScreen  {
                         plug.getPlugType().equalsIgnoreCase("tv")||
                         plug.getPlugType().equalsIgnoreCase("t.v")||
                         plug.getPlugType().equalsIgnoreCase("television")
-
                 );
     }
 }
