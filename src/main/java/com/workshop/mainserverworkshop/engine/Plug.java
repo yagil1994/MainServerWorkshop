@@ -71,6 +71,10 @@ public class Plug implements IModeListener {
         return electricityStorage.SimulateAnnualElectricityStatisticsAndGetMonthList();
     }
 
+    public float[] SimulateWeeklyElectricityConsumption() {
+        return electricityStorage.SimulateWeeklyElectricityStatisticsAndGetDayList();
+    }
+
     public String off() {
         status = false;
         overTimeTimer.cancel();
@@ -91,6 +95,11 @@ public class Plug implements IModeListener {
         }, 5000, 5000);
 
         return plugsMediator.sendTurnOnOrOffRequestToPlug(port, true);
+    }
+
+    public void OverTimeAndDoNotTurnOff(){
+        overTimeTimer.cancel();
+        overTimeFlag = false;
     }
 
     public boolean isOverTimeFlag() {
