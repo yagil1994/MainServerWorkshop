@@ -120,6 +120,22 @@ public class OnOffScreen  {
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(array));
     }
 
+    @GetMapping("/workshop/on_off_screen/doNotTurnOffAfterOverTime")
+    public ResponseEntity<String> DoNotTurnOffAfterOverTime(@RequestParam String i_UiIndex){
+        ResponseEntity<String> response;
+        int plugIndex = Integer.parseInt(i_UiIndex);
+        Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
+        if(plug != null){
+            plug.OverTimeAndDoNotTurnOff();
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("OverTime ignored"));
+        }
+        else {
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
+
+        return response;
+    }
+
     private boolean checkIfThisPlugIsInOverTimeConsumption(Plug plug)
     {
         return plug.isOverTimeFlag() &&

@@ -93,6 +93,11 @@ public class Plug implements IModeListener {
         return plugsMediator.sendTurnOnOrOffRequestToPlug(port, true);
     }
 
+    public void OverTimeAndDoNotTurnOff(){
+        overTimeTimer.cancel();
+        overTimeFlag = false;
+    }
+
     public boolean isOverTimeFlag() {
         return overTimeFlag;
     }
