@@ -126,8 +126,15 @@ public class OnOffScreen  {
         int plugIndex = Integer.parseInt(i_UiIndex);
         Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
         if(plug != null){
-            plug.OverTimeAndDoNotTurnOff();
-            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("OverTime ignored"));
+            String message;
+            if(plug.getOnOffStatus().equals("on")) {
+                plug.OverTimeAndDoNotTurnOff();
+                message = "OverTime for plug "+ plug.getUiIndex() +" ignored";
+            }
+            else {
+                message = "Plug "+plug.getUiIndex()+ " is off";
+            }
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(message));
         }
         else {
             response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
