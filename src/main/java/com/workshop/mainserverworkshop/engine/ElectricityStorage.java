@@ -20,11 +20,23 @@ public class ElectricityStorage {
             int randomNumberOfUsageInDay = random.nextInt(25);
             electricityConsumption[i] = ((randomVolt * randomNumberOfUsageInDay) / 1000f) * 30;
         }
-        for (int i = 0; i < electricityConsumption.length; i++) {
-            System.out.println("Month " + (i + 1) + ": " + electricityConsumption[i] + " kWh");
-        }
+//        for (int i = 0; i < electricityConsumption.length; i++) {
+//            System.out.println("Month " + (i + 1) + ": " + electricityConsumption[i] + " kWh");
+//        }
 
         return electricityConsumption;
+    }
+
+    public float[] SimulateWeeklyElectricityStatisticsAndGetDayList() {
+        float[] dailyElectricityConsumption = new float[7];
+        Random random = new Random();
+        for (int i = 0; i < dailyElectricityConsumption.length; i++) { //(Wattage × Hours Used Per Day) ÷ 1000 = Daily Kilowatt-hour (kWh) consumption
+            int randomVolt = random.nextInt(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
+            int randomNumberOfUsageInDay = random.nextInt(25);
+            dailyElectricityConsumption[i] = ((randomVolt * randomNumberOfUsageInDay) / 1000f);
+        }
+
+        return dailyElectricityConsumption;
     }
 
     public void UpdateElectricityUsageAndGetUpdatedValue()
@@ -38,6 +50,7 @@ public class ElectricityStorage {
             electricityUsageTillNow += add;
         }
     }
+
     public float getElectricityUsageTillNow(){
         DecimalFormat df = new DecimalFormat("#.####");
         return Float.parseFloat(df.format(electricityUsageTillNow));
