@@ -128,7 +128,6 @@ public class OnOffScreen  {
                         plug.getPlugType().equalsIgnoreCase("aircondition") ||
                         plug.getPlugType().equalsIgnoreCase("air condition") ||
                                 plug.getPlugType().equalsIgnoreCase("airConditioner") ||
-
                         plug.getPlugType().equalsIgnoreCase("tv")||
                         plug.getPlugType().equalsIgnoreCase("t.v")||
                         plug.getPlugType().equalsIgnoreCase("television")
