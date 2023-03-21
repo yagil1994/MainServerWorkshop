@@ -6,6 +6,8 @@ import com.workshop.mainserverworkshop.containers.IndexesContainer;
 import com.workshop.mainserverworkshop.containers.PlugInfoContainer;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.mediators.UIMediator;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +29,27 @@ public class OnOffScreen  {
     {
         gson = new Gson();
         uiMediator = UIMediator.getInstance();
+       // foo();
     }
+
+//    public void foo()  {
+//        //https://api.developer.lifx.com/reference/list-scenes
+//        //check it to do
+//        AsyncHttpClient client = new DefaultAsyncHttpClient();
+//        client.prepare("GET", "https://api.lifx.com/v1/scenes")
+//                .setHeader("accept", "application/json")
+//                .setHeader("Authorization", "Bearer c39dce41acf04ef51280468d6b594aa3511a2dce8d3ae9f669c4634bb9537dd9")
+//                .execute()
+//                .toCompletableFuture()
+//                .thenAccept(System.out::println)
+//                .join();
+//        try {
+//            client.close();
+//        }
+//       catch (Exception exception){
+//           System.out.println(exception.getMessage());
+//       }
+//    }
 
     @GetMapping("/workshop/on_off_screen/getOnOffScreen")
     public ResponseEntity<String> GetPlugsStatus()

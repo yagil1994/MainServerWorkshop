@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 public class MainScreen {
@@ -30,15 +31,14 @@ public class MainScreen {
     @GetMapping("/workshop/mainScreen/addNewPlug")
     public ResponseEntity<String> addNewPlug(@RequestParam String i_Title, @RequestParam String i_Type,
                                              @RequestParam String i_MinElectricityVolt, @RequestParam String i_MaxElectricityVolt, @RequestParam String i_UiIndex) {
-        int minElectricityVolt = Integer.parseInt(i_MinElectricityVolt);
-        int maxElectricityVolt = Integer.parseInt(i_MaxElectricityVolt);
+
+        int minElectricityVolt = !Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MinElectricityVolt) : 220;
+        int maxElectricityVolt =!Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MaxElectricityVolt) : 240;
         int UiIndex = Integer.parseInt(i_UiIndex);
 
         JsonObject body = new JsonObject();
         Process process = null;
         HttpStatus responseStatus = HttpStatus.OK;
-        //String[] command = new String[]{"java", "-jar", "C:\\Users\\ASUS\\IdeaProjects\\WorkshopPlug\\target\\plug-server.jar", "--server.port=" + port};
-        //String[] command = new String[]{"java", "-jar", "D:\\workshop\\workshopPlug\\target\\plug-server.jar", "--server.port=" + port};
         String[] command = new String[]{"java", "-jar", "C:\\plug-server.jar", "--server.port=" + port};
         ProcessBuilder pb = new ProcessBuilder(command);
         try {
