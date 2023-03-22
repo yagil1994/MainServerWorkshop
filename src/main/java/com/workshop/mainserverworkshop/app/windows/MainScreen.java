@@ -310,7 +310,7 @@ public class MainScreen {
         ResponseEntity<String> response;
         int plugIndex = Integer.parseInt(i_UiIndex);
         if(removePlugFromMode(plugIndex, uiMediator.getPlugsMediator().SAFE_MODE_LIST)){
-            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ i_UiIndex + "removed from safe mode"));
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plug "+ i_UiIndex + " removed from safe mode"));
         }
         else {
             response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
