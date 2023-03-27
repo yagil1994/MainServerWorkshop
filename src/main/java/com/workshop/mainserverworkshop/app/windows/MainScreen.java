@@ -47,21 +47,6 @@ public class MainScreen {
         ProcessBuilder pb = new ProcessBuilder(command);
         try {
             process = pb.start();
-//            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//            int i = 0;
-//            String line;
-//            while ((line = inputReader.readLine()) != null) {
-//                System.out.println(line);
-//                body.addProperty(String.valueOf(i), line);
-//                i++;
-//            }
-//            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-//             i = 0;
-//            while ((line = errorReader.readLine()) != null) {
-//                System.err.println(line);
-//                body.addProperty(String.valueOf(i), line);
-//                i++;
-//            }
         } catch (Exception ex) {
             System.out.println(Arrays.toString(ex.getStackTrace()));
         }
