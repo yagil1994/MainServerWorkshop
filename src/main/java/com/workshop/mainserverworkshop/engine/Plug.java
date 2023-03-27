@@ -7,7 +7,7 @@ import java.util.TimerTask;
 
 public class Plug implements IModeListener {
     private Process process;
-    private boolean status, overTimeFlag;
+    private boolean status, overTimeFlag,isInvalidPlug;
     private String plugType, plugTitle;
     private int port, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt;
     private PlugsMediator plugsMediator;
@@ -24,6 +24,7 @@ public class Plug implements IModeListener {
         plugsMediator = i_PlugsMediator;
         status = false;
         overTimeFlag = false;
+        isInvalidPlug = false;
         internalPlugIndex = i_InternalIndex;
         UiIndex = i_UiIndex;
         electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt);
@@ -55,6 +56,14 @@ public class Plug implements IModeListener {
         electricityConsumptionTimer.schedule(updateProcessTable,1000, 1000);
     }
 
+    public boolean isInvalidPlug() {
+        return isInvalidPlug;
+    }
+
+    public void setInvalidPlugToTrue() {
+        isInvalidPlug = true;
+    }
+
     public float GetElectricityConsumptionTillNow()
     {
        return electricityStorage.getElectricityUsageTillNow();
@@ -76,7 +85,7 @@ public class Plug implements IModeListener {
     }
 
     public float GetElectricityConsumptionInLiveForSingleUsage() {
-        return electricityStorage.GetElectricityConsumptionInLiveForSingleUsage();
+        return !isInvalidPlug ? electricityStorage.GetElectricityConsumptionInLiveForSingleUsage() : maxElectricityVolt*2;
     }
 
 

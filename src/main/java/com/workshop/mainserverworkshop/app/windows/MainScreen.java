@@ -42,8 +42,8 @@ public class MainScreen {
         JsonObject body = new JsonObject();
         Process process = null;
         HttpStatus responseStatus = HttpStatus.OK;
-        //String[] command = new String[]{"java", "-jar", "C:\\plug-server.jar", "--server.port=" + port};
-        String[] command = new String[]{"java", "-jar", "/home/ec2-user/plug-server.jar","--server.address=172.31.44.173","--server.port=" + port, "&"};
+        String[] command = new String[]{"java", "-jar", "C:\\plug-server.jar", "--server.port=" + port};
+        //String[] command = new String[]{"java", "-jar", "/home/ec2-user/plug-server.jar","--server.address=172.31.44.173","--server.port=" + port, "&"};
         ProcessBuilder pb = new ProcessBuilder(command);
         try {
             process = pb.start();
