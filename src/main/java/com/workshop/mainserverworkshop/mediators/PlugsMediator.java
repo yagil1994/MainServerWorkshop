@@ -170,7 +170,8 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {
         String getResponse;
         //String endPoint = "http://13.39.111.151:" + i_Port + "/workshop/plug/turnOnOrOff";
-        String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
+        String endPoint = "http://172.31.44.173:" + i_Port + "/workshop/plug/turnOnOrOff";
+        //String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
         HttpUrl.Builder urlBuilder = HttpUrl.parse(endPoint).newBuilder();
         urlBuilder.addQueryParameter("TrueOrFalse", String.valueOf(i_TurnOn));
         Request request = new Request.Builder()
@@ -188,8 +189,4 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
         return getResponse;
     }
-
-
-
-
 }

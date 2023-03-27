@@ -75,6 +75,11 @@ public class Plug implements IModeListener {
         return electricityStorage.SimulateWeeklyElectricityStatisticsAndGetDayList();
     }
 
+    public float GetElectricityConsumptionInLiveForSingleUsage() {
+        return electricityStorage.GetElectricityConsumptionInLiveForSingleUsage();
+    }
+
+
     public String off() {
         status = false;
         overTimeTimer.cancel();

@@ -20,11 +20,15 @@ public class ElectricityStorage {
             int randomNumberOfUsageInDay = random.nextInt(25);
             electricityConsumption[i] = ((randomVolt * randomNumberOfUsageInDay) / 1000f) * 30;
         }
-//        for (int i = 0; i < electricityConsumption.length; i++) {
-//            System.out.println("Month " + (i + 1) + ": " + electricityConsumption[i] + " kWh");
-//        }
 
         return electricityConsumption;
+    }
+
+    public float GetElectricityConsumptionInLiveForSingleUsage()
+    {
+        Random random = new Random();
+
+        return random.nextInt(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
     }
 
     public float[] SimulateWeeklyElectricityStatisticsAndGetDayList() {

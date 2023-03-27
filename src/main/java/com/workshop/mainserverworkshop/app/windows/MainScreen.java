@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +27,7 @@ public class MainScreen {
 
     public MainScreen() {
         uiMediator = UIMediator.getInstance();
-        port = 1920;
+        port = 9040;
         gson = new Gson();
     }
 
@@ -39,10 +42,26 @@ public class MainScreen {
         JsonObject body = new JsonObject();
         Process process = null;
         HttpStatus responseStatus = HttpStatus.OK;
-        String[] command = new String[]{"java", "-jar", "C:\\plug-server.jar", "--server.port=" + port};
+        //String[] command = new String[]{"java", "-jar", "C:\\plug-server.jar", "--server.port=" + port};
+        String[] command = new String[]{"java", "-jar", "/home/ec2-user/plug-server.jar","--server.address=172.31.44.173","--server.port=" + port, "&"};
         ProcessBuilder pb = new ProcessBuilder(command);
         try {
             process = pb.start();
+//            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//            int i = 0;
+//            String line;
+//            while ((line = inputReader.readLine()) != null) {
+//                System.out.println(line);
+//                body.addProperty(String.valueOf(i), line);
+//                i++;
+//            }
+//            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+//             i = 0;
+//            while ((line = errorReader.readLine()) != null) {
+//                System.err.println(line);
+//                body.addProperty(String.valueOf(i), line);
+//                i++;
+//            }
         } catch (Exception ex) {
             System.out.println(Arrays.toString(ex.getStackTrace()));
         }
@@ -58,6 +77,7 @@ public class MainScreen {
             boolean plugAdded = uiMediator.getPlugsMediator().AddNewPlug(process, port, i_Title, UiIndex, i_Type, minElectricityVolt, maxElectricityVolt);
             if (plugAdded) {
                 body.addProperty("result:", "new plug added in port: " + port);
+               // body.addProperty("process name:", process.toString());
                 port++;
             } else {
                 body.addProperty("result:", "failed to add new plug. reached to maximum plugs");
