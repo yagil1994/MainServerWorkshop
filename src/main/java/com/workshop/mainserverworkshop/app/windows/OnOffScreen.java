@@ -91,6 +91,8 @@ public class OnOffScreen  {
         return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
+
+
     @GetMapping("/workshop/on_off_screen/getPlugStatus")
     public ResponseEntity<String> GetPlugStatus(@RequestParam String i_UiIndex){
         ResponseEntity<String> response;
