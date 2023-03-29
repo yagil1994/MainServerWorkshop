@@ -1,5 +1,7 @@
 package com.workshop.mainserverworkshop.mediators;
 
+import com.workshop.mainserverworkshop.DB.PlugRepoController;
+import com.workshop.mainserverworkshop.DB.PlugSave;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @RestController
 public class PlugsMediator { //this mediator sends http requests to the plugs(the main server behaves here as client)
@@ -21,6 +24,12 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     private final List<Boolean> indexesFreeList;
     private final OkHttpClient httpClient;
     private final List<List<IModeListener>> signedUpPlugsForModesList;
+    private static PlugRepoController plugRepoController;
+    //private PlugRepository plugRepository;
+
+    public static void UpdatePlugController(PlugRepoController plugRepoController) {
+        PlugsMediator.plugRepoController = plugRepoController;
+    }
 
     private PlugsMediator() {
         plugsList = new ArrayList<>(MAX_PLUGS);
@@ -40,6 +49,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             indexesFreeList.set(availableInternalIndex, false);
             Plug newPlug = new Plug(i_Process, i_Port,i_PlugTitle, i_PlugType, this,availableInternalIndex,i_UiIndex,i_MinElectricityVolt, i_MaxElectricityVolt);
             plugsList.add(availableInternalIndex,newPlug);
+            SavePlugToDB(newPlug);
             res = true;
         }
 
@@ -137,6 +147,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             plug.updateUiIndex(i);
             i++;
         }
+        UpdateAllPlugsInDB();
     }
 
     public void RemovePlug(int i_UiIndex, boolean i_WithRefreshUiIndexes) {
@@ -150,6 +161,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
         if(i_WithRefreshUiIndexes){
             plugsList.remove(plug);
+            RemovePlugFromDB(plug);
             RefreshUiIndexes();
         }
     }
@@ -177,6 +189,53 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
         return res;
     }
+
+    //************************* Data Base *************************/
+
+    public void SavePlugToDB(Plug plug){
+        PlugSave plugSave = new PlugSave(plug);
+        plugRepoController.SavePlugToDB(plugSave);
+    }
+
+    public void RemovePlugFromDB(Plug plug){
+        PlugSave plugSave = new PlugSave(plug);
+        plugRepoController.RemovePlugFromDB(plugSave);
+    }
+
+    public void UpdateAllPlugsInDB(){
+        plugsList.forEach(this::SavePlugToDB);
+    }
+
+    public void RemoveAllPlugsInDB(){
+        plugsList.forEach(this::RemovePlugFromDB);
+    }
+
+    public List<PlugSave> GetPlugsFromDB(){
+        return plugRepoController.GetAllPlugsFromDB();
+    }
+
+    private boolean checkIfPlugIsInDB(Plug plug) {
+        List<PlugSave> plugSaveList = GetPlugsFromDB();
+        return plugSaveList.stream().anyMatch(plugSave -> plugSave.getPlugTitle().equals(plug.getPlugTitle()));
+    }
+
+    private List<Plug> checkIfPlugIsInDBAndNotOnList() {
+        List<PlugSave> plugSaveList = GetPlugsFromDB();
+        List<PlugSave> plugSavesOnlyInDB = new ArrayList<>();
+        for (PlugSave plugSave : plugSaveList) {
+            if (!plugsList.stream().anyMatch(plug -> plug.getPlugTitle().equals(plugSave.getPlugTitle()))) {
+                plugSavesOnlyInDB.add(plugSave);
+            }
+        }
+        // convert List<PlugSave> to List<Plug> and return it
+        return plugSavesOnlyInDB.stream().map(PlugSave::toPlug).collect(Collectors.toList());
+    }
+
+//    private List<Plug> convertPlugSaveListToPlugList(PlugSave PlugSave){
+//
+//    }
+
+
     //************************* Requests to the plug *************************/
     public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {
         String getResponse;
@@ -199,4 +258,5 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
         return getResponse;
     }
+
 }

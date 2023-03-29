@@ -159,4 +159,12 @@ public class Plug implements IModeListener {
     {
         process.destroy();
     }
+
+    public boolean getStatus() {
+        return status;
+    }
+
+    public int getPort() {
+        return port;
+    }
 }
