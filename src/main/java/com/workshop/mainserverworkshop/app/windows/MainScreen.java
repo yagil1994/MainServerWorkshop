@@ -1,6 +1,7 @@
 package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.workshop.mainserverworkshop.DB.PlugSave;
 import com.workshop.mainserverworkshop.containers.ConnectedPlugsDetailsContainer;
 import com.workshop.mainserverworkshop.containers.IndexesContainer;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
@@ -11,9 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,6 +69,24 @@ public class MainScreen {
         }
 
         return ResponseEntity.status(responseStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+    }
+
+    @GetMapping("/workshop/mainScreen/GetPlugsFromDB")
+    public ResponseEntity<String> GetPlugsFromDB(){
+        JsonObject body = new JsonObject();
+
+        List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().GetPlugsFromDB();
+        List<ConnectedPlugsDetailsContainer> connectedPlugsDetailsContainer = new ArrayList<>();
+        if(plugSaveList.isEmpty())
+        {
+            body.addProperty("result: ", "no plugs are connected yet!");
+        }
+        for (PlugSave plug: plugSaveList) {
+            connectedPlugsDetailsContainer.add(new ConnectedPlugsDetailsContainer(plug.getPlugTitle(),String.valueOf(plug.getUiIndex()),
+                    plug.getStatus()?"on":"off",plug.getPlugType()));
+        }
+
+        return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(connectedPlugsDetailsContainer));
     }
 
     @GetMapping("/workshop/mainScreen/close_app")
@@ -369,4 +385,6 @@ public class MainScreen {
 
         return plugList;
     }
+
+
 }
