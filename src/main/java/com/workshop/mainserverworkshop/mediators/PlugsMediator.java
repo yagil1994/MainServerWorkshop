@@ -6,9 +6,11 @@ import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import okhttp3.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,6 +41,16 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         httpClient = new OkHttpClient();
         indexesFreeList = new ArrayList<>(MAX_PLUGS);
         for(int i = 0; i < MAX_PLUGS; i++){indexesFreeList.add(true);}
+    }
+
+    public Process CreateProcess(int i_Port) throws IOException {
+        Process process = null;
+        String[] command = new String[]{"java", "-jar", "C:\\plug-server.jar", "--server.port=" + i_Port};
+        //String[] command = new String[]{"java", "-jar", "/home/ec2-user/plug-server.jar","--server.address=172.31.44.173","--server.port=" + i_Port, "&"};
+        ProcessBuilder pb = new ProcessBuilder(command);
+        process = pb.start();
+
+        return process;
     }
 
     public boolean AddNewPlug(Process i_Process, int i_Port, String i_PlugTitle, int i_UiIndex, String i_PlugType, int i_MinElectricityVolt, int i_MaxElectricityVolt)
@@ -219,7 +231,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return plugSaveList.stream().anyMatch(plugSave -> plugSave.getPlugTitle().equals(plug.getPlugTitle()));
     }
 
-    private List<Plug> checkIfPlugIsInDBAndNotOnList() {
+    private List<Plug> getPlugsInDBAndNotOnList() {
         List<PlugSave> plugSaveList = GetPlugsFromDB();
         List<PlugSave> plugSavesOnlyInDB = new ArrayList<>();
         for (PlugSave plugSave : plugSaveList) {
@@ -228,8 +240,27 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             }
         }
         // convert List<PlugSave> to List<Plug> and return it
-        return plugSavesOnlyInDB.stream().map(PlugSave::toPlug).collect(Collectors.toList());
+        //return plugSavesOnlyInDB.stream().map(PlugSave::toPlug).collect(Collectors.toList());
+        return plugSavesOnlyInDB.stream().map(plugSave -> {
+            try {
+                return plugSave.toPlug(this);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }).collect(Collectors.toList());
     }
+
+    public void AddPlugsFromDB(){
+        List<Plug> plugListToAdd = getPlugsInDBAndNotOnList();
+        if(plugListToAdd != null){
+            plugsList.addAll(plugListToAdd);
+        }
+        else {
+            System.out.println("error: plugListToAdd is null in AddPlugsFromDB function");
+        }
+    }
+
 
 //    private List<Plug> convertPlugSaveListToPlugList(PlugSave PlugSave){
 //

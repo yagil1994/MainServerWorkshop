@@ -13,6 +13,7 @@ public class Plug implements IModeListener {
     private PlugsMediator plugsMediator;
     private ElectricityStorage electricityStorage;
     private Timer electricityConsumptionTimer, overTimeTimer;
+    private boolean fakePlug;
 
     public Plug(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt) {
         process = i_Process;
@@ -25,6 +26,7 @@ public class Plug implements IModeListener {
         status = false;
         overTimeFlag = false;
         isInvalidPlug = false;
+        fakePlug = true; //change it if real
         internalPlugIndex = i_InternalIndex;
         UiIndex = i_UiIndex;
         electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt);
@@ -32,6 +34,8 @@ public class Plug implements IModeListener {
         overTimeTimer = new Timer();
         consumeElectricity();
     }
+
+    public boolean isFakePlug() {return fakePlug;}
 
     public int getMinElectricityVolt() {
         return minElectricityVolt;

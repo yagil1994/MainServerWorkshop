@@ -89,6 +89,20 @@ public class MainScreen {
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(connectedPlugsDetailsContainer));
     }
 
+    @GetMapping("/workshop/mainScreen/AddPlugsFromDB")
+    public ResponseEntity<String> AddPlugsFromDB(){
+        JsonObject body = new JsonObject();
+
+        List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().GetPlugsFromDB();
+        if(plugSaveList.isEmpty())
+        {
+            body.addProperty("result: ", "there are no plugs in DB");
+        }
+        uiMediator.getPlugsMediator().AddPlugsFromDB();
+
+        return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plugs from DB have been added"));
+    }
+
     @GetMapping("/workshop/mainScreen/close_app")
     public ResponseEntity<String> closeApp() {
         JsonObject body = new JsonObject();

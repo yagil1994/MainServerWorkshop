@@ -1,9 +1,12 @@
 package com.workshop.mainserverworkshop.DB;
 
 import com.workshop.mainserverworkshop.engine.Plug;
+import com.workshop.mainserverworkshop.mediators.PlugsMediator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.io.IOException;
 
 @Document("PlugSaves")
 public class PlugSave {
@@ -38,10 +41,10 @@ public class PlugSave {
 
     public PlugSave() {}
 
-    public Plug toPlug(){
-        Plug plug;
+    public Plug toPlug(PlugsMediator plugsMediator) throws IOException {
+        Process process = plugsMediator.CreateProcess(port);
 
-        return null;
+        return new Plug(process, port, plugTitle, plugType, plugsMediator, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt);
     }
 
     public String getPlugTitle() {
