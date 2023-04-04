@@ -6,9 +6,11 @@ import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import okhttp3.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,7 +27,6 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     private final OkHttpClient httpClient;
     private final List<List<IModeListener>> signedUpPlugsForModesList;
     private static PlugRepoController plugRepoController;
-    //private PlugRepository plugRepository;
 
     public static void UpdatePlugController(PlugRepoController plugRepoController) {
         PlugsMediator.plugRepoController = plugRepoController;
@@ -39,6 +40,16 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         httpClient = new OkHttpClient();
         indexesFreeList = new ArrayList<>(MAX_PLUGS);
         for(int i = 0; i < MAX_PLUGS; i++){indexesFreeList.add(true);}
+    }
+
+    public Process CreateProcess(int i_Port) throws IOException {
+        Process process = null;
+        String[] command = new String[]{"java", "-jar", "C:\\plug-server.jar", "--server.port=" + i_Port};
+        //String[] command = new String[]{"java", "-jar", "/home/ec2-user/plug-server.jar","--server.address=172.31.44.173","--server.port=" + i_Port, "&"};
+        ProcessBuilder pb = new ProcessBuilder(command);
+        process = pb.start();
+
+        return process;
     }
 
     public boolean AddNewPlug(Process i_Process, int i_Port, String i_PlugTitle, int i_UiIndex, String i_PlugType, int i_MinElectricityVolt, int i_MaxElectricityVolt)
@@ -98,10 +109,12 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
     public void addModeListener(IModeListener i_ModeListener, int i_ModeType) {
         signedUpPlugsForModesList.get(i_ModeType).add(i_ModeListener);
+        UpdateAllPlugsInDB();
     }
 
     public void removeModeListener(IModeListener i_ModeListener, int i_ModeType) {
         signedUpPlugsForModesList.get(i_ModeType).remove(i_ModeListener);
+        UpdateAllPlugsInDB();
     }
 
     private void removePlugFromAllModeLists(Plug i_Plug)
@@ -166,6 +179,12 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
     }
 
+    public void closeProcess(int i_UiIndex){
+        Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
+        plug.stopTimer();
+        plug.KillProcess();
+    }
+
     public boolean CheckIfPlugTitleAlreadyExist(String i_PlugTitle){
         boolean res = false;
         for (Plug plug : plugsList) {
@@ -190,23 +209,38 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return res;
     }
 
+    public List<Plug> getPlugsThatRegisteredForMode(int i_ModeType) {
+        List<Plug> plugList = new ArrayList<>();
+        for (IModeListener listener : getPlugsThatSignedUpForMode(i_ModeType)) {
+            plugList.add((Plug) listener);
+        }
+
+        return plugList;
+    }
+
     //************************* Data Base *************************/
 
+    private PlugSave createPlugSave(Plug plug){
+        List<Plug> plugsRegisteredToSleepModeList = getPlugsThatRegisteredForMode(SLEEP_MODE_LIST);
+        List<Plug> plugsRegisteredToSafeModeList = getPlugsThatRegisteredForMode(SAFE_MODE_LIST);
+        boolean registeredToSleepMode = plugsRegisteredToSleepModeList.contains(plug);
+        boolean registeredToSafeMode = plugsRegisteredToSafeModeList.contains(plug);
+        return new PlugSave(plug, registeredToSleepMode, registeredToSafeMode);
+    }
+
     public void SavePlugToDB(Plug plug){
-        PlugSave plugSave = new PlugSave(plug);
-        plugRepoController.SavePlugToDB(plugSave);
+        plugRepoController.SavePlugToDB(createPlugSave(plug));
     }
 
     public void RemovePlugFromDB(Plug plug){
-        PlugSave plugSave = new PlugSave(plug);
-        plugRepoController.RemovePlugFromDB(plugSave);
+        plugRepoController.RemovePlugFromDB(createPlugSave(plug));
     }
 
     public void UpdateAllPlugsInDB(){
         plugsList.forEach(this::SavePlugToDB);
     }
 
-    public void RemoveAllPlugsInDB(){
+    public void RemoveAllPlugsFromDB(){
         plugsList.forEach(this::RemovePlugFromDB);
     }
 
@@ -219,7 +253,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return plugSaveList.stream().anyMatch(plugSave -> plugSave.getPlugTitle().equals(plug.getPlugTitle()));
     }
 
-    private List<Plug> checkIfPlugIsInDBAndNotOnList() {
+    private List<Plug> getPlugsInDBAndNotOnList() {
         List<PlugSave> plugSaveList = GetPlugsFromDB();
         List<PlugSave> plugSavesOnlyInDB = new ArrayList<>();
         for (PlugSave plugSave : plugSaveList) {
@@ -228,12 +262,25 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             }
         }
         // convert List<PlugSave> to List<Plug> and return it
-        return plugSavesOnlyInDB.stream().map(PlugSave::toPlug).collect(Collectors.toList());
+        return plugSavesOnlyInDB.stream().map(plugSave -> {
+            try {
+                return plugSave.toPlug(this);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }).collect(Collectors.toList());
     }
 
-//    private List<Plug> convertPlugSaveListToPlugList(PlugSave PlugSave){
-//
-//    }
+    public void AddPlugsFromDB(){
+        List<Plug> plugListToAdd = getPlugsInDBAndNotOnList();
+        if(plugListToAdd != null){
+            plugsList.addAll(plugListToAdd);
+        }
+        else {
+            System.out.println("error: plugListToAdd is null in AddPlugsFromDB function");
+        }
+    }
 
 
     //************************* Requests to the plug *************************/

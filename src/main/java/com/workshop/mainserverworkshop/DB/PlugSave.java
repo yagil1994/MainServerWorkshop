@@ -1,9 +1,12 @@
 package com.workshop.mainserverworkshop.DB;
 
 import com.workshop.mainserverworkshop.engine.Plug;
+import com.workshop.mainserverworkshop.mediators.PlugsMediator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.io.IOException;
 
 @Document("PlugSaves")
 public class PlugSave {
@@ -21,27 +24,45 @@ public class PlugSave {
     @Field
     private int minElectricityVolt;
     @Field
-        private int maxElectricityVolt;
+    private int maxElectricityVolt;
     @Field
     private boolean status;
+    @Field
+    private boolean fakePlug;
+    @Field
+    private boolean overTimeFlag;
+    @Field
+    private boolean isInvalidPlug;
+    @Field
+    private boolean registeredToSleepMode;
+    @Field
+    private boolean registeredToSafeMode;
 
-    public PlugSave(Plug plug) {
+    public PlugSave(Plug plug, boolean i_RegisteredToSleepMode, boolean i_RegisteredToSafeMode) {
         this.plugTitle = plug.getPlugTitle();
         this.plugType = plug.getPlugType();
         this.port = plug.getPort();
         this.internalPlugIndex = plug.getInternalPlugIndex();
-        UiIndex = plug.getUiIndex();
+        this.UiIndex = plug.getUiIndex();
         this.minElectricityVolt = plug.getMinElectricityVolt();
         this.maxElectricityVolt = plug.getMaxElectricityVolt();
         this.status = plug.getStatus();
+
+        this.fakePlug = plug.isFakePlug();
+        this.overTimeFlag = plug.isOverTimeFlag();
+        this.isInvalidPlug = plug.isInvalidPlug();
+        registeredToSleepMode = i_RegisteredToSleepMode;
+        registeredToSafeMode = i_RegisteredToSafeMode;
     }
 
     public PlugSave() {}
 
-    public Plug toPlug(){
-        Plug plug;
+    public Plug toPlug(PlugsMediator plugsMediator) throws IOException {
+        Process process = plugsMediator.CreateProcess(port);
+        Plug plug = new Plug(process, port, plugTitle, plugType, plugsMediator, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt);
+        plug.UpdateFieldsFromDB(overTimeFlag, isInvalidPlug, status, registeredToSleepMode, registeredToSafeMode);
 
-        return null;
+        return plug;
     }
 
     public String getPlugTitle() {
@@ -106,6 +127,46 @@ public class PlugSave {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public boolean isFakePlug() {
+        return fakePlug;
+    }
+
+    public void setFakePlug(boolean fakePlug) {
+        this.fakePlug = fakePlug;
+    }
+
+    public boolean isOverTimeFlag() {
+        return overTimeFlag;
+    }
+
+    public void setOverTimeFlag(boolean overTimeFlag) {
+        this.overTimeFlag = overTimeFlag;
+    }
+
+    public boolean isInvalidPlug() {
+        return isInvalidPlug;
+    }
+
+    public void setInvalidPlug(boolean invalidPlug) {
+        isInvalidPlug = invalidPlug;
+    }
+
+    public boolean isRegisteredToSleepMode() {
+        return registeredToSleepMode;
+    }
+
+    public void setRegisteredToSleepMode(boolean registeredToSleepMode) {
+        this.registeredToSleepMode = registeredToSleepMode;
+    }
+
+    public boolean isRegisteredToSafeMode() {
+        return registeredToSafeMode;
+    }
+
+    public void setRegisteredToSafeMode(boolean registeredToSafeMode) {
+        this.registeredToSafeMode = registeredToSafeMode;
     }
 }
 

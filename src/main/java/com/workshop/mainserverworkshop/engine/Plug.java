@@ -13,6 +13,7 @@ public class Plug implements IModeListener {
     private PlugsMediator plugsMediator;
     private ElectricityStorage electricityStorage;
     private Timer electricityConsumptionTimer, overTimeTimer;
+    private boolean fakePlug;
 
     public Plug(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt) {
         process = i_Process;
@@ -25,13 +26,17 @@ public class Plug implements IModeListener {
         status = false;
         overTimeFlag = false;
         isInvalidPlug = false;
+        fakePlug = true; //change it if real
         internalPlugIndex = i_InternalIndex;
         UiIndex = i_UiIndex;
         electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt);
         electricityConsumptionTimer = new Timer();
         overTimeTimer = new Timer();
         consumeElectricity();
+        plugsMediator.SavePlugToDB(this);
     }
+
+    public boolean isFakePlug() {return fakePlug;}
 
     public int getMinElectricityVolt() {
         return minElectricityVolt;
@@ -62,6 +67,7 @@ public class Plug implements IModeListener {
 
     public void setInvalidPlugToTrue() {
         isInvalidPlug = true;
+        plugsMediator.SavePlugToDB(this);
     }
 
     public float GetElectricityConsumptionTillNow()
@@ -74,7 +80,11 @@ public class Plug implements IModeListener {
     }
 
     public int getUiIndex() {return UiIndex;}
-    public void updateUiIndex(int i_NewUiIndex) {UiIndex = i_NewUiIndex;}
+
+    public void updateUiIndex(int i_NewUiIndex) {
+        UiIndex = i_NewUiIndex;
+        plugsMediator.SavePlugToDB(this);
+    }
 
     public float[] SimulateAnnualElectricityConsumption() {
         return electricityStorage.SimulateAnnualElectricityStatisticsAndGetMonthList();
@@ -88,13 +98,17 @@ public class Plug implements IModeListener {
         return !isInvalidPlug ? electricityStorage.GetElectricityConsumptionInLiveForSingleUsage() : maxElectricityVolt*2;
     }
 
-
     public String off() {
         status = false;
         overTimeTimer.cancel();
         overTimeFlag = false;
+        String res = "turned off";
+        if(process.isAlive()){
+            res = plugsMediator.sendTurnOnOrOffRequestToPlug(port, false);
+        }
+        plugsMediator.SavePlugToDB(this);
 
-        return plugsMediator.sendTurnOnOrOffRequestToPlug(port, false);
+        return res;
     }
 
     public String on() {
@@ -105,15 +119,23 @@ public class Plug implements IModeListener {
             public void run() {
                 overTimeTimer.cancel();
                 overTimeFlag = true;
+                plugsMediator.SavePlugToDB(plugsMediator.GetPlugAccordingToUiIndex(UiIndex));
             }
         }, 5000, 5000);
 
-        return plugsMediator.sendTurnOnOrOffRequestToPlug(port, true);
+        String res = "turned on";
+        if(process.isAlive()){
+            res = plugsMediator.sendTurnOnOrOffRequestToPlug(port,true);
+        }
+        plugsMediator.SavePlugToDB(this);
+
+        return res;
     }
 
     public void OverTimeAndDoNotTurnOff(){
         overTimeTimer.cancel();
         overTimeFlag = false;
+        plugsMediator.SavePlugToDB(this);
     }
 
     public boolean isOverTimeFlag() {
@@ -134,6 +156,7 @@ public class Plug implements IModeListener {
 
     public void updateStatus(boolean newStatus) {
         status = newStatus;
+        plugsMediator.SavePlugToDB(this);
     }
 
     public String getOnOffStatus() {
@@ -166,5 +189,17 @@ public class Plug implements IModeListener {
 
     public int getPort() {
         return port;
+    }
+
+    public void UpdateFieldsFromDB(boolean overTimeFlag, boolean isInvalidPlug, boolean status, boolean registeredToSleepMode, boolean registeredToSafeMode){
+        this.overTimeFlag = overTimeFlag;
+        this.isInvalidPlug = isInvalidPlug;
+        this.status = status;
+        if(registeredToSleepMode && !plugsMediator.getPlugsThatRegisteredForMode(plugsMediator.SLEEP_MODE_LIST).contains(this)){
+                plugsMediator.addModeListener(this, plugsMediator.SLEEP_MODE_LIST);
+        }
+        if(registeredToSafeMode && !plugsMediator.getPlugsThatRegisteredForMode(plugsMediator.SAFE_MODE_LIST).contains(this)){
+            plugsMediator.addModeListener(this, plugsMediator.SAFE_MODE_LIST);
+        }
     }
 }
