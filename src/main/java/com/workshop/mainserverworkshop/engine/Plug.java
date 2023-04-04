@@ -102,7 +102,10 @@ public class Plug implements IModeListener {
         status = false;
         overTimeTimer.cancel();
         overTimeFlag = false;
-        String res = plugsMediator.sendTurnOnOrOffRequestToPlug(port, false);
+        String res = "turned off";
+        if(process.isAlive()){
+            res = plugsMediator.sendTurnOnOrOffRequestToPlug(port, false);
+        }
         plugsMediator.SavePlugToDB(this);
 
         return res;
@@ -120,7 +123,10 @@ public class Plug implements IModeListener {
             }
         }, 5000, 5000);
 
-        String res = plugsMediator.sendTurnOnOrOffRequestToPlug(port,true);
+        String res = "turned on";
+        if(process.isAlive()){
+            res = plugsMediator.sendTurnOnOrOffRequestToPlug(port,true);
+        }
         plugsMediator.SavePlugToDB(this);
 
         return res;
@@ -185,9 +191,15 @@ public class Plug implements IModeListener {
         return port;
     }
 
-    public void UpdateFieldsFromDB(boolean overTimeFlag, boolean isInvalidPlug, boolean status){
+    public void UpdateFieldsFromDB(boolean overTimeFlag, boolean isInvalidPlug, boolean status, boolean registeredToSleepMode, boolean registeredToSafeMode){
         this.overTimeFlag = overTimeFlag;
         this.isInvalidPlug = isInvalidPlug;
         this.status = status;
+        if(registeredToSleepMode && !plugsMediator.getPlugsThatRegisteredForMode(plugsMediator.SLEEP_MODE_LIST).contains(this)){
+                plugsMediator.addModeListener(this, plugsMediator.SLEEP_MODE_LIST);
+        }
+        if(registeredToSafeMode && !plugsMediator.getPlugsThatRegisteredForMode(plugsMediator.SAFE_MODE_LIST).contains(this)){
+            plugsMediator.addModeListener(this, plugsMediator.SAFE_MODE_LIST);
+        }
     }
 }

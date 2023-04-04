@@ -38,13 +38,10 @@ public class MainScreen {
         int UiIndex = Integer.parseInt(i_UiIndex);
 
         JsonObject body = new JsonObject();
-        Process process = null;
         HttpStatus responseStatus = HttpStatus.OK;
-        String[] command = new String[]{"java", "-jar", "C:\\plug-server.jar", "--server.port=" + port};
-        //String[] command = new String[]{"java", "-jar", "/home/ec2-user/plug-server.jar","--server.address=172.31.44.173","--server.port=" + port, "&"};
-        ProcessBuilder pb = new ProcessBuilder(command);
+        Process process = null;
         try {
-            process = pb.start();
+            process = uiMediator.getPlugsMediator().CreateProcess(port);
         } catch (Exception ex) {
             System.out.println(Arrays.toString(ex.getStackTrace()));
         }
@@ -103,8 +100,34 @@ public class MainScreen {
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plugs from DB have been added"));
     }
 
+    @DeleteMapping("/workshop/mainScreen/DeleteAllPlugsFromDB")
+    public ResponseEntity<String> DeleteAllPlugsFromDB(){
+        uiMediator.getPlugsMediator().RemoveAllPlugsFromDB();
+
+        return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("All plugs have been deleted from DB"));
+    }
+
     @GetMapping("/workshop/mainScreen/close_app")
     public ResponseEntity<String> closeApp() {
+        JsonObject body = new JsonObject();
+        List<Integer> uiIndexes = new ArrayList<>();
+        for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
+            uiIndexes.add(plug.getUiIndex());
+        }
+
+        for (int index : uiIndexes) {
+            //uiMediator.getPlugsMediator().RemovePlug(index, false);
+            uiMediator.getPlugsMediator().closeProcess(index);
+        }
+
+        //uiMediator.getPlugsMediator().getPlugsList().removeAll(uiMediator.getPlugsMediator().getPlugsList());
+        body.addProperty("result: ", "all processes have been removed!");
+        port = 9040;
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+    }
+
+    @GetMapping("/workshop/mainScreen/close_appOld")
+    public ResponseEntity<String> closeAppOld() {
         JsonObject body = new JsonObject();
         List<Integer> uiIndexes = new ArrayList<>();
         for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
@@ -392,12 +415,7 @@ public class MainScreen {
     }
 
     public List<Plug> getPlugsThatRegisteredForMode(int i_ModeType) {
-        List<Plug> plugList = new ArrayList<>();
-        for (IModeListener listener : this.uiMediator.getPlugsMediator().getPlugsThatSignedUpForMode(i_ModeType)) {
-            plugList.add((Plug) listener);
-        }
-
-        return plugList;
+        return uiMediator.getPlugsMediator().getPlugsThatRegisteredForMode(i_ModeType);
     }
 
 

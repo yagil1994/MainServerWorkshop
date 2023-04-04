@@ -33,8 +33,12 @@ public class PlugSave {
     private boolean overTimeFlag;
     @Field
     private boolean isInvalidPlug;
+    @Field
+    private boolean registeredToSleepMode;
+    @Field
+    private boolean registeredToSafeMode;
 
-    public PlugSave(Plug plug) {
+    public PlugSave(Plug plug, boolean i_RegisteredToSleepMode, boolean i_RegisteredToSafeMode) {
         this.plugTitle = plug.getPlugTitle();
         this.plugType = plug.getPlugType();
         this.port = plug.getPort();
@@ -47,6 +51,8 @@ public class PlugSave {
         this.fakePlug = plug.isFakePlug();
         this.overTimeFlag = plug.isOverTimeFlag();
         this.isInvalidPlug = plug.isInvalidPlug();
+        registeredToSleepMode = i_RegisteredToSleepMode;
+        registeredToSafeMode = i_RegisteredToSafeMode;
     }
 
     public PlugSave() {}
@@ -54,7 +60,7 @@ public class PlugSave {
     public Plug toPlug(PlugsMediator plugsMediator) throws IOException {
         Process process = plugsMediator.CreateProcess(port);
         Plug plug = new Plug(process, port, plugTitle, plugType, plugsMediator, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt);
-        plug.UpdateFieldsFromDB(overTimeFlag, isInvalidPlug, status);
+        plug.UpdateFieldsFromDB(overTimeFlag, isInvalidPlug, status, registeredToSleepMode, registeredToSafeMode);
 
         return plug;
     }
@@ -145,6 +151,22 @@ public class PlugSave {
 
     public void setInvalidPlug(boolean invalidPlug) {
         isInvalidPlug = invalidPlug;
+    }
+
+    public boolean isRegisteredToSleepMode() {
+        return registeredToSleepMode;
+    }
+
+    public void setRegisteredToSleepMode(boolean registeredToSleepMode) {
+        this.registeredToSleepMode = registeredToSleepMode;
+    }
+
+    public boolean isRegisteredToSafeMode() {
+        return registeredToSafeMode;
+    }
+
+    public void setRegisteredToSafeMode(boolean registeredToSafeMode) {
+        this.registeredToSafeMode = registeredToSafeMode;
     }
 }
 

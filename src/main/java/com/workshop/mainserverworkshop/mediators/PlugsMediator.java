@@ -27,7 +27,6 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     private final OkHttpClient httpClient;
     private final List<List<IModeListener>> signedUpPlugsForModesList;
     private static PlugRepoController plugRepoController;
-    //private PlugRepository plugRepository;
 
     public static void UpdatePlugController(PlugRepoController plugRepoController) {
         PlugsMediator.plugRepoController = plugRepoController;
@@ -110,10 +109,12 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
     public void addModeListener(IModeListener i_ModeListener, int i_ModeType) {
         signedUpPlugsForModesList.get(i_ModeType).add(i_ModeListener);
+        UpdateAllPlugsInDB();
     }
 
     public void removeModeListener(IModeListener i_ModeListener, int i_ModeType) {
         signedUpPlugsForModesList.get(i_ModeType).remove(i_ModeListener);
+        UpdateAllPlugsInDB();
     }
 
     private void removePlugFromAllModeLists(Plug i_Plug)
@@ -208,16 +209,31 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return res;
     }
 
+    public List<Plug> getPlugsThatRegisteredForMode(int i_ModeType) {
+        List<Plug> plugList = new ArrayList<>();
+        for (IModeListener listener : getPlugsThatSignedUpForMode(i_ModeType)) {
+            plugList.add((Plug) listener);
+        }
+
+        return plugList;
+    }
+
     //************************* Data Base *************************/
 
+    private PlugSave createPlugSave(Plug plug){
+        List<Plug> plugsRegisteredToSleepModeList = getPlugsThatRegisteredForMode(SLEEP_MODE_LIST);
+        List<Plug> plugsRegisteredToSafeModeList = getPlugsThatRegisteredForMode(SAFE_MODE_LIST);
+        boolean registeredToSleepMode = plugsRegisteredToSleepModeList.contains(plug);
+        boolean registeredToSafeMode = plugsRegisteredToSafeModeList.contains(plug);
+        return new PlugSave(plug, registeredToSleepMode, registeredToSafeMode);
+    }
+
     public void SavePlugToDB(Plug plug){
-        PlugSave plugSave = new PlugSave(plug);
-        plugRepoController.SavePlugToDB(plugSave);
+        plugRepoController.SavePlugToDB(createPlugSave(plug));
     }
 
     public void RemovePlugFromDB(Plug plug){
-        PlugSave plugSave = new PlugSave(plug);
-        plugRepoController.RemovePlugFromDB(plugSave);
+        plugRepoController.RemovePlugFromDB(createPlugSave(plug));
     }
 
     public void UpdateAllPlugsInDB(){
