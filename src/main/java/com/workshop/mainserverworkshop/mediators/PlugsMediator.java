@@ -178,6 +178,12 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
     }
 
+    public void closeProcess(int i_UiIndex){
+        Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
+        plug.stopTimer();
+        plug.KillProcess();
+    }
+
     public boolean CheckIfPlugTitleAlreadyExist(String i_PlugTitle){
         boolean res = false;
         for (Plug plug : plugsList) {
@@ -218,7 +224,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         plugsList.forEach(this::SavePlugToDB);
     }
 
-    public void RemoveAllPlugsInDB(){
+    public void RemoveAllPlugsFromDB(){
         plugsList.forEach(this::RemovePlugFromDB);
     }
 
@@ -240,7 +246,6 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             }
         }
         // convert List<PlugSave> to List<Plug> and return it
-        //return plugSavesOnlyInDB.stream().map(PlugSave::toPlug).collect(Collectors.toList());
         return plugSavesOnlyInDB.stream().map(plugSave -> {
             try {
                 return plugSave.toPlug(this);
@@ -260,11 +265,6 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             System.out.println("error: plugListToAdd is null in AddPlugsFromDB function");
         }
     }
-
-
-//    private List<Plug> convertPlugSaveListToPlugList(PlugSave PlugSave){
-//
-//    }
 
 
     //************************* Requests to the plug *************************/

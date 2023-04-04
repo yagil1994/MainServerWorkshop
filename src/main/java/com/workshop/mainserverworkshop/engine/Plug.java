@@ -33,6 +33,7 @@ public class Plug implements IModeListener {
         electricityConsumptionTimer = new Timer();
         overTimeTimer = new Timer();
         consumeElectricity();
+        plugsMediator.SavePlugToDB(this);
     }
 
     public boolean isFakePlug() {return fakePlug;}
@@ -66,6 +67,7 @@ public class Plug implements IModeListener {
 
     public void setInvalidPlugToTrue() {
         isInvalidPlug = true;
+        plugsMediator.SavePlugToDB(this);
     }
 
     public float GetElectricityConsumptionTillNow()
@@ -78,7 +80,11 @@ public class Plug implements IModeListener {
     }
 
     public int getUiIndex() {return UiIndex;}
-    public void updateUiIndex(int i_NewUiIndex) {UiIndex = i_NewUiIndex;}
+
+    public void updateUiIndex(int i_NewUiIndex) {
+        UiIndex = i_NewUiIndex;
+        plugsMediator.SavePlugToDB(this);
+    }
 
     public float[] SimulateAnnualElectricityConsumption() {
         return electricityStorage.SimulateAnnualElectricityStatisticsAndGetMonthList();
@@ -92,13 +98,14 @@ public class Plug implements IModeListener {
         return !isInvalidPlug ? electricityStorage.GetElectricityConsumptionInLiveForSingleUsage() : maxElectricityVolt*2;
     }
 
-
     public String off() {
         status = false;
         overTimeTimer.cancel();
         overTimeFlag = false;
+        String res = plugsMediator.sendTurnOnOrOffRequestToPlug(port, false);
+        plugsMediator.SavePlugToDB(this);
 
-        return plugsMediator.sendTurnOnOrOffRequestToPlug(port, false);
+        return res;
     }
 
     public String on() {
@@ -109,15 +116,20 @@ public class Plug implements IModeListener {
             public void run() {
                 overTimeTimer.cancel();
                 overTimeFlag = true;
+                plugsMediator.SavePlugToDB(plugsMediator.GetPlugAccordingToUiIndex(UiIndex));
             }
         }, 5000, 5000);
 
-        return plugsMediator.sendTurnOnOrOffRequestToPlug(port, true);
+        String res = plugsMediator.sendTurnOnOrOffRequestToPlug(port,true);
+        plugsMediator.SavePlugToDB(this);
+
+        return res;
     }
 
     public void OverTimeAndDoNotTurnOff(){
         overTimeTimer.cancel();
         overTimeFlag = false;
+        plugsMediator.SavePlugToDB(this);
     }
 
     public boolean isOverTimeFlag() {
@@ -138,6 +150,7 @@ public class Plug implements IModeListener {
 
     public void updateStatus(boolean newStatus) {
         status = newStatus;
+        plugsMediator.SavePlugToDB(this);
     }
 
     public String getOnOffStatus() {
@@ -170,5 +183,11 @@ public class Plug implements IModeListener {
 
     public int getPort() {
         return port;
+    }
+
+    public void UpdateFieldsFromDB(boolean overTimeFlag, boolean isInvalidPlug, boolean status){
+        this.overTimeFlag = overTimeFlag;
+        this.isInvalidPlug = isInvalidPlug;
+        this.status = status;
     }
 }

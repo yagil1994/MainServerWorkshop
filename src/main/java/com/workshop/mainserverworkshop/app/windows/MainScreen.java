@@ -117,7 +117,7 @@ public class MainScreen {
 
         uiMediator.getPlugsMediator().getPlugsList().removeAll(uiMediator.getPlugsMediator().getPlugsList());
         body.addProperty("result: ", "all processes have been removed!");
-        port = 1920;
+        port = 9040;
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
