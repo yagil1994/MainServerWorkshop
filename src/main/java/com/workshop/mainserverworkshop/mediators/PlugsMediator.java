@@ -6,11 +6,9 @@ import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import okhttp3.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
@@ -241,20 +239,22 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     }
 
     public void RemoveAllPlugsFromDB(){
-        plugsList.forEach(this::RemovePlugFromDB);
+        List<PlugSave> plugsFromDB = FetchPlugsFromDB();
+        List<Plug> plugList = convertPlugSaveListToPlugList(plugsFromDB);
+        plugList.forEach(this::RemovePlugFromDB);
     }
 
-    public List<PlugSave> GetPlugsFromDB(){
+    public List<PlugSave> FetchPlugsFromDB(){
         return plugRepoController.GetAllPlugsFromDB();
     }
 
     private boolean checkIfPlugIsInDB(Plug plug) {
-        List<PlugSave> plugSaveList = GetPlugsFromDB();
+        List<PlugSave> plugSaveList = FetchPlugsFromDB();
         return plugSaveList.stream().anyMatch(plugSave -> plugSave.getPlugTitle().equals(plug.getPlugTitle()));
     }
 
     private List<Plug> getPlugsInDBAndNotOnList() {
-        List<PlugSave> plugSaveList = GetPlugsFromDB();
+        List<PlugSave> plugSaveList = FetchPlugsFromDB();
         List<PlugSave> plugSavesOnlyInDB = new ArrayList<>();
         for (PlugSave plugSave : plugSaveList) {
             if (!plugsList.stream().anyMatch(plug -> plug.getPlugTitle().equals(plugSave.getPlugTitle()))) {
@@ -262,14 +262,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             }
         }
         // convert List<PlugSave> to List<Plug> and return it
-        return plugSavesOnlyInDB.stream().map(plugSave -> {
-            try {
-                return plugSave.toPlug(this);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }).collect(Collectors.toList());
+        return convertPlugSaveListToPlugList(plugSavesOnlyInDB);
     }
 
     public void AddPlugsFromDB(){
@@ -282,6 +275,16 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
     }
 
+    private List<Plug> convertPlugSaveListToPlugList(List<PlugSave> plugSaveList){
+        return plugSaveList.stream().map(plugSave -> {
+            try {
+                return plugSave.toPlug(this);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }).collect(Collectors.toList());
+    }
 
     //************************* Requests to the plug *************************/
     public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {

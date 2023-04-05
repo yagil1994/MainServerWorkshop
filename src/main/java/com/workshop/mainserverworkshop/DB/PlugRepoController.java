@@ -11,9 +11,7 @@ public class PlugRepoController {
     }
 
     public void SavePlugToDB(PlugSave plugSave){
-        if(plugRepository.existsById(plugSave.getPlugTitle())){
-            plugRepository.delete(plugSave);
-        }
+        RemovePlugFromDB(plugSave);
         plugRepository.save(plugSave);
     }
 
@@ -25,7 +23,7 @@ public class PlugRepoController {
 
     public List<PlugSave> GetAllPlugsFromDB(){
         List<PlugSave> plugSaveList;
-        if(plugRepository.count()==0){
+        if(plugRepository.count() == 0){
             plugSaveList = new ArrayList<>();
         }
         else {

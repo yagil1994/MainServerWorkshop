@@ -1,7 +1,10 @@
 package com.workshop.mainserverworkshop.engine;
+import com.workshop.mainserverworkshop.containers.AllStatisticsContainer;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.mediators.PlugsMediator;
+import com.workshop.mainserverworkshop.mediators.UIMediator;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -72,7 +75,9 @@ public class Plug implements IModeListener {
 
     public float GetElectricityConsumptionTillNow()
     {
-       return electricityStorage.getElectricityUsageTillNow();
+       float res = electricityStorage.getElectricityUsageTillNow();
+       plugsMediator.SavePlugToDB(this);
+       return res;
     }
 
     public int getInternalPlugIndex() {
@@ -87,15 +92,22 @@ public class Plug implements IModeListener {
     }
 
     public float[] SimulateAnnualElectricityConsumption() {
-        return electricityStorage.SimulateAnnualElectricityStatisticsAndGetMonthList();
+        float[] annualElectricityConsumption = electricityStorage.SimulateAnnualElectricityStatisticsAndGetMonthList();
+        plugsMediator.SavePlugToDB(this);
+        return annualElectricityConsumption;
     }
 
     public float[] SimulateWeeklyElectricityConsumption() {
-        return electricityStorage.SimulateWeeklyElectricityStatisticsAndGetDayList();
+        float[] weeklyElectricityConsumption = electricityStorage.SimulateWeeklyElectricityStatisticsAndGetDayList();
+        plugsMediator.SavePlugToDB(this);
+        return weeklyElectricityConsumption;
     }
 
     public float GetElectricityConsumptionInLiveForSingleUsage() {
-        return !isInvalidPlug ? electricityStorage.GetElectricityConsumptionInLiveForSingleUsage() : maxElectricityVolt*2;
+        float res = !isInvalidPlug ? electricityStorage.GetElectricityConsumptionInLiveForSingleUsage() : maxElectricityVolt*2;
+        plugsMediator.SavePlugToDB(this);
+
+        return res;
     }
 
     public String off() {
@@ -191,7 +203,13 @@ public class Plug implements IModeListener {
         return port;
     }
 
-    public void UpdateFieldsFromDB(boolean overTimeFlag, boolean isInvalidPlug, boolean status, boolean registeredToSleepMode, boolean registeredToSafeMode){
+    public AllStatisticsContainer getAllStatisticsContainer(){
+        return new AllStatisticsContainer(electricityStorage.getElectricityUsageTillNow(),
+                electricityStorage.getLastSingleUsageStatistics(),electricityStorage.getLastWeeklyStatistics(),
+                electricityStorage.getLastAnnualStatistics());
+    }
+
+    public void UpdateFieldsFromDB(boolean overTimeFlag, boolean isInvalidPlug, boolean status, boolean registeredToSleepMode, boolean registeredToSafeMode, AllStatisticsContainer statisticsContainer){
         this.overTimeFlag = overTimeFlag;
         this.isInvalidPlug = isInvalidPlug;
         this.status = status;
@@ -201,5 +219,9 @@ public class Plug implements IModeListener {
         if(registeredToSafeMode && !plugsMediator.getPlugsThatRegisteredForMode(plugsMediator.SAFE_MODE_LIST).contains(this)){
             plugsMediator.addModeListener(this, plugsMediator.SAFE_MODE_LIST);
         }
+        electricityStorage.setElectricityUsageTillNow(statisticsContainer.getElectricityUsageTillNow());
+        electricityStorage.setLastSingleUsageStatistics(statisticsContainer.getLastSingleUsageStatistics());
+        electricityStorage.setLastWeeklyStatistics(statisticsContainer.getLastWeeklyStatistics());
+        electricityStorage.setLastAnnualStatistics(statisticsContainer.getLastAnnualStatistics());
     }
 }

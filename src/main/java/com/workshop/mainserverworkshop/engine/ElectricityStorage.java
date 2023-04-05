@@ -4,7 +4,8 @@ import java.util.Random;
 
 public class ElectricityStorage {
     private int minElectricityVolt, maxElectricityVolt;
-    private float electricityUsageTillNow;
+    private float electricityUsageTillNow, lastSingleUsageStatistics;
+    private float[] lastWeeklyStatistics, lastAnnualStatistics;
 
     public ElectricityStorage(int i_MinElectricityVoltInput, int i_MxElectricityVoltInput) {
         minElectricityVolt = i_MinElectricityVoltInput;
@@ -21,14 +22,17 @@ public class ElectricityStorage {
             electricityConsumption[i] = ((randomVolt * randomNumberOfUsageInDay) / 1000f) * 30;
         }
 
+        lastAnnualStatistics = electricityConsumption;
+
         return electricityConsumption;
     }
 
     public float GetElectricityConsumptionInLiveForSingleUsage()
     {
         Random random = new Random();
+        lastSingleUsageStatistics = random.nextInt(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
 
-        return random.nextInt(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
+        return lastSingleUsageStatistics;
     }
 
     public float[] SimulateWeeklyElectricityStatisticsAndGetDayList() {
@@ -39,6 +43,8 @@ public class ElectricityStorage {
             int randomNumberOfUsageInDay = random.nextInt(25);
             dailyElectricityConsumption[i] = ((randomVolt * randomNumberOfUsageInDay) / 1000f);
         }
+
+        lastWeeklyStatistics = dailyElectricityConsumption;
 
         return dailyElectricityConsumption;
     }
@@ -58,5 +64,33 @@ public class ElectricityStorage {
     public float getElectricityUsageTillNow(){
         DecimalFormat df = new DecimalFormat("#.####");
         return Float.parseFloat(df.format(electricityUsageTillNow));
+    }
+
+    public void setElectricityUsageTillNow(float electricityUsageTillNow) {
+        this.electricityUsageTillNow = electricityUsageTillNow;
+    }
+
+    public float[] getLastWeeklyStatistics() {
+        return lastWeeklyStatistics;
+    }
+
+    public void setLastWeeklyStatistics(float[] lastWeeklyStatistics) {
+        this.lastWeeklyStatistics = lastWeeklyStatistics;
+    }
+
+    public float[] getLastAnnualStatistics() {
+        return lastAnnualStatistics;
+    }
+
+    public void setLastAnnualStatistics(float[] lastAnnualStatistics) {
+        this.lastAnnualStatistics = lastAnnualStatistics;
+    }
+
+    public float getLastSingleUsageStatistics() {
+        return lastSingleUsageStatistics;
+    }
+
+    public void setLastSingleUsageStatistics(float lastSingleUsageStatistics) {
+        this.lastSingleUsageStatistics = lastSingleUsageStatistics;
     }
 }

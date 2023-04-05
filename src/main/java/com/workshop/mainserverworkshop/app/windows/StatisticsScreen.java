@@ -1,5 +1,6 @@
 package com.workshop.mainserverworkshop.app.windows;
 import com.google.gson.Gson;
+import com.workshop.mainserverworkshop.containers.AllStatisticsContainer;
 import com.workshop.mainserverworkshop.containers.IndexAndElectricityConsumptionContainer;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.mediators.UIMediator;
@@ -52,6 +53,29 @@ public class StatisticsScreen {
         else {
             float[] weeklyConsumption = plug.SimulateWeeklyElectricityConsumption();
             response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(weeklyConsumption));
+        }
+
+        return response;
+    }
+
+    @GetMapping("/workshop/statisticsScreen/GetLastElectricityUsageForPlugByType")
+    public ResponseEntity<String> GetLastElectricityUsageForPlugByType(@RequestParam String i_UiIndex, @RequestParam String i_StatisticsType)
+    {
+        ResponseEntity<String> response;
+        int UiIndex = Integer.parseInt(i_UiIndex);
+        Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
+        if(plug == null){
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        }
+        else {
+            AllStatisticsContainer statisticsContainer = plug.getAllStatisticsContainer();
+            response = switch (i_StatisticsType) {
+                case "weekly" -> ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(statisticsContainer.getLastWeeklyStatistics()));
+                case "annual" -> ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(statisticsContainer.getLastAnnualStatistics()));
+                case "tilNow" -> ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(statisticsContainer.getElectricityUsageTillNow()));
+                case "single" -> ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(statisticsContainer.getLastSingleUsageStatistics()));
+                default -> ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("error"));
+            };
         }
 
         return response;

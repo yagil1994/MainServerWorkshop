@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.workshop.mainserverworkshop.DB.PlugSave;
 import com.workshop.mainserverworkshop.containers.ConnectedPlugsDetailsContainer;
 import com.workshop.mainserverworkshop.containers.IndexesContainer;
-import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.mediators.UIMediator;
@@ -68,11 +67,11 @@ public class MainScreen {
         return ResponseEntity.status(responseStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
-    @GetMapping("/workshop/mainScreen/GetPlugsFromDB")
-    public ResponseEntity<String> GetPlugsFromDB(){
+    @GetMapping("/workshop/mainScreen/SeePlugsAtDB")
+    public ResponseEntity<String> SeePlugsAtDB(){
         JsonObject body = new JsonObject();
 
-        List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().GetPlugsFromDB();
+        List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().FetchPlugsFromDB();
         List<ConnectedPlugsDetailsContainer> connectedPlugsDetailsContainer = new ArrayList<>();
         if(plugSaveList.isEmpty())
         {
@@ -86,18 +85,18 @@ public class MainScreen {
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(connectedPlugsDetailsContainer));
     }
 
-    @GetMapping("/workshop/mainScreen/AddPlugsFromDB")
-    public ResponseEntity<String> AddPlugsFromDB(){
+    @GetMapping("/workshop/mainScreen/FetchPlugsFromDB")
+    public ResponseEntity<String> FetchPlugsFromDB(){
         JsonObject body = new JsonObject();
 
-        List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().GetPlugsFromDB();
+        List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().FetchPlugsFromDB();
         if(plugSaveList.isEmpty())
         {
             body.addProperty("result: ", "there are no plugs in DB");
         }
         uiMediator.getPlugsMediator().AddPlugsFromDB();
 
-        return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plugs from DB have been added"));
+        return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plugs from DB have been fetched"));
     }
 
     @DeleteMapping("/workshop/mainScreen/DeleteAllPlugsFromDB")
