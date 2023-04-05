@@ -1,5 +1,6 @@
 package com.workshop.mainserverworkshop.DB;
 
+import com.workshop.mainserverworkshop.containers.AllStatisticsContainer;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.mediators.PlugsMediator;
 import org.springframework.data.annotation.Id;
@@ -37,6 +38,14 @@ public class PlugSave {
     private boolean registeredToSleepMode;
     @Field
     private boolean registeredToSafeMode;
+    @Field
+    private float electricityUsageTillNow;
+    @Field
+    private float lastSingleUsageStatistics;
+    @Field
+    private float[] lastWeeklyStatistics;
+    @Field
+    private float[] lastAnnualStatistics;
 
     public PlugSave(Plug plug, boolean i_RegisteredToSleepMode, boolean i_RegisteredToSafeMode) {
         this.plugTitle = plug.getPlugTitle();
@@ -53,6 +62,12 @@ public class PlugSave {
         this.isInvalidPlug = plug.isInvalidPlug();
         registeredToSleepMode = i_RegisteredToSleepMode;
         registeredToSafeMode = i_RegisteredToSafeMode;
+
+        AllStatisticsContainer allStatisticsContainer = plug.getAllStatisticsContainer();
+        electricityUsageTillNow = allStatisticsContainer.getElectricityUsageTillNow();
+        lastSingleUsageStatistics = allStatisticsContainer.getLastSingleUsageStatistics();
+        lastWeeklyStatistics = allStatisticsContainer.getLastWeeklyStatistics();
+        lastAnnualStatistics = allStatisticsContainer.getLastAnnualStatistics();
     }
 
     public PlugSave() {}
@@ -60,7 +75,8 @@ public class PlugSave {
     public Plug toPlug(PlugsMediator plugsMediator) throws IOException {
         Process process = plugsMediator.CreateProcess(port);
         Plug plug = new Plug(process, port, plugTitle, plugType, plugsMediator, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt);
-        plug.UpdateFieldsFromDB(overTimeFlag, isInvalidPlug, status, registeredToSleepMode, registeredToSafeMode);
+        AllStatisticsContainer StatisticsContainer = new AllStatisticsContainer(electricityUsageTillNow,lastSingleUsageStatistics,lastWeeklyStatistics,lastAnnualStatistics);
+        plug.UpdateFieldsFromDB(overTimeFlag, isInvalidPlug, status, registeredToSleepMode, registeredToSafeMode, StatisticsContainer);
 
         return plug;
     }
