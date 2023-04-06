@@ -119,6 +119,8 @@ public class MainScreen {
             uiMediator.getPlugsMediator().closeProcess(index);
         }
 
+        uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+
         //uiMediator.getPlugsMediator().getPlugsList().removeAll(uiMediator.getPlugsMediator().getPlugsList());
         body.addProperty("result: ", "all processes have been removed!");
         port = 9040;
