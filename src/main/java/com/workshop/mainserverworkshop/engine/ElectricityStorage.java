@@ -7,9 +7,9 @@ public class ElectricityStorage {
     private float electricityUsageTillNow, lastSingleUsageStatistics;
     private float[] lastWeeklyStatistics, lastAnnualStatistics;
 
-    public ElectricityStorage(int i_MinElectricityVoltInput, int i_MxElectricityVoltInput) {
+    public ElectricityStorage(int i_MinElectricityVoltInput, int i_MaxElectricityVoltInput) {
         minElectricityVolt = i_MinElectricityVoltInput;
-        maxElectricityVolt = i_MxElectricityVoltInput;
+        maxElectricityVolt = i_MaxElectricityVoltInput;
         electricityUsageTillNow = 0f;
     }
 
@@ -27,14 +27,6 @@ public class ElectricityStorage {
         return electricityConsumption;
     }
 
-    public float GetElectricityConsumptionInLiveForSingleUsage()
-    {
-        Random random = new Random();
-        lastSingleUsageStatistics = random.nextInt(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
-
-        return lastSingleUsageStatistics;
-    }
-
     public float[] SimulateWeeklyElectricityStatisticsAndGetDayList() {
         float[] dailyElectricityConsumption = new float[7];
         Random random = new Random();
@@ -49,7 +41,7 @@ public class ElectricityStorage {
         return dailyElectricityConsumption;
     }
 
-    public void UpdateElectricityUsageAndGetUpdatedValue()
+    public void UpdateElectricityUsageAndGetUpdatedValue(float i_LastSingleUsageAccordingToCaseOfInvalid, boolean isInvalid)
     {
         Random random = new Random();
         int randomVolt = random.nextInt(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
@@ -58,6 +50,7 @@ public class ElectricityStorage {
 
         synchronized (this){
             electricityUsageTillNow += add;
+            lastSingleUsageStatistics = isInvalid ?i_LastSingleUsageAccordingToCaseOfInvalid : add;
         }
     }
 

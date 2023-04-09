@@ -3,7 +3,6 @@ import com.workshop.mainserverworkshop.containers.AllStatisticsContainer;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.mediators.PlugsMediator;
-import com.workshop.mainserverworkshop.mediators.UIMediator;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -56,7 +55,8 @@ public class Plug implements IModeListener {
             public void run()
             {
                 if(status){
-                  electricityStorage.UpdateElectricityUsageAndGetUpdatedValue();
+                    float electricityConsumptionInLiveForSingleUsage = GetElectricityConsumptionInLiveForSingleUsage();
+                  electricityStorage.UpdateElectricityUsageAndGetUpdatedValue(electricityConsumptionInLiveForSingleUsage,isInvalidPlug);
                 }
             }
         }
@@ -68,8 +68,8 @@ public class Plug implements IModeListener {
         return isInvalidPlug;
     }
 
-    public void setInvalidPlugToTrue() {
-        isInvalidPlug = true;
+    public void setFalseToInvalidAndTrueToValidThePlug(boolean i_Value) {
+        isInvalidPlug = !i_Value;
         plugsMediator.SavePlugToDB(this);
     }
 
@@ -104,7 +104,7 @@ public class Plug implements IModeListener {
     }
 
     public float GetElectricityConsumptionInLiveForSingleUsage() {
-        float res = !isInvalidPlug ? electricityStorage.GetElectricityConsumptionInLiveForSingleUsage() : maxElectricityVolt*2;
+        float res = !isInvalidPlug ? electricityStorage.getLastSingleUsageStatistics() : maxElectricityVolt*2;
         plugsMediator.SavePlugToDB(this);
 
         return res;
@@ -149,6 +149,7 @@ public class Plug implements IModeListener {
         overTimeFlag = false;
         plugsMediator.SavePlugToDB(this);
     }
+
 
     public boolean isOverTimeFlag() {
         return overTimeFlag;

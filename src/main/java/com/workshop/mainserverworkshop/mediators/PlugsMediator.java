@@ -143,7 +143,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             for (Plug plug: plugsList) {
                 if(plug.getInternalPlugIndex() == index)
                 {
-                    plug.setInvalidPlugToTrue();
+                    plug.setFalseToInvalidAndTrueToValidThePlug(false);
                 }
             }
         }
