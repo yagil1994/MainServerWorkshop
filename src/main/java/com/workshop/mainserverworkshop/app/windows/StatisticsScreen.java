@@ -81,22 +81,22 @@ public class StatisticsScreen {
         return response;
     }
 
-    @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionInLiveForSingleUsage")
-    public ResponseEntity<String> GetElectricityConsumptionInLiveForSingleUsage(@RequestParam String i_UiIndex)
-    {
-        ResponseEntity<String> response;
-        int UiIndex = Integer.parseInt(i_UiIndex);
-        Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-        if(plug == null){
-            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
-        }
-        else {
-            float consumption = plug.GetElectricityConsumptionInLiveForSingleUsage();
-            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(consumption));
-        }
-
-        return response;
-    }
+//    @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionInLiveForSingleUsage")
+//    public ResponseEntity<String> GetElectricityConsumptionInLiveForSingleUsage(@RequestParam String i_UiIndex)
+//    {
+//        ResponseEntity<String> response;
+//        int UiIndex = Integer.parseInt(i_UiIndex);
+//        Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
+//        if(plug == null){
+//            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+//        }
+//        else {
+//            float consumption = plug.GetElectricityConsumptionInLiveForSingleUsage();
+//            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(consumption));
+//        }
+//
+//        return response;
+//    }
 
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
     public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs()
