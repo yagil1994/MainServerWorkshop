@@ -74,7 +74,7 @@ public class PlugSave {
 
     public Plug toPlug(PlugsMediator plugsMediator) throws IOException {
         Process process = plugsMediator.CreateProcess(port);
-        Plug plug = new Plug(process, port, plugTitle, plugType, plugsMediator, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt);
+        Plug plug = new Plug(process, port, plugTitle, plugType, plugsMediator, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt,true);
         AllStatisticsContainer StatisticsContainer = new AllStatisticsContainer(electricityUsageTillNow,lastSingleUsageStatistics,lastWeeklyStatistics,lastAnnualStatistics);
         plug.UpdateFieldsFromDB(overTimeFlag, isInvalidPlug, status, registeredToSleepMode, registeredToSafeMode, StatisticsContainer);
 
