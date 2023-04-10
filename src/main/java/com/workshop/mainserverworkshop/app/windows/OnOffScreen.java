@@ -56,9 +56,11 @@ public class OnOffScreen  {
         {
             body.addProperty("result: ", "no plugs are connected yet!");
         }
+
         for (Plug plug: plugs) {
             plugInfoContainerList.add(new PlugInfoContainer(plug.getPlugTitle(),plug.getPlugType(), plug.getOnOffStatus(), String.valueOf(plug.getInternalPlugIndex())));
         }
+
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plugInfoContainerList));
     }
 
@@ -85,8 +87,6 @@ public class OnOffScreen  {
 
         return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
-
-
 
     @GetMapping("/workshop/on_off_screen/getPlugStatus")
     public ResponseEntity<String> GetPlugStatus(@RequestParam String i_UiIndex){
@@ -162,41 +162,33 @@ public class OnOffScreen  {
 //
 //        return response;
 //    }
-@GetMapping("/workshop/on_off_screen/doNotTurnOffAfterOverTimeOrInvalidConsumption")
-public ResponseEntity<String> DoNotTurnOffAfterOverTimeOrInvalidConsumption(@RequestParam String i_UiIndex,@RequestParam String  i_Type){
-    ResponseEntity<String> response;
-    int plugIndex = Integer.parseInt(i_UiIndex);
-    Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
-    if(plug != null){
-        String message;
-        if(i_Type.equalsIgnoreCase("overtime"))
-        {
-            if(plug.getOnOffStatus().equals("on")) {
-                plug.OverTimeAndDoNotTurnOff();
-                message = "OverTime for plug "+ plug.getUiIndex() +" ignored";
+    @GetMapping("/workshop/on_off_screen/doNotTurnOffAfterOverTimeOrInvalidConsumption")
+    public ResponseEntity<String> DoNotTurnOffAfterOverTimeOrInvalidConsumption(@RequestParam String i_UiIndex,@RequestParam String  i_Type) {
+        ResponseEntity<String> response;
+        int plugIndex = Integer.parseInt(i_UiIndex);
+        Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
+        if (plug != null) {
+            String message;
+            if (i_Type.equalsIgnoreCase("overtime")) {
+                if (plug.getOnOffStatus().equals("on")) {
+                    plug.OverTimeAndDoNotTurnOff();
+                    message = "OverTime for plug " + plug.getUiIndex() + " ignored";
+                } else {
+                    message = "Plug " + plug.getUiIndex() + " is off";
+                }
+            } else if (i_Type.equalsIgnoreCase("invalidConsumption")) {
+                plug.setFalseToInvalidAndTrueToValidThePlug(true);
+                message = "Plug " + plug.getUiIndex() + " is valid now";
+            } else {
+                message = "Wrong type! it should be exactly: 'overtime' or 'invalidConsumption'";
             }
-            else {
-                message = "Plug "+plug.getUiIndex()+ " is off";
-            }
+            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(message));
+        } else {
+            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
         }
-        else  if(i_Type.equalsIgnoreCase("invalidConsumption"))
-        {
-           plug.setFalseToInvalidAndTrueToValidThePlug(true);
-           message = "Plug "+plug.getUiIndex()+ " is valid now";
-        }
-        else{
-            message = "Wrong type! it should be exactly: 'overtime' or 'invalidConsumption'";
-        }
-        response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(message));
+
+        return response;
     }
-    else {
-        response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
-    }
-
-    return response;
-}
-
-
 
     private boolean checkIfThisPlugIsInOverTimeConsumption(Plug plug)
     {

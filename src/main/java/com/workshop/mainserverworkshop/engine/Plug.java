@@ -18,6 +18,19 @@ public class Plug implements IModeListener {
     private boolean fakePlug;
 
     public Plug(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt) {
+        starter(i_Process, i_port, i_PlugTitle, i_PlugType, i_PlugsMediator, i_InternalIndex, i_UiIndex, i_minElectricityVolt, i_maxElectricityVolt);
+        electricityConsumptionTimer = new Timer();
+        overTimeTimer = new Timer();
+        consumeElectricity();
+        plugsMediator.SavePlugToDB(this);
+    }
+
+    //form PlugSave
+    public Plug (Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt, boolean fromPlugSave){
+        starter(i_Process, i_port, i_PlugTitle, i_PlugType, i_PlugsMediator, i_InternalIndex, i_UiIndex, i_minElectricityVolt, i_maxElectricityVolt);
+    }
+
+    private void starter(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt){
         process = i_Process;
         plugType = i_PlugType;
         plugTitle = i_PlugTitle;
@@ -32,10 +45,6 @@ public class Plug implements IModeListener {
         internalPlugIndex = i_InternalIndex;
         UiIndex = i_UiIndex;
         electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt);
-        electricityConsumptionTimer = new Timer();
-        overTimeTimer = new Timer();
-        consumeElectricity();
-        plugsMediator.SavePlugToDB(this);
     }
 
     public boolean isFakePlug() {return fakePlug;}
