@@ -4,6 +4,7 @@ import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.mediators.PlugsMediator;
 
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -64,8 +65,7 @@ public class Plug implements IModeListener {
             public void run()
             {
                 if(status){
-                    float electricityConsumptionInLiveForSingleUsage = GetElectricityConsumptionInLiveForSingleUsage();
-                  electricityStorage.UpdateElectricityUsageAndGetUpdatedValue(electricityConsumptionInLiveForSingleUsage,isInvalidPlug);
+                  electricityStorage.UpdateElectricityUsageAndGetUpdatedValue(isInvalidPlug);
                 }
             }
         }
@@ -112,6 +112,7 @@ public class Plug implements IModeListener {
         return weeklyElectricityConsumption;
     }
 
+    //not using
     public float GetElectricityConsumptionInLiveForSingleUsage() {
         float res = !isInvalidPlug ? electricityStorage.getLastSingleUsageStatistics() : maxElectricityVolt*2;
         plugsMediator.SavePlugToDB(this);
