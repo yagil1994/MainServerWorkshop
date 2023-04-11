@@ -41,7 +41,7 @@ public class ElectricityStorage {
         return dailyElectricityConsumption;
     }
 
-    public void UpdateElectricityUsageAndGetUpdatedValue(boolean isInvalid)
+    public void UpdateElectricityUsage(boolean isInvalid)
     {
         Random random = new Random();
         int randomVolt = random.nextInt(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
@@ -59,12 +59,12 @@ public class ElectricityStorage {
     }
 
     public float SimulateInValidConsumption(){
-        Random random = new Random();
-        int randomVolt = random.nextInt(maxElectricityVolt -  1) + minElectricityVolt;
-        int randomNumberOfUsageInDay = random.nextInt(25);
-        float high = (((randomVolt * randomNumberOfUsageInDay) / 100f)/86);
+//        Random random = new Random();
+//        int randomVolt = random.nextInt(maxElectricityVolt -  1) + minElectricityVolt;
+//        int randomNumberOfUsageInDay = random.nextInt(25);
+//        float high = (((randomVolt * randomNumberOfUsageInDay) / 100f)/86);
 
-        return high;
+        return  (520*2)/ 100f/86;   //=0.120930225
     }
 
     public float getElectricityUsageTillNow(){

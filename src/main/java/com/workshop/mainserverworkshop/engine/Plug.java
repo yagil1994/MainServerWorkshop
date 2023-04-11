@@ -4,7 +4,6 @@ import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.mediators.PlugsMediator;
 
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -65,7 +64,7 @@ public class Plug implements IModeListener {
             public void run()
             {
                 if(status){
-                  electricityStorage.UpdateElectricityUsageAndGetUpdatedValue(isInvalidPlug);
+                  electricityStorage.UpdateElectricityUsage(isInvalidPlug);
                 }
             }
         }
