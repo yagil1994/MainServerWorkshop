@@ -6,6 +6,8 @@ import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import okhttp3.*;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
 public class PlugsMediator { //this mediator sends http requests to the plugs(the main server behaves here as client)
     public final int SAFE_MODE_LIST = 0;
     public final int SLEEP_MODE_LIST = 1;
-    private final int MAX_PLUGS = 9;
+    private final int MAX_PLUGS = 10;
     private static PlugsMediator instance = null;
     private final List<Plug> plugsList;
     private final List<Boolean> indexesFreeList;
@@ -97,10 +99,6 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return found ? res.get() : null;
     }
 
-//    public Plug getPlugAccordingToInternalIndex(int i_InternalIndex) {
-//        return getPlugsList().get(i_InternalIndex);
-//    }
-
     public List<Plug> getPlugsList() {
         return getInstance().plugsList;
     }
@@ -162,11 +160,13 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     }
 
     public void RemovePlug(int i_UiIndex, boolean i_WithRefreshUiIndexes) {
-        //todo: when we work with the real plug we need to update it accordingly
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
         int internalIndex = plug.getInternalPlugIndex();
         plug.stopTimer();
-        plug.KillProcess();
+        if(plug.isFakePlug())
+        {
+            plug.KillProcess();
+        }
         removePlugFromAllModeLists(plug);
         indexesFreeList.set(internalIndex, true);
 
@@ -180,7 +180,10 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     public void closeProcess(int i_UiIndex){
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
         plug.stopTimer();
-        plug.KillProcess();
+        if(plug.isFakePlug())
+        {
+            plug.KillProcess();
+        }
     }
 
     public boolean CheckIfPlugTitleAlreadyExist(String i_PlugTitle){
@@ -309,4 +312,25 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return getResponse;
     }
 
+    public void RealPlugOnOrOff(String status)  {
+        //https://api.developer.lifx.com/reference/list-scenes
+        AsyncHttpClient client = new DefaultAsyncHttpClient();
+        client.prepare("PUT", "https://api.lifx.com/v1/lights/D073D55D366A/state")
+                .setHeader("accept", "text/plain")
+                .setHeader("content-type", "application/json")
+                .setHeader("Authorization", "Bearer c39dce41acf04ef51280468d6b594aa3511a2dce8d3ae9f669c4634bb9537dd9")
+                .setBody("{\"duration\":1,\"fast\":false,\"power\":\"" +status +"\"}")
+                .execute()
+                .toCompletableFuture()
+                .thenAccept(System.out::println)
+                .join();
+        try {
+            client.close();
+        }
+        catch (Exception exception){
+            System.out.println(exception.getMessage());
+        }
+    }
 }
+
+

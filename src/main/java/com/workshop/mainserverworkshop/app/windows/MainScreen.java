@@ -35,14 +35,19 @@ public class MainScreen {
         int minElectricityVolt = !Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MinElectricityVolt) : 220;
         int maxElectricityVolt =!Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MaxElectricityVolt) : 240;
         int UiIndex = Integer.parseInt(i_UiIndex);
+        boolean fakePlug = UiIndex != 10;
 
         JsonObject body = new JsonObject();
         HttpStatus responseStatus = HttpStatus.OK;
         Process process = null;
-        try {
-            process = uiMediator.getPlugsMediator().CreateProcess(port);
-        } catch (Exception ex) {
-            System.out.println(Arrays.toString(ex.getStackTrace()));
+
+        if(fakePlug)
+        {
+            try {
+                process = uiMediator.getPlugsMediator().CreateProcess(port);
+            } catch (Exception ex) {
+                System.out.println(Arrays.toString(ex.getStackTrace()));
+            }
         }
         if(uiMediator.getPlugsMediator().CheckIfPlugTitleAlreadyExist(i_Title)){
             body.addProperty("result:", "failed to add new plug. title already exist");
@@ -55,8 +60,14 @@ public class MainScreen {
         else {
             boolean plugAdded = uiMediator.getPlugsMediator().AddNewPlug(process, port, i_Title, UiIndex, i_Type, minElectricityVolt, maxElectricityVolt);
             if (plugAdded) {
-                body.addProperty("result:", "new plug added in port: " + port);
-               // body.addProperty("process name:", process.toString());
+                if(fakePlug)
+                {
+                    body.addProperty("result:", "new plug added in port: " + port);
+                }
+                else{
+                    body.addProperty("result:", "real plug added!!");
+                }
+
                 port++;
             } else {
                 body.addProperty("result:", "failed to add new plug. reached to maximum plugs");
@@ -127,23 +138,23 @@ public class MainScreen {
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
 
-    @GetMapping("/workshop/mainScreen/close_appOld")
-    public ResponseEntity<String> closeAppOld() {
-        JsonObject body = new JsonObject();
-        List<Integer> uiIndexes = new ArrayList<>();
-        for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
-            uiIndexes.add(plug.getUiIndex());
-        }
-
-        for (int index : uiIndexes) {
-            uiMediator.getPlugsMediator().RemovePlug(index, false);
-        }
-
-        uiMediator.getPlugsMediator().getPlugsList().removeAll(uiMediator.getPlugsMediator().getPlugsList());
-        body.addProperty("result: ", "all processes have been removed!");
-        port = 9040;
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
-    }
+//    @GetMapping("/workshop/mainScreen/close_appOld")
+//    public ResponseEntity<String> closeAppOld() {
+//        JsonObject body = new JsonObject();
+//        List<Integer> uiIndexes = new ArrayList<>();
+//        for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
+//            uiIndexes.add(plug.getUiIndex());
+//        }
+//
+//        for (int index : uiIndexes) {
+//            uiMediator.getPlugsMediator().RemovePlug(index, false);
+//        }
+//
+//        uiMediator.getPlugsMediator().getPlugsList().removeAll(uiMediator.getPlugsMediator().getPlugsList());
+//        body.addProperty("result: ", "all processes have been removed!");
+//        port = 9040;
+//        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+//    }
 
     @PostMapping("/workshop/mainScreen/RegisterToSleepMode")
     public ResponseEntity<String> RegisterToSleepMode(@RequestBody String i_JsonArguments) {

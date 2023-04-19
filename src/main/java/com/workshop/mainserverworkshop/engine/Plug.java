@@ -41,7 +41,7 @@ public class Plug implements IModeListener {
         status = false;
         overTimeFlag = false;
         isInvalidPlug = false;
-        fakePlug = true; //change it if real
+        fakePlug = i_UiIndex != 10;
         internalPlugIndex = i_InternalIndex;
         UiIndex = i_UiIndex;
         electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt);
@@ -95,8 +95,11 @@ public class Plug implements IModeListener {
     public int getUiIndex() {return UiIndex;}
 
     public void updateUiIndex(int i_NewUiIndex) {
-        UiIndex = i_NewUiIndex;
-        plugsMediator.SavePlugToDB(this);
+        if(isFakePlug())
+        {
+            UiIndex = i_NewUiIndex;
+            plugsMediator.SavePlugToDB(this);
+        }
     }
 
     public float[] SimulateAnnualElectricityConsumption() {
@@ -112,29 +115,47 @@ public class Plug implements IModeListener {
     }
 
     //not using
-    public float GetElectricityConsumptionInLiveForSingleUsage() {
-        float res = !isInvalidPlug ? electricityStorage.getLastSingleUsageStatistics() : maxElectricityVolt*2;
-        plugsMediator.SavePlugToDB(this);
-
-        return res;
-    }
+//    public float GetElectricityConsumptionInLiveForSingleUsage() {
+//        float res = !isInvalidPlug ? electricityStorage.getLastSingleUsageStatistics() : maxElectricityVolt*2;
+//        plugsMediator.SavePlugToDB(this);
+//
+//        return res;
+//    }
 
     public String off() {
+        String res = "turned off";
         status = false;
         overTimeTimer.cancel();
         overTimeFlag = false;
-        String res = "turned off";
-        if(process.isAlive()){
+        if(!fakePlug)
+        {
+            //plugsMediator.flipRealPlug();
+            //plugsMediator.RealPlugOff();
+            plugsMediator.RealPlugOnOrOff("off");
+        }
+       else if(process.isAlive()){
             res = plugsMediator.sendTurnOnOrOffRequestToPlug(port, false);
         }
+
         plugsMediator.SavePlugToDB(this);
 
         return res;
     }
 
     public String on() {
+        String res = "turned on";
         status = true;
         overTimeTimer = new Timer();
+        if(!fakePlug)
+        {
+            //plugsMediator.flipRealPlug();
+            //plugsMediator.RealPlugOn();
+            plugsMediator.RealPlugOnOrOff("on");
+        }
+        else if(process.isAlive()){
+            res = plugsMediator.sendTurnOnOrOffRequestToPlug(port,true);
+        }
+
         overTimeTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -144,10 +165,6 @@ public class Plug implements IModeListener {
             }
         }, 5000, 5000);
 
-        String res = "turned on";
-        if(process.isAlive()){
-            res = plugsMediator.sendTurnOnOrOffRequestToPlug(port,true);
-        }
         plugsMediator.SavePlugToDB(this);
 
         return res;
