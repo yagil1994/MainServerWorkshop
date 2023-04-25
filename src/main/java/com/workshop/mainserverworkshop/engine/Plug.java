@@ -4,7 +4,6 @@ import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.mediators.PlugsMediator;
 
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,9 +19,7 @@ public class Plug implements IModeListener {
 
     public Plug(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt) {
         starter(i_Process, i_port, i_PlugTitle, i_PlugType, i_PlugsMediator, i_InternalIndex, i_UiIndex, i_minElectricityVolt, i_maxElectricityVolt);
-        electricityConsumptionTimer = new Timer();
-        overTimeTimer = new Timer();
-        consumeElectricity();
+        initTimerAndElectricityConsumption();
         plugsMediator.SavePlugToDB(this);
     }
 
@@ -48,6 +45,12 @@ public class Plug implements IModeListener {
         electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt);
     }
 
+    public void initTimerAndElectricityConsumption(){
+        electricityConsumptionTimer = new Timer();
+        overTimeTimer = new Timer();
+        consumeElectricity();
+    }
+
     public boolean isFakePlug() {return fakePlug;}
 
     public int getMinElectricityVolt() {
@@ -65,7 +68,7 @@ public class Plug implements IModeListener {
             public void run()
             {
                 if(status){
-                  electricityStorage.UpdateElectricityUsageAndGetUpdatedValue(isInvalidPlug);
+                  electricityStorage.UpdateElectricityUsage(isInvalidPlug);
                 }
             }
         }
