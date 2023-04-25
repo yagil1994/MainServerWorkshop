@@ -179,9 +179,9 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
     public void closeProcess(int i_UiIndex){
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
-        plug.stopTimer();
         if(plug.isFakePlug())
         {
+            plug.stopTimer();
             plug.KillProcess();
         }
     }
@@ -271,6 +271,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     public void AddPlugsFromDB(){
         List<Plug> plugListToAdd = getPlugsInDBAndNotOnList();
         if(plugListToAdd != null){
+            plugListToAdd.forEach(Plug::initTimerAndElectricityConsumption);
             plugsList.addAll(plugListToAdd);
         }
         else {
