@@ -319,7 +319,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         client.prepare("PUT", "https://api.lifx.com/v1/lights/D073D55D366A/state")
                 .setHeader("accept", "text/plain")
                 .setHeader("content-type", "application/json")
-                .setHeader("Authorization", "Bearer c39dce41acf04ef51280468d6b594aa3511a2dce8d3ae9f669c4634bb9537dd9")
+                .setHeader("Authorization", "Bearer c92666ccf547bee99111be18537483efd44945dd012959c954c687cf69a82731")
                 .setBody("{\"duration\":1,\"fast\":false,\"power\":\"" +status +"\"}")
                 .execute()
                 .toCompletableFuture()
