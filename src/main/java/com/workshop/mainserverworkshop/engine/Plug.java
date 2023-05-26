@@ -118,14 +118,6 @@ public class Plug implements IModeListener {
         return weeklyElectricityConsumption;
     }
 
-    //not using
-//    public float GetElectricityConsumptionInLiveForSingleUsage() {
-//        float res = !isInvalidPlug ? electricityStorage.getLastSingleUsageStatistics() : maxElectricityVolt*2;
-//        plugsMediator.SavePlugToDB(this);
-//
-//        return res;
-//    }
-
     public String off() {
         String res = "turned off";
         status = false;
@@ -133,8 +125,6 @@ public class Plug implements IModeListener {
         overTimeFlag = false;
         if(!fakePlug)
         {
-            //plugsMediator.flipRealPlug();
-            //plugsMediator.RealPlugOff();
             plugsMediator.RealPlugOnOrOff("off");
         }
        else if(process.isAlive()){
@@ -152,8 +142,6 @@ public class Plug implements IModeListener {
         overTimeTimer = new Timer();
         if(!fakePlug)
         {
-            //plugsMediator.flipRealPlug();
-            //plugsMediator.RealPlugOn();
             plugsMediator.RealPlugOnOrOff("on");
         }
         else if(process.isAlive()){
