@@ -59,11 +59,6 @@ public class ElectricityStorage {
     }
 
     public float SimulateInValidConsumption(){
-//        Random random = new Random();
-//        int randomVolt = random.nextInt(maxElectricityVolt -  1) + minElectricityVolt;
-//        int randomNumberOfUsageInDay = random.nextInt(25);
-//        float high = (((randomVolt * randomNumberOfUsageInDay) / 100f)/86);
-
         return  (520*2)/ 100f/86;   //=0.120930225
     }
 
