@@ -176,6 +176,14 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
     }
 
+    public void RemoveAllPlugs() {
+        for (int i=0; i<MAX_PLUGS;i++){
+            if(GetPlugAccordingToUiIndex(0)!=null){
+                RemovePlug(0,true);
+            }
+        }
+    }
+
     public void closeProcess(int i_UiIndex){
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
         if(plug.isFakePlug())
