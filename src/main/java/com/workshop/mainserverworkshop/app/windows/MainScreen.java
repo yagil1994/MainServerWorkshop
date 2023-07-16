@@ -361,6 +361,14 @@ public class MainScreen {
         return response;
     }
 
+    @DeleteMapping("/workshop/mainScreen/RemoveAllFakePlugs")
+    public ResponseEntity<String> RemoveAllFakePlugs() {
+        ResponseEntity<String> response;
+        uiMediator.getPlugsMediator().RemoveAllPlugs();
+        response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("all plugs removed"));
+        return response;
+    }
+
     @DeleteMapping("/workshop/mainScreen/RemovePlugFromSleepMode")
     public ResponseEntity<String> RemovePlugFromSleepMode(@RequestParam String i_UiIndex) {
         ResponseEntity<String> response;
