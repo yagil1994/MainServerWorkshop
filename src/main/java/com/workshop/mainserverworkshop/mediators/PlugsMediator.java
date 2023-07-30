@@ -184,6 +184,11 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
     }
 
+    public void CancelRegisteredPlugs(){
+        signedUpPlugsForModesList.remove(SLEEP_MODE_LIST);
+        signedUpPlugsForModesList.remove(SAFE_MODE_LIST);
+    }
+
     public void closeProcess(int i_UiIndex){
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
         if(plug.isFakePlug())
