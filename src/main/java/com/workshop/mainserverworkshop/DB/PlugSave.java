@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.IOException;
 
-@Document("PlugSavesLocal")
+@Document("PlugSaves")
 public class PlugSave {
     @Id
     private String plugTitle;
