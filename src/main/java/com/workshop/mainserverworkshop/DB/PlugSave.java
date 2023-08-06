@@ -9,9 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.IOException;
 
-@Document("PlugSaves")
+@Document("PlugSavesLocal")
 public class PlugSave {
-
     @Id
     private String plugTitle;
     @Field
