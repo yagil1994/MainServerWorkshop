@@ -1,5 +1,4 @@
 package com.workshop.mainserverworkshop.engine;
-
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.Random;
@@ -73,7 +72,6 @@ public class ElectricityStorage {
 
     synchronized public void LearnMoreAfterSomeTimePassed() {
         learningUsages.clear();
-        learningTimes = 0;
         finishedElectricityUsageLearning = false;
         maxElectricityVolt *= 1.05;
         minElectricityVolt *= 1.05;

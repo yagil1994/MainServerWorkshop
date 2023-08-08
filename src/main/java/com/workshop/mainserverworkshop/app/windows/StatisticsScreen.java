@@ -33,7 +33,7 @@ public class StatisticsScreen {
         if (plug == null) {
             response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
         } else {
-            double[] monthsConsumption = plug.SimulateAnnualElectricityConsumption();
+            float[] monthsConsumption = plug.SimulateAnnualElectricityConsumption();
             response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
         }
 
@@ -48,7 +48,7 @@ public class StatisticsScreen {
         if (plug == null) {
             response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
         } else {
-            double[] weeklyConsumption = plug.SimulateWeeklyElectricityConsumption();
+            float[] weeklyConsumption = plug.SimulateWeeklyElectricityConsumption();
             response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(weeklyConsumption));
         }
 
@@ -89,18 +89,21 @@ public class StatisticsScreen {
 
             int i = 0, connectedPlugs = uiMediator.getPlugsMediator().getPlugsList().size();
             System.out.println("connectedPlugs size is : " + connectedPlugs + "\n");
-            double[][] monthsConsumption = new double[connectedPlugs][12];
+            float[][] monthsConsumption = new float[connectedPlugs][12];
 
-//            for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
-//                monthsConsumption[i] = plug.SimulateAnnualElectricityConsumption();
-//                System.out.println("plus UI index is: " +  plug.getUiIndex() + "and the monthly electricity consumption is: " +  monthsConsumption[i] + "\n");
-//                i++;
-//            }
-            for (int plugUIIndex = 0;plugUIIndex < connectedPlugs; plugUIIndex++) {
-                Plug plug = UIMediator.getInstance().getPlugsMediator().GetPlugAccordingToUiIndex(plugUIIndex);
-                monthsConsumption[plugUIIndex] = plug.SimulateAnnualElectricityConsumption();
-                System.out.println("plus UI index is: " + plug.getUiIndex() + "and the monthly electricity consumption is: " + monthsConsumption[plugUIIndex] + "\n");
+            synchronized (this)
+            {
+                for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
+                    monthsConsumption[i] = plug.SimulateAnnualElectricityConsumption();
+                    System.out.println("plus UI index is: " +  plug.getUiIndex() + "and the monthly electricity consumption is: " +  monthsConsumption[i] + "\n");
+                    i++;
+                }
             }
+//            for (int plugInternalIndex = 0;plugInternalIndex < connectedPlugs; plugInternalIndex++) {
+//                Plug plug = UIMediator.getInstance().getPlugsMediator().GetPlugAccordingToUiIndex(plugInternalIndex);
+//                monthsConsumption[plugUIIndex] = plug.SimulateAnnualElectricityConsumption();
+//                System.out.println("plus UI index is: " + plug.getUiIndex() + "and the monthly electricity consumption is: " + monthsConsumption[plugUIIndex] + "\n");
+//            }
 
             for (int month = 0; month < 12; month++) {
                 float monthSum = 0;
@@ -135,7 +138,7 @@ public class StatisticsScreen {
     @GetMapping("/workshop/statisticsScreen/SimulateWeeklyElectricityForAllPlugs")
     public ResponseEntity<String> SimulateWeeklyElectricityForAllPlugs() {
         int i = 0, connectedPlugs = uiMediator.getPlugsMediator().getPlugsList().size();
-        double[][] dailyConsumption = new double[connectedPlugs][7];
+        float[][] dailyConsumption = new float[connectedPlugs][7];
         for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
             dailyConsumption[i] = plug.SimulateWeeklyElectricityConsumption();
             i++;
