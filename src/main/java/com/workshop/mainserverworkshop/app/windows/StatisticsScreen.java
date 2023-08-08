@@ -33,7 +33,7 @@ public class StatisticsScreen {
         if (plug == null) {
             response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
         } else {
-            float[] monthsConsumption = plug.SimulateAnnualElectricityConsumption();
+            double[] monthsConsumption = plug.SimulateAnnualElectricityConsumption();
             response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
         }
 
@@ -48,7 +48,7 @@ public class StatisticsScreen {
         if (plug == null) {
             response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
         } else {
-            float[] weeklyConsumption = plug.SimulateWeeklyElectricityConsumption();
+            double[] weeklyConsumption = plug.SimulateWeeklyElectricityConsumption();
             response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(weeklyConsumption));
         }
 
@@ -81,23 +81,6 @@ public class StatisticsScreen {
         return response;
     }
 
-//    @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionInLiveForSingleUsage")
-//    public ResponseEntity<String> GetElectricityConsumptionInLiveForSingleUsage(@RequestParam String i_UiIndex)
-//    {
-//        ResponseEntity<String> response;
-//        int UiIndex = Integer.parseInt(i_UiIndex);
-//        Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-//        if(plug == null){
-//            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
-//        }
-//        else {
-//            float consumption = plug.GetElectricityConsumptionInLiveForSingleUsage();
-//            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(consumption));
-//        }
-//
-//        return response;
-//    }
-
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
     public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs() {
         ResponseEntity<String> result = null;
@@ -106,7 +89,7 @@ public class StatisticsScreen {
 
             int i = 0, connectedPlugs = uiMediator.getPlugsMediator().getPlugsList().size();
             System.out.println("connectedPlugs size is : " + connectedPlugs + "\n");
-            float[][] monthsConsumption = new float[connectedPlugs][12];
+            double[][] monthsConsumption = new double[connectedPlugs][12];
 
 //            for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
 //                monthsConsumption[i] = plug.SimulateAnnualElectricityConsumption();
@@ -152,7 +135,7 @@ public class StatisticsScreen {
     @GetMapping("/workshop/statisticsScreen/SimulateWeeklyElectricityForAllPlugs")
     public ResponseEntity<String> SimulateWeeklyElectricityForAllPlugs() {
         int i = 0, connectedPlugs = uiMediator.getPlugsMediator().getPlugsList().size();
-        float[][] dailyConsumption = new float[connectedPlugs][7];
+        double[][] dailyConsumption = new double[connectedPlugs][7];
         for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
             dailyConsumption[i] = plug.SimulateWeeklyElectricityConsumption();
             i++;

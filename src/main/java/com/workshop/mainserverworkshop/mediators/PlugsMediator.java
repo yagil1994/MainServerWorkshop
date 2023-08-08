@@ -126,7 +126,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return signedUpPlugsForModesList.get(i_ModeType);
     }
 
-    public int GetRandomActivePlugIndex() //returns -1 is not found any
+    public int GetRandomActivePlugIndexAndMakeInvalidIfAnyDeviceExist() //returns -1 is not found any
     {
         List<Integer> activePlugsIndexesList = this.plugsList.stream()
                 .filter((t) -> t.getOnOffStatus().equals("on"))
@@ -136,16 +136,18 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
                 activePlugsIndexesList.get(new Random().nextInt(activePlugsIndexesList.size()))
                 : -1;
 
+        int uiIndexRes = -1;
         if(index != -1){
             for (Plug plug: plugsList) {
                 if(plug.getInternalPlugIndex() == index)
                 {
                     plug.setFalseToInvalidAndTrueToValidThePlug(false);
+                    uiIndexRes = plug.getUiIndex();
                 }
             }
         }
 
-        return index;
+        return uiIndexRes;
     }
 
     public void RefreshUiIndexes()
@@ -305,8 +307,8 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     //************************* Requests to the plug *************************/
     public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {
         String getResponse;
-        String endPoint = "http://172.31.82.219:" + i_Port + "/workshop/plug/turnOnOrOff";
-       // String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
+        //String endPoint = "http://172.31.82.219:" + i_Port + "/workshop/plug/turnOnOrOff";
+       String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
         HttpUrl.Builder urlBuilder = HttpUrl.parse(endPoint).newBuilder();
         urlBuilder.addQueryParameter("TrueOrFalse", String.valueOf(i_TurnOn));
         Request request = new Request.Builder()

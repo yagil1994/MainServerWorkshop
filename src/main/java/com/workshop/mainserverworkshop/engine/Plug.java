@@ -11,7 +11,7 @@ public class Plug implements IModeListener {
     private Process process;
     private boolean status, overTimeFlag,isInvalidPlug;
     private String plugType, plugTitle;
-    private int port, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt;
+    private int port, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt, unitsToGetOld = 50, oldUnitsCounter = 1;
     private PlugsMediator plugsMediator;
     private ElectricityStorage electricityStorage;
     private Timer electricityConsumptionTimer, overTimeTimer;
@@ -68,12 +68,17 @@ public class Plug implements IModeListener {
             public void run()
             {
                 if(status){
-                  electricityStorage.UpdateElectricityUsage(isInvalidPlug);
+                    electricityStorage.UpdateElectricityUsage(isInvalidPlug);
+                    oldUnitsCounter = ((oldUnitsCounter +1)) % unitsToGetOld;
+                    if(oldUnitsCounter == 0)//every 50 times the timer works the device gets older
+                    {
+                        electricityStorage.LearnMoreAfterSomeTimePassed();
+                    }
                 }
             }
         }
-        TimerTask updateProcessTable = new Helper();
-        electricityConsumptionTimer.schedule(updateProcessTable,1000, 1000);
+        TimerTask updateElectricityUsageTimerTask = new Helper();
+        electricityConsumptionTimer.schedule(updateElectricityUsageTimerTask,1000, 1000);
     }
 
     public boolean isInvalidPlug() {

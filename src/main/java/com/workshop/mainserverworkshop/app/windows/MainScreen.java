@@ -323,7 +323,7 @@ public class MainScreen {
 
     @GetMapping("/workshop/mainScreen/SimulateInvalidElectricityConsumption")
     public ResponseEntity<String> SimulateInvalidElectricityConsumption() {
-        int randomActivePlugIndex = uiMediator.getPlugsMediator().GetRandomActivePlugIndex();
+        int randomActivePlugIndex = uiMediator.getPlugsMediator().GetRandomActivePlugIndexAndMakeInvalidIfAnyDeviceExist();
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(randomActivePlugIndex));
     }
