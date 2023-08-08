@@ -122,28 +122,6 @@ public class OnOffScreen  {
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(array));
     }
 
-//    @GetMapping("/workshop/on_off_screen/doNotTurnOffAfterOverTime")
-//    public ResponseEntity<String> DoNotTurnOffAfterOverTime(@RequestParam String i_UiIndex){
-//        ResponseEntity<String> response;
-//        int plugIndex = Integer.parseInt(i_UiIndex);
-//        Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
-//        if(plug != null){
-//            String message;
-//            if(plug.getOnOffStatus().equals("on")) {
-//                plug.OverTimeAndDoNotTurnOff();
-//                message = "OverTime for plug "+ plug.getUiIndex() +" ignored";
-//            }
-//            else {
-//                message = "Plug "+plug.getUiIndex()+ " is off";
-//            }
-//            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(message));
-//        }
-//        else {
-//            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
-//        }
-//
-//        return response;
-//    }
     @GetMapping("/workshop/on_off_screen/doNotTurnOffAfterOverTimeOrInvalidConsumption")
     public ResponseEntity<String> DoNotTurnOffAfterOverTimeOrInvalidConsumption(@RequestParam String i_UiIndex,@RequestParam String  i_Type) {
         ResponseEntity<String> response;

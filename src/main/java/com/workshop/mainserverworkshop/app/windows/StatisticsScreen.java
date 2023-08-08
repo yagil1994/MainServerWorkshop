@@ -81,23 +81,6 @@ public class StatisticsScreen {
         return response;
     }
 
-//    @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionInLiveForSingleUsage")
-//    public ResponseEntity<String> GetElectricityConsumptionInLiveForSingleUsage(@RequestParam String i_UiIndex)
-//    {
-//        ResponseEntity<String> response;
-//        int UiIndex = Integer.parseInt(i_UiIndex);
-//        Plug plug =  uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-//        if(plug == null){
-//            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
-//        }
-//        else {
-//            float consumption = plug.GetElectricityConsumptionInLiveForSingleUsage();
-//            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(consumption));
-//        }
-//
-//        return response;
-//    }
-
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
     public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs() {
         ResponseEntity<String> result = null;
@@ -108,16 +91,19 @@ public class StatisticsScreen {
             System.out.println("connectedPlugs size is : " + connectedPlugs + "\n");
             float[][] monthsConsumption = new float[connectedPlugs][12];
 
-//            for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
-//                monthsConsumption[i] = plug.SimulateAnnualElectricityConsumption();
-//                System.out.println("plus UI index is: " +  plug.getUiIndex() + "and the monthly electricity consumption is: " +  monthsConsumption[i] + "\n");
-//                i++;
-//            }
-            for (int plugUIIndex = 0;plugUIIndex < connectedPlugs; plugUIIndex++) {
-                Plug plug = UIMediator.getInstance().getPlugsMediator().GetPlugAccordingToUiIndex(plugUIIndex);
-                monthsConsumption[plugUIIndex] = plug.SimulateAnnualElectricityConsumption();
-                System.out.println("plus UI index is: " + plug.getUiIndex() + "and the monthly electricity consumption is: " + monthsConsumption[plugUIIndex] + "\n");
+            synchronized (this)
+            {
+                for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
+                    monthsConsumption[i] = plug.SimulateAnnualElectricityConsumption();
+                    System.out.println("plus UI index is: " +  plug.getUiIndex() + "and the monthly electricity consumption is: " +  monthsConsumption[i] + "\n");
+                    i++;
+                }
             }
+//            for (int plugInternalIndex = 0;plugInternalIndex < connectedPlugs; plugInternalIndex++) {
+//                Plug plug = UIMediator.getInstance().getPlugsMediator().GetPlugAccordingToUiIndex(plugInternalIndex);
+//                monthsConsumption[plugUIIndex] = plug.SimulateAnnualElectricityConsumption();
+//                System.out.println("plus UI index is: " + plug.getUiIndex() + "and the monthly electricity consumption is: " + monthsConsumption[plugUIIndex] + "\n");
+//            }
 
             for (int month = 0; month < 12; month++) {
                 float monthSum = 0;
