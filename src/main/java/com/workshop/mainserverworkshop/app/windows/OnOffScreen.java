@@ -5,8 +5,6 @@ import com.workshop.mainserverworkshop.containers.IndexesContainer;
 import com.workshop.mainserverworkshop.containers.PlugInfoContainer;
 import com.workshop.mainserverworkshop.engine.Plug;
 import com.workshop.mainserverworkshop.mediators.UIMediator;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -113,6 +111,29 @@ public class OnOffScreen  {
             if(plug.getOnOffStatus().equals("on")){
                 onPlugsIndexes.add(String.valueOf(plug.getUiIndex()));
 
+            }
+        }
+
+        String[] array = new String[onPlugsIndexes.size()];
+        indexesContainer.setJsonArguments(onPlugsIndexes.toArray(array));
+
+        return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(array));
+    }
+
+    @GetMapping("/workshop/on_off_screen/getAllInvalidPlugs")
+    public ResponseEntity<String> GetAllInvalidPlugs()
+    {
+        JsonObject body = new JsonObject();
+        List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
+        List<String> onPlugsIndexes = new ArrayList<>();
+        IndexesContainer indexesContainer = new IndexesContainer();
+        if(plugs.isEmpty())
+        {
+            body.addProperty("result: ", "no plugs are connected yet!");
+        }
+        for (Plug plug: plugs) {
+            if(plug.isInvalidPlug()){
+                onPlugsIndexes.add(String.valueOf(plug.getUiIndex()));
             }
         }
 

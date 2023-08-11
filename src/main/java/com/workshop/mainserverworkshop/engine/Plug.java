@@ -4,6 +4,7 @@ import com.workshop.mainserverworkshop.engine.modes.GenericMode;
 import com.workshop.mainserverworkshop.engine.modes.IModeListener;
 import com.workshop.mainserverworkshop.mediators.PlugsMediator;
 
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -11,7 +12,8 @@ public class Plug implements IModeListener {
     private Process process;
     private boolean status, overTimeFlag,isInvalidPlug;
     private String plugType, plugTitle;
-    private int port, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt, unitsToGetOld = 50, oldUnitsCounter = 1;
+    private float minElectricityVolt, maxElectricityVolt;
+    private int port, internalPlugIndex, UiIndex,  unitsToGetOld = 50, oldUnitsCounter = 1;
     private PlugsMediator plugsMediator;
     private ElectricityStorage electricityStorage;
     private Timer electricityConsumptionTimer, overTimeTimer;
@@ -24,11 +26,11 @@ public class Plug implements IModeListener {
     }
 
     //form PlugSave
-    public Plug (Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt, boolean fromPlugSave){
+    public Plug (Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, float i_minElectricityVolt, float i_maxElectricityVolt, boolean fromPlugSave){
         starter(i_Process, i_port, i_PlugTitle, i_PlugType, i_PlugsMediator, i_InternalIndex, i_UiIndex, i_minElectricityVolt, i_maxElectricityVolt);
     }
 
-    private void starter(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt){
+    private void starter(Process i_Process, int i_port,String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator,int i_InternalIndex, int i_UiIndex, float i_minElectricityVolt, float i_maxElectricityVolt){
         process = i_Process;
         plugType = i_PlugType;
         plugTitle = i_PlugTitle;
@@ -51,13 +53,33 @@ public class Plug implements IModeListener {
         consumeElectricity();
     }
 
+    public float getInvalidUsageVolt() {
+        return electricityStorage.getInvalidUsageVolt();
+    }
+
+    public float getAvgElectricityUsageAfterLearning() {
+        return electricityStorage.getAvgElectricityUsageAfterLearning();
+    }
+
+    public LinkedList<Float> getLearningUsages() {
+        return electricityStorage.getLearningUsages();
+    }
+
+    public int getLearningTimes() {
+        return electricityStorage.getLearningTimes();
+    }
+
+    public boolean isFinishedElectricityUsageLearning() {
+        return electricityStorage.isFinishedElectricityUsageLearning();
+    }
+
     public boolean isFakePlug() {return fakePlug;}
 
-    public int getMinElectricityVolt() {
+    public float getMinElectricityVolt() {
         return minElectricityVolt;
     }
 
-    public int getMaxElectricityVolt() {
+    public float getMaxElectricityVolt() {
         return maxElectricityVolt;
     }
 
@@ -233,7 +255,13 @@ public class Plug implements IModeListener {
                 electricityStorage.getLastAnnualStatistics());
     }
 
-    public void UpdateFieldsFromDB(boolean overTimeFlag, boolean isInvalidPlug, boolean status, boolean registeredToSleepMode, boolean registeredToSafeMode, AllStatisticsContainer statisticsContainer){
+    public void UpdateFieldsFromDB(boolean overTimeFlag, boolean isInvalidPlug,
+                                   boolean status, boolean registeredToSleepMode, boolean registeredToSafeMode,
+                                   AllStatisticsContainer statisticsContainer,
+                                   float invalidUsageVolt, float avgElectricityUsageAfterLearning,
+                                   LinkedList<Float> learningUsages, int learningTimes,
+                                   boolean finishedElectricityUsageLearning){
+
         this.overTimeFlag = overTimeFlag;
         this.isInvalidPlug = isInvalidPlug;
         this.status = status;
@@ -247,5 +275,10 @@ public class Plug implements IModeListener {
         electricityStorage.setLastSingleUsageStatistics(statisticsContainer.getLastSingleUsageStatistics());
         electricityStorage.setLastWeeklyStatistics(statisticsContainer.getLastWeeklyStatistics());
         electricityStorage.setLastAnnualStatistics(statisticsContainer.getLastAnnualStatistics());
+        electricityStorage.setInvalidUsageVolt(invalidUsageVolt);
+        electricityStorage.setAvgElectricityUsageAfterLearning(avgElectricityUsageAfterLearning);
+        electricityStorage.setLearningUsages(learningUsages);
+        electricityStorage.setLearningTimes(learningTimes);
+        electricityStorage.setFinishedElectricityUsageLearning(finishedElectricityUsageLearning);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.IOException;
+import java.util.LinkedList;
 
 @Document("PlugSaves")
 public class PlugSave {
@@ -22,9 +23,9 @@ public class PlugSave {
     @Field
     private int UiIndex;
     @Field
-    private int minElectricityVolt;
+    private float minElectricityVolt;
     @Field
-    private int maxElectricityVolt;
+    private float maxElectricityVolt;
     @Field
     private boolean status;
     @Field
@@ -45,37 +46,136 @@ public class PlugSave {
     private float[] lastWeeklyStatistics;
     @Field
     private float[] lastAnnualStatistics;
+    @Field
+    private LinkedList<Float> learningUsages;
+    @Field
+    private boolean finishedElectricityUsageLearning;
+    @Field
+    public int learningTimes;
+    @Field
+    private float invalidUsageVolt;
+    @Field
+    private float avgElectricityUsageAfterLearning;
 
     public PlugSave(Plug plug, boolean i_RegisteredToSleepMode, boolean i_RegisteredToSafeMode) {
-        this.plugTitle = plug.getPlugTitle();
-        this.plugType = plug.getPlugType();
-        this.port = plug.getPort();
-        this.internalPlugIndex = plug.getInternalPlugIndex();
-        this.UiIndex = plug.getUiIndex();
-        this.minElectricityVolt = plug.getMinElectricityVolt();
-        this.maxElectricityVolt = plug.getMaxElectricityVolt();
-        this.status = plug.getStatus();
-
-        this.fakePlug = plug.isFakePlug();
-        this.overTimeFlag = plug.isOverTimeFlag();
-        this.isInvalidPlug = plug.isInvalidPlug();
+        plugTitle = plug.getPlugTitle();
+        plugType = plug.getPlugType();
+        port = plug.getPort();
+        internalPlugIndex = plug.getInternalPlugIndex();
+        UiIndex = plug.getUiIndex();
+        minElectricityVolt = plug.getMinElectricityVolt();
+        maxElectricityVolt = plug.getMaxElectricityVolt();
+        status = plug.getStatus();
+        fakePlug = plug.isFakePlug();
+        overTimeFlag = plug.isOverTimeFlag();
+        isInvalidPlug = plug.isInvalidPlug();
         registeredToSleepMode = i_RegisteredToSleepMode;
         registeredToSafeMode = i_RegisteredToSafeMode;
-
         AllStatisticsContainer allStatisticsContainer = plug.getAllStatisticsContainer();
         electricityUsageTillNow = allStatisticsContainer.getElectricityUsageTillNow();
         lastSingleUsageStatistics = allStatisticsContainer.getLastSingleUsageStatistics();
         lastWeeklyStatistics = allStatisticsContainer.getLastWeeklyStatistics();
         lastAnnualStatistics = allStatisticsContainer.getLastAnnualStatistics();
+        invalidUsageVolt = plug.getInvalidUsageVolt();
+        avgElectricityUsageAfterLearning = plug.getAvgElectricityUsageAfterLearning();
+        learningUsages = plug.getLearningUsages();
+        learningTimes = plug.getLearningTimes();
+        finishedElectricityUsageLearning = plug.isFinishedElectricityUsageLearning();
     }
 
-    public PlugSave() {}
+    public PlugSave() {
+    }
+
+    public void setMinElectricityVolt(float minElectricityVolt) {
+        this.minElectricityVolt = minElectricityVolt;
+    }
+
+    public void setMaxElectricityVolt(float maxElectricityVolt) {
+        this.maxElectricityVolt = maxElectricityVolt;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public float getElectricityUsageTillNow() {
+        return electricityUsageTillNow;
+    }
+
+    public void setElectricityUsageTillNow(float electricityUsageTillNow) {
+        this.electricityUsageTillNow = electricityUsageTillNow;
+    }
+
+    public float getLastSingleUsageStatistics() {
+        return lastSingleUsageStatistics;
+    }
+
+    public void setLastSingleUsageStatistics(float lastSingleUsageStatistics) {
+        this.lastSingleUsageStatistics = lastSingleUsageStatistics;
+    }
+
+    public float[] getLastWeeklyStatistics() {
+        return lastWeeklyStatistics;
+    }
+
+    public void setLastWeeklyStatistics(float[] lastWeeklyStatistics) {
+        this.lastWeeklyStatistics = lastWeeklyStatistics;
+    }
+
+    public float[] getLastAnnualStatistics() {
+        return lastAnnualStatistics;
+    }
+
+    public void setLastAnnualStatistics(float[] lastAnnualStatistics) {
+        this.lastAnnualStatistics = lastAnnualStatistics;
+    }
+
+    public LinkedList<Float> getLearningUsages() {
+        return learningUsages;
+    }
+
+    public void setLearningUsages(LinkedList<Float> learningUsages) {
+        this.learningUsages = learningUsages;
+    }
+
+    public boolean isFinishedElectricityUsageLearning() {
+        return finishedElectricityUsageLearning;
+    }
+
+    public void setFinishedElectricityUsageLearning(boolean finishedElectricityUsageLearning) {
+        this.finishedElectricityUsageLearning = finishedElectricityUsageLearning;
+    }
+
+    public int getLearningTimes() {
+        return learningTimes;
+    }
+
+    public void setLearningTimes(int learningTimes) {
+        this.learningTimes = learningTimes;
+    }
+
+    public float getInvalidUsageVolt() {
+        return invalidUsageVolt;
+    }
+
+    public void setInvalidUsageVolt(float invalidUsageVolt) {
+        this.invalidUsageVolt = invalidUsageVolt;
+    }
+
+    public float getAvgElectricityUsageAfterLearning() {
+        return avgElectricityUsageAfterLearning;
+    }
+
+    public void setAvgElectricityUsageAfterLearning(float avgElectricityUsageAfterLearning) {
+        this.avgElectricityUsageAfterLearning = avgElectricityUsageAfterLearning;
+    }
 
     public Plug toPlug(PlugsMediator plugsMediator) throws IOException {
         Process process = plugsMediator.CreateProcess(port);
-        Plug plug = new Plug(process, port, plugTitle, plugType, plugsMediator, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt,true);
-        AllStatisticsContainer StatisticsContainer = new AllStatisticsContainer(electricityUsageTillNow,lastSingleUsageStatistics,lastWeeklyStatistics,lastAnnualStatistics);
-        plug.UpdateFieldsFromDB(overTimeFlag, isInvalidPlug, status, registeredToSleepMode, registeredToSafeMode, StatisticsContainer);
+        Plug plug = new Plug(process, port, plugTitle, plugType, plugsMediator, internalPlugIndex, UiIndex, minElectricityVolt, maxElectricityVolt, true);
+        AllStatisticsContainer StatisticsContainer = new AllStatisticsContainer(electricityUsageTillNow, lastSingleUsageStatistics, lastWeeklyStatistics, lastAnnualStatistics);
+        plug.UpdateFieldsFromDB(overTimeFlag, isInvalidPlug, status, registeredToSleepMode, registeredToSafeMode, StatisticsContainer,
+                invalidUsageVolt, avgElectricityUsageAfterLearning,learningUsages, learningTimes,finishedElectricityUsageLearning);
 
         return plug;
     }
@@ -120,7 +220,7 @@ public class PlugSave {
         UiIndex = uiIndex;
     }
 
-    public int getMinElectricityVolt() {
+    public float getMinElectricityVolt() {
         return minElectricityVolt;
     }
 
@@ -128,7 +228,7 @@ public class PlugSave {
         this.minElectricityVolt = minElectricityVolt;
     }
 
-    public int getMaxElectricityVolt() {
+    public float getMaxElectricityVolt() {
         return maxElectricityVolt;
     }
 
