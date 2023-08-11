@@ -21,10 +21,11 @@ public class MainScreen {
     private final UIMediator uiMediator;
     private final Gson gson;
     private int port;
+    private final int PORT_INIT = 9040;
 
     public MainScreen() {
         uiMediator = UIMediator.getInstance();
-        port = 9040;
+        port = PORT_INIT;
         gson = new Gson();
     }
 
@@ -106,6 +107,8 @@ public class MainScreen {
             body.addProperty("result: ", "there are no plugs in DB");
         }
         uiMediator.getPlugsMediator().AddPlugsFromDB();
+        int tmpPort = getMaxPortAccordingToPlugsList();
+        port = tmpPort == PORT_INIT ? PORT_INIT : tmpPort + 1;
 
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plugs from DB have been fetched"));
     }
@@ -113,6 +116,7 @@ public class MainScreen {
     @DeleteMapping("/workshop/mainScreen/DeleteAllPlugsFromDB")
     public ResponseEntity<String> DeleteAllPlugsFromDB(){
         uiMediator.getPlugsMediator().RemoveAllPlugsFromDB();
+        port = PORT_INIT;
 
         return  ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("All plugs have been deleted from DB"));
     }
@@ -131,30 +135,10 @@ public class MainScreen {
         }
 
         uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
-
-        //uiMediator.getPlugsMediator().getPlugsList().removeAll(uiMediator.getPlugsMediator().getPlugsList());
         body.addProperty("result: ", "all processes have been removed!");
-        port = 9040;
+        port = PORT_INIT;
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
     }
-
-//    @GetMapping("/workshop/mainScreen/close_appOld")
-//    public ResponseEntity<String> closeAppOld() {
-//        JsonObject body = new JsonObject();
-//        List<Integer> uiIndexes = new ArrayList<>();
-//        for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
-//            uiIndexes.add(plug.getUiIndex());
-//        }
-//
-//        for (int index : uiIndexes) {
-//            uiMediator.getPlugsMediator().RemovePlug(index, false);
-//        }
-//
-//        uiMediator.getPlugsMediator().getPlugsList().removeAll(uiMediator.getPlugsMediator().getPlugsList());
-//        body.addProperty("result: ", "all processes have been removed!");
-//        port = 9040;
-//        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
-//    }
 
     @PostMapping("/workshop/mainScreen/RegisterToSleepMode")
     public ResponseEntity<String> RegisterToSleepMode(@RequestBody String i_JsonArguments) {
@@ -446,5 +430,17 @@ public class MainScreen {
         return uiMediator.getPlugsMediator().getPlugsThatRegisteredForMode(i_ModeType);
     }
 
+    synchronized private int getMaxPortAccordingToPlugsList(){
+        int maxPort = PORT_INIT;
+        for (Plug plug:this.uiMediator.getPlugsMediator().getPlugsList()) {
+            int currentPlugPort = plug.getPort();
+            if(currentPlugPort > maxPort)
+            {
+                maxPort = currentPlugPort;
+            }
+        }
+
+        return maxPort;
+    }
 
 }

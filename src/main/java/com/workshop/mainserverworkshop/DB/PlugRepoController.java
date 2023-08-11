@@ -29,6 +29,7 @@ public class PlugRepoController {
         else {
             plugSaveList = plugRepository.findAll();
         }
+
         return plugSaveList;
     }
 }

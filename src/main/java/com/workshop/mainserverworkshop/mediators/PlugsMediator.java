@@ -9,6 +9,7 @@ import okhttp3.*;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,9 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         signedUpPlugsForModesList.add(new ArrayList<>());   //for sleep list
         httpClient = new OkHttpClient();
         indexesFreeList = new ArrayList<>(MAX_PLUGS);
-        for(int i = 0; i < MAX_PLUGS; i++){indexesFreeList.add(true);}
+        for (int i = 0; i < MAX_PLUGS; i++) {
+            indexesFreeList.add(true);
+        }
     }
 
     public Process CreateProcess(int i_Port) throws IOException {
@@ -52,14 +55,13 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return process;
     }
 
-    public boolean AddNewPlug(Process i_Process, int i_Port, String i_PlugTitle, int i_UiIndex, String i_PlugType, int i_MinElectricityVolt, int i_MaxElectricityVolt)
-    {
+    public boolean AddNewPlug(Process i_Process, int i_Port, String i_PlugTitle, int i_UiIndex, String i_PlugType, int i_MinElectricityVolt, int i_MaxElectricityVolt) {
         boolean res = false;
         int availableInternalIndex = findFirstAvailableInternalIndexForNewPlug();
-        if(availableInternalIndex != -1){
+        if (availableInternalIndex != -1) {
             indexesFreeList.set(availableInternalIndex, false);
-            Plug newPlug = new Plug(i_Process, i_Port,i_PlugTitle, i_PlugType, this,availableInternalIndex,i_UiIndex,i_MinElectricityVolt, i_MaxElectricityVolt);
-            plugsList.add(availableInternalIndex,newPlug);
+            Plug newPlug = new Plug(i_Process, i_Port, i_PlugTitle, i_PlugType, this, availableInternalIndex, i_UiIndex, i_MinElectricityVolt, i_MaxElectricityVolt);
+            plugsList.add(availableInternalIndex, newPlug);
             SavePlugToDB(newPlug);
             res = true;
         }
@@ -67,11 +69,10 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return res;
     }
 
-    private int findFirstAvailableInternalIndexForNewPlug()
-    {
+    private int findFirstAvailableInternalIndexForNewPlug() {
         int i, res = -1;
-        for(i = 0; i < indexesFreeList.size(); i++){
-            if(indexesFreeList.get(i)){
+        for (i = 0; i < indexesFreeList.size(); i++) {
+            if (indexesFreeList.get(i)) {
                 res = i;
                 break;
             }
@@ -113,8 +114,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         UpdateAllPlugsInDB();
     }
 
-    private void removePlugFromAllModeLists(Plug i_Plug)
-    {
+    private void removePlugFromAllModeLists(Plug i_Plug) {
         signedUpPlugsForModesList.forEach(list -> list.remove(i_Plug));
     }
 
@@ -137,10 +137,9 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
                 : -1;
 
         int uiIndexRes = -1;
-        if(index != -1){
-            for (Plug plug: plugsList) {
-                if(plug.getInternalPlugIndex() == index)
-                {
+        if (index != -1) {
+            for (Plug plug : plugsList) {
+                if (plug.getInternalPlugIndex() == index) {
                     plug.setFalseToInvalidAndTrueToValidThePlug(false);
                     uiIndexRes = plug.getUiIndex();
                 }
@@ -150,8 +149,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return uiIndexRes;
     }
 
-    public void RefreshUiIndexes()
-    {
+    public void RefreshUiIndexes() {
         int i = 0;
         for (Plug plug : plugsList) {
             plug.updateUiIndex(i);
@@ -164,43 +162,41 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
         int internalIndex = plug.getInternalPlugIndex();
         plug.stopTimer();
-        if(plug.isFakePlug())
-        {
+        if (plug.isFakePlug()) {
             plug.KillProcess();
         }
         removePlugFromAllModeLists(plug);
         indexesFreeList.set(internalIndex, true);
 
-        if(i_WithRefreshUiIndexes){
+        if (i_WithRefreshUiIndexes) {
             plugsList.remove(plug);
             RemovePlugFromDB(plug);
             RefreshUiIndexes();
         }
     }
 
-    public void RemoveAllPlugs() {
-        for (int i=0; i<MAX_PLUGS;i++){
-            if(GetPlugAccordingToUiIndex(0)!=null){
-                RemovePlug(0,true);
+   synchronized public void RemoveAllPlugs() {
+        for (int i = 0; i < MAX_PLUGS; i++) {
+            if (GetPlugAccordingToUiIndex(i) != null) {
+                RemovePlug(i, true);
             }
         }
     }
 
-    public void CancelRegisteredPlugs(){
+    public void CancelRegisteredPlugs() {
         signedUpPlugsForModesList.remove(SLEEP_MODE_LIST);
         signedUpPlugsForModesList.remove(SAFE_MODE_LIST);
     }
 
-    public void closeProcess(int i_UiIndex){
+    public void closeProcess(int i_UiIndex) {
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
-        if(plug.isFakePlug())
-        {
+        if (plug.isFakePlug()) {
             plug.stopTimer();
             plug.KillProcess();
         }
     }
 
-    public boolean CheckIfPlugTitleAlreadyExist(String i_PlugTitle){
+    public boolean CheckIfPlugTitleAlreadyExist(String i_PlugTitle) {
         boolean res = false;
         for (Plug plug : plugsList) {
             if (plug.getPlugTitle().equals(i_PlugTitle)) {
@@ -212,7 +208,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return res;
     }
 
-    public boolean CheckIfPlugUiIndexAlreadyExist(int i_PlugUiIndex){
+    public boolean CheckIfPlugUiIndexAlreadyExist(int i_PlugUiIndex) {
         boolean res = false;
         for (Plug plug : plugsList) {
             if (plug.getUiIndex() == i_PlugUiIndex) {
@@ -235,7 +231,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
     //************************* Data Base *************************/
 
-    private PlugSave createPlugSave(Plug plug){
+    private PlugSave createPlugSave(Plug plug) {
         List<Plug> plugsRegisteredToSleepModeList = getPlugsThatRegisteredForMode(SLEEP_MODE_LIST);
         List<Plug> plugsRegisteredToSafeModeList = getPlugsThatRegisteredForMode(SAFE_MODE_LIST);
         boolean registeredToSleepMode = plugsRegisteredToSleepModeList.contains(plug);
@@ -243,25 +239,25 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return new PlugSave(plug, registeredToSleepMode, registeredToSafeMode);
     }
 
-    public void SavePlugToDB(Plug plug){
+    public void SavePlugToDB(Plug plug) {
         plugRepoController.SavePlugToDB(createPlugSave(plug));
     }
 
-    public void RemovePlugFromDB(Plug plug){
+    public void RemovePlugFromDB(Plug plug) {
         plugRepoController.RemovePlugFromDB(createPlugSave(plug));
     }
 
-    public void UpdateAllPlugsInDB(){
+    public void UpdateAllPlugsInDB() {
         plugsList.forEach(this::SavePlugToDB);
     }
 
-    public void RemoveAllPlugsFromDB(){
+    public void RemoveAllPlugsFromDB() {
         List<PlugSave> plugsFromDB = FetchPlugsFromDB();
         List<Plug> plugList = convertPlugSaveListToPlugList(plugsFromDB);
         plugList.forEach(this::RemovePlugFromDB);
     }
 
-    public List<PlugSave> FetchPlugsFromDB(){
+    public List<PlugSave> FetchPlugsFromDB() {
         return plugRepoController.GetAllPlugsFromDB();
     }
 
@@ -282,18 +278,18 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return convertPlugSaveListToPlugList(plugSavesOnlyInDB);
     }
 
-    public void AddPlugsFromDB(){
+    public void AddPlugsFromDB() {
         List<Plug> plugListToAdd = getPlugsInDBAndNotOnList();
-        if(plugListToAdd != null){
+        if (plugListToAdd != null) {
             plugListToAdd.forEach(Plug::initTimerAndElectricityConsumption);
             plugsList.addAll(plugListToAdd);
-        }
-        else {
+
+        } else {
             System.out.println("error: plugListToAdd is null in AddPlugsFromDB function");
         }
     }
 
-    private List<Plug> convertPlugSaveListToPlugList(List<PlugSave> plugSaveList){
+    private List<Plug> convertPlugSaveListToPlugList(List<PlugSave> plugSaveList) {
         return plugSaveList.stream().map(plugSave -> {
             try {
                 return plugSave.toPlug(this);
@@ -308,7 +304,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {
         String getResponse;
         String endPoint = "http://172.31.82.219:" + i_Port + "/workshop/plug/turnOnOrOff";
-       //String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
+        //String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
         HttpUrl.Builder urlBuilder = HttpUrl.parse(endPoint).newBuilder();
         urlBuilder.addQueryParameter("TrueOrFalse", String.valueOf(i_TurnOn));
         Request request = new Request.Builder()
@@ -327,22 +323,21 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return getResponse;
     }
 
-    public void RealPlugOnOrOff(String status)  {
+    public void RealPlugOnOrOff(String status) {
         //https://api.developer.lifx.com/reference/list-scenes
         AsyncHttpClient client = new DefaultAsyncHttpClient();
         client.prepare("PUT", "https://api.lifx.com/v1/lights/D073D55D366A/state")
                 .setHeader("accept", "text/plain")
                 .setHeader("content-type", "application/json")
                 .setHeader("Authorization", "Bearer c92666ccf547bee99111be18537483efd44945dd012959c954c687cf69a82731")
-                .setBody("{\"duration\":1,\"fast\":false,\"power\":\"" +status +"\"}")
+                .setBody("{\"duration\":1,\"fast\":false,\"power\":\"" + status + "\"}")
                 .execute()
                 .toCompletableFuture()
                 .thenAccept(System.out::println)
                 .join();
         try {
             client.close();
-        }
-        catch (Exception exception){
+        } catch (Exception exception) {
             System.out.println(exception.getMessage());
         }
     }

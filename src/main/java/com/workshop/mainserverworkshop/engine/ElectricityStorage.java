@@ -5,13 +5,53 @@ import java.util.Random;
 
 public class ElectricityStorage {
     private float minElectricityVolt, maxElectricityVolt;
-    public int learningTimes;
     private float electricityUsageTillNow, lastSingleUsageStatistics, invalidUsageVolt, avgElectricityUsageAfterLearning;
     private float[] lastWeeklyStatistics, lastAnnualStatistics;
-    private boolean finishedElectricityUsageLearning;
     private LinkedList<Float> learningUsages;
+    private int learningTimes;
+    private boolean finishedElectricityUsageLearning;
 
-    public ElectricityStorage(int i_MinElectricityVoltInput, int i_MaxElectricityVoltInput) {
+    public float getInvalidUsageVolt() {
+        return invalidUsageVolt;
+    }
+
+    public float getAvgElectricityUsageAfterLearning() {
+        return avgElectricityUsageAfterLearning;
+    }
+
+    public LinkedList<Float> getLearningUsages() {
+        return learningUsages;
+    }
+
+    public int getLearningTimes() {
+        return learningTimes;
+    }
+
+    public boolean isFinishedElectricityUsageLearning() {
+        return finishedElectricityUsageLearning;
+    }
+
+    public void setInvalidUsageVolt(float invalidUsageVolt) {
+        this.invalidUsageVolt = invalidUsageVolt;
+    }
+
+    public void setAvgElectricityUsageAfterLearning(float avgElectricityUsageAfterLearning) {
+        this.avgElectricityUsageAfterLearning = avgElectricityUsageAfterLearning;
+    }
+
+    public void setLearningUsages(LinkedList<Float> learningUsages) {
+        this.learningUsages = learningUsages;
+    }
+
+    public void setLearningTimes(int learningTimes) {
+        this.learningTimes = learningTimes;
+    }
+
+    public void setFinishedElectricityUsageLearning(boolean finishedElectricityUsageLearning) {
+        this.finishedElectricityUsageLearning = finishedElectricityUsageLearning;
+    }
+
+    public ElectricityStorage(float i_MinElectricityVoltInput, float i_MaxElectricityVoltInput) {
         minElectricityVolt = i_MinElectricityVoltInput;
         maxElectricityVolt = i_MaxElectricityVoltInput;
         electricityUsageTillNow = 0f;
@@ -22,7 +62,7 @@ public class ElectricityStorage {
         learningUsages = new LinkedList<>();
     }
 
-    public float[] SimulateAnnualElectricityStatisticsAndGetMonthList() {
+   synchronized public float[] SimulateAnnualElectricityStatisticsAndGetMonthList() {
         float[] electricityConsumption = new float[12];
         Random random = new Random();
         for (int i = 0; i < electricityConsumption.length; i++) { //(Wattage × Hours Used Per Day) ÷ 1000 = Daily Kilowatt-hour (kWh) consumption
@@ -36,7 +76,7 @@ public class ElectricityStorage {
         return electricityConsumption;
     }
 
-    public float[] SimulateWeeklyElectricityStatisticsAndGetDayList() {
+    synchronized public float[] SimulateWeeklyElectricityStatisticsAndGetDayList() {
         float[] dailyElectricityConsumption = new float[7];
         Random random = new Random();
         for (int i = 0; i < dailyElectricityConsumption.length; i++) { //(Wattage × Hours Used Per Day) ÷ 1000 = Daily Kilowatt-hour (kWh) consumption
@@ -50,7 +90,7 @@ public class ElectricityStorage {
         return dailyElectricityConsumption;
     }
 
-    public void UpdateElectricityUsage(boolean isInvalid) {
+     public void UpdateElectricityUsage(boolean isInvalid) {
         Random random = new Random();
         float randomVolt = random.nextFloat(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
         int randomNumberOfUsageInDay = random.nextInt(25);
