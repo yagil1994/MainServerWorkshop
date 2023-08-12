@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.io.IOException;
 import java.util.LinkedList;
 
-@Document("PlugSavesLocal")
+@Document("PlugSaves")
 public class PlugSave {
     @Id
     private String plugTitle;
