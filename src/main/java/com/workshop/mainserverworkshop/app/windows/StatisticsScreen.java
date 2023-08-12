@@ -26,7 +26,7 @@ public class StatisticsScreen {
     }
 
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForPlug")
-    public ResponseEntity<String> SimulateAnnualElectricityForPlug(@RequestParam String i_UiIndex) {
+    synchronized public ResponseEntity<String> SimulateAnnualElectricityForPlug(@RequestParam String i_UiIndex) {
         ResponseEntity<String> response;
         int UiIndex = Integer.parseInt(i_UiIndex);
         Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
@@ -41,7 +41,7 @@ public class StatisticsScreen {
     }
 
     @GetMapping("/workshop/statisticsScreen/SimulateWeeklyElectricityForPlug")
-    public ResponseEntity<String> SimulateWeeklyElectricityForPlug(@RequestParam String i_UiIndex) {
+    synchronized public ResponseEntity<String> SimulateWeeklyElectricityForPlug(@RequestParam String i_UiIndex) {
         ResponseEntity<String> response;
         int UiIndex = Integer.parseInt(i_UiIndex);
         Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
@@ -79,28 +79,25 @@ public class StatisticsScreen {
                 };
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println(e);
+            System.out.println("GetLastElectricityUsageForPlugByType: " + e.getMessage());
+            System.out.println("GetLastElectricityUsageForPlugByType: " + e);
         }
 
         return response;
     }
 
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
-     public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs() {
+    synchronized public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs() {
         ResponseEntity<String> result = null;
         float[] res = new float[12];
         try {
             List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
             int i = 0, connectedPlugs = plugs.size();
-                System.out.println("connectedPlugs size is : " + connectedPlugs + "\n");
-                float[][] monthsConsumption = new float[connectedPlugs][12];
+            float[][] monthsConsumption = new float[connectedPlugs][12];
 
-            synchronized (uiMediator.getPlugsMediator().getPlugsList())
-            {
+            synchronized (uiMediator.getPlugsMediator().getPlugsList()) {
                 for (Plug plug : plugs) {
                     monthsConsumption[i] = plug.SimulateAnnualElectricityConsumption();
-                    System.out.println("plus UI index is: " + plug.getUiIndex() + "and the monthly electricity consumption is: " + monthsConsumption[i] + "\n");
                     i++;
                 }
             }
@@ -109,22 +106,16 @@ public class StatisticsScreen {
                 float monthSum = 0;
                 for (int p = 0; p < connectedPlugs; p++) {
                     monthSum += monthsConsumption[p][month];
-                    System.out.println("month " + month + "sum = " + monthSum + "\n");
                 }
 
                 res[month] = monthSum;
             }
-                result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+            result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
 
         } catch (Exception err) {
-            try {
-                result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
-                System.out.println("annual: the error is : " + err);
-                System.out.println("annual: the error message is : " + err.getMessage());
-            } catch (Exception err2) {
-                System.out.println("annual:  the error2 is : " + err2);
-                System.out.println("annual:  err2 = " + err2.getMessage());
-            }
+            result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+            System.out.println("annual: the error is : " + err);
+            System.out.println("annual: the error message is : " + err.getMessage());
         }
 
         if (result == null) {
@@ -157,17 +148,10 @@ public class StatisticsScreen {
                 res[day] = daySum;
             }
             result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
-        }
-        catch (Exception err)
-        {
-            try {
-                result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
-                System.out.println("weekly: the error is : " + err);
-                System.out.println("weekly: the error message is : " + err.getMessage());
-            } catch (Exception err2) {
-                System.out.println("weekly:  the error2 is : " + err2);
-                System.out.println("weekly:  err2 = " + err2.getMessage());
-            }
+        } catch (Exception err) {
+            result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+            System.out.println("weekly: the error is : " + err);
+            System.out.println("weekly: the error message is : " + err.getMessage());
         }
 
         return result;

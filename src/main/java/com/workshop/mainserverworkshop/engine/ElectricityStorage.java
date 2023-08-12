@@ -1,4 +1,5 @@
 package com.workshop.mainserverworkshop.engine;
+
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.Random;
@@ -62,7 +63,7 @@ public class ElectricityStorage {
         learningUsages = new LinkedList<>();
     }
 
-   synchronized public float[] SimulateAnnualElectricityStatisticsAndGetMonthList() {
+    public float[] SimulateAnnualElectricityStatisticsAndGetMonthList() {
         float[] electricityConsumption = new float[12];
         Random random = new Random();
         for (int i = 0; i < electricityConsumption.length; i++) { //(Wattage × Hours Used Per Day) ÷ 1000 = Daily Kilowatt-hour (kWh) consumption
@@ -76,7 +77,7 @@ public class ElectricityStorage {
         return electricityConsumption;
     }
 
-    synchronized public float[] SimulateWeeklyElectricityStatisticsAndGetDayList() {
+    public float[] SimulateWeeklyElectricityStatisticsAndGetDayList() {
         float[] dailyElectricityConsumption = new float[7];
         Random random = new Random();
         for (int i = 0; i < dailyElectricityConsumption.length; i++) { //(Wattage × Hours Used Per Day) ÷ 1000 = Daily Kilowatt-hour (kWh) consumption
@@ -90,7 +91,7 @@ public class ElectricityStorage {
         return dailyElectricityConsumption;
     }
 
-     public void UpdateElectricityUsage(boolean isInvalid) {
+    synchronized public void UpdateElectricityUsage(boolean isInvalid) {
         Random random = new Random();
         float randomVolt = random.nextFloat(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
         int randomNumberOfUsageInDay = random.nextInt(25);
@@ -100,10 +101,8 @@ public class ElectricityStorage {
             add = SimulateInValidConsumption();
         }
 
-        synchronized (this) {
-            electricityUsageTillNow += add;
-            lastSingleUsageStatistics = add;
-        }
+        electricityUsageTillNow += add;
+        lastSingleUsageStatistics = add;
 
         if (!finishedElectricityUsageLearning) {
             LearnElectricityUsage(add);

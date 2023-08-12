@@ -80,7 +80,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return res;
     }
 
-    public static PlugsMediator getInstance() {
+   synchronized public static PlugsMediator getInstance() {
         if (instance == null) {
             instance = new PlugsMediator();
         }
@@ -100,7 +100,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return found ? res.get() : null;
     }
 
-    public List<Plug> getPlugsList() {
+    synchronized public List<Plug> getPlugsList() {
         return getInstance().plugsList;
     }
 
@@ -158,7 +158,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         UpdateAllPlugsInDB();
     }
 
-    public void RemovePlug(int i_UiIndex, boolean i_WithRefreshUiIndexes) {
+    synchronized public void RemovePlug(int i_UiIndex, boolean i_WithRefreshUiIndexes) {
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
         int internalIndex = plug.getInternalPlugIndex();
         plug.stopTimer();
@@ -303,8 +303,8 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     //************************* Requests to the plug *************************/
     public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {
         String getResponse;
-        String endPoint = "http://172.31.82.219:" + i_Port + "/workshop/plug/turnOnOrOff";
-        //String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
+        //String endPoint = "http://172.31.82.219:" + i_Port + "/workshop/plug/turnOnOrOff";
+        String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
         HttpUrl.Builder urlBuilder = HttpUrl.parse(endPoint).newBuilder();
         urlBuilder.addQueryParameter("TrueOrFalse", String.valueOf(i_TurnOn));
         Request request = new Request.Builder()
