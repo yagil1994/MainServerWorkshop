@@ -87,7 +87,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return instance;
     }
 
-    public Plug GetPlugAccordingToUiIndex(int i_UiIndex) {
+   synchronized public Plug GetPlugAccordingToUiIndex(int i_UiIndex) {
         AtomicReference<Plug> res = new AtomicReference<>();
         boolean found = false;
         for (Plug p : getPlugsList()) {
@@ -179,7 +179,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
     }
 
-   synchronized public void RemoveAllPlugs() {
+    synchronized public void RemoveAllPlugs() {
         for (int i = 0; i < MAX_PLUGS; i++) {
             if (GetPlugAccordingToUiIndex(i) != null) {
                 RemovePlug(i, true);

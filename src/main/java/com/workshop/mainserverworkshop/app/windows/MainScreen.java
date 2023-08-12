@@ -341,7 +341,8 @@ public class MainScreen {
                     uiMediator.getPlugsMediator().RemovePlug(UiIndex, true);
                     response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getPlugTitle() + " on index " + i_UiIndex + " removed"));
                 }
-            } catch (Exception error) {
+            }
+            catch (Exception error) {
                 System.out.println("RemoveExistPlug: " + error);
                 System.out.println("RemoveExistPlug: " + error.getMessage());
             }
