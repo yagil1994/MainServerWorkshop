@@ -1,5 +1,7 @@
 package com.workshop.mainserverworkshop.engine;
 
+import com.workshop.mainserverworkshop.mediators.PlugsMediator;
+
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.Random;
@@ -11,6 +13,7 @@ public class ElectricityStorage {
     private LinkedList<Float> learningUsages;
     private int learningTimes;
     private boolean finishedElectricityUsageLearning;
+    private PlugsMediator plugsMediator;
 
     public float getInvalidUsageVolt() {
         return invalidUsageVolt;
@@ -52,7 +55,7 @@ public class ElectricityStorage {
         this.finishedElectricityUsageLearning = finishedElectricityUsageLearning;
     }
 
-    public ElectricityStorage(float i_MinElectricityVoltInput, float i_MaxElectricityVoltInput) {
+    public ElectricityStorage(float i_MinElectricityVoltInput, float i_MaxElectricityVoltInput, PlugsMediator i_PlugsMediator) {
         minElectricityVolt = i_MinElectricityVoltInput;
         maxElectricityVolt = i_MaxElectricityVoltInput;
         electricityUsageTillNow = 0f;
@@ -61,6 +64,7 @@ public class ElectricityStorage {
         avgElectricityUsageAfterLearning = 0;
         learningTimes = 10;
         learningUsages = new LinkedList<>();
+         plugsMediator = i_PlugsMediator;
     }
 
     public float[] SimulateAnnualElectricityStatisticsAndGetMonthList() {
@@ -91,41 +95,48 @@ public class ElectricityStorage {
         return dailyElectricityConsumption;
     }
 
-    synchronized public void UpdateElectricityUsage(boolean isInvalid) {
-        Random random = new Random();
-        float randomVolt = random.nextFloat(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
-        int randomNumberOfUsageInDay = random.nextInt(25);
-        float add = (((randomVolt * randomNumberOfUsageInDay) / 1000f) / 86);
+    public void UpdateElectricityUsage(boolean isInvalid) {
+        synchronized (plugsMediator.GetInstance()) {
+            Random random = new Random();
+            float randomVolt = random.nextFloat(maxElectricityVolt - minElectricityVolt + 1) + minElectricityVolt;
+            int randomNumberOfUsageInDay = random.nextInt(25);
+            float add = (((randomVolt * randomNumberOfUsageInDay) / 1000f) / 86);
 
-        if (isInvalid && finishedElectricityUsageLearning) {
-            add = SimulateInValidConsumption();
-        }
+            if (isInvalid && finishedElectricityUsageLearning) {
+                add = SimulateInValidConsumption();
+            }
 
-        electricityUsageTillNow += add;
-        lastSingleUsageStatistics = add;
+            electricityUsageTillNow += add;
+            lastSingleUsageStatistics = add;
 
-        if (!finishedElectricityUsageLearning) {
-            LearnElectricityUsage(add);
+            if (!finishedElectricityUsageLearning) {
+                LearnElectricityUsage(add);
+            }
         }
     }
 
-    synchronized public void LearnMoreAfterSomeTimePassed() {
-        learningUsages.clear();
-        finishedElectricityUsageLearning = false;
-        maxElectricityVolt *= 1.05;
-        minElectricityVolt *= 1.05;
-        avgElectricityUsageAfterLearning = 0f;
+     public void LearnMoreAfterSomeTimePassed() {
+        synchronized (plugsMediator.GetInstance())
+         {
+             learningUsages.clear();
+             finishedElectricityUsageLearning = false;
+             maxElectricityVolt *= 1.05;
+             minElectricityVolt *= 1.05;
+             avgElectricityUsageAfterLearning = 0f;
+         }
     }
 
-    synchronized void LearnElectricityUsage(float add) {
-        if (learningUsages.size() < learningTimes) {
-            learningUsages.add(add);
-        }
+     void LearnElectricityUsage(float add) {
+        synchronized (plugsMediator.GetInstance()) {
+            if (learningUsages.size() < learningTimes) {
+                learningUsages.add(add);
+            }
 
-        if (learningUsages.size() == learningTimes) {
-            avgElectricityUsageAfterLearning = calculateAgvConsumption();
-            invalidUsageVolt = (float) (avgElectricityUsageAfterLearning * (1.3));
-            finishedElectricityUsageLearning = true;
+            if (learningUsages.size() == learningTimes) {
+                avgElectricityUsageAfterLearning = calculateAgvConsumption();
+                invalidUsageVolt = (float) (avgElectricityUsageAfterLearning * (1.3));
+                finishedElectricityUsageLearning = true;
+            }
         }
     }
 

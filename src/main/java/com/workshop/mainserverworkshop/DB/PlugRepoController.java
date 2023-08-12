@@ -10,18 +10,18 @@ public class PlugRepoController {
         this.plugRepository = plugRepository;
     }
 
-    synchronized public void SavePlugToDB(PlugSave plugSave){
+     public void SavePlugToDB(PlugSave plugSave){
         RemovePlugFromDB(plugSave);
         plugRepository.save(plugSave);
     }
 
-    synchronized public void RemovePlugFromDB(PlugSave plugSave){
+     public void RemovePlugFromDB(PlugSave plugSave){
         if(plugRepository.existsById(plugSave.getPlugTitle())){
             plugRepository.delete(plugSave);
         }
     }
 
-    synchronized  public List<PlugSave> GetAllPlugsFromDB(){
+     public List<PlugSave> GetAllPlugsFromDB(){
         List<PlugSave> plugSaveList;
         if(plugRepository.count() == 0){
             plugSaveList = new ArrayList<>();

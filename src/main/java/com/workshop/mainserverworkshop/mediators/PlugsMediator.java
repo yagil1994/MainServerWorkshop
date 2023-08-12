@@ -100,6 +100,8 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return found ? res.get() : null;
     }
 
+    synchronized public PlugsMediator GetInstance(){ return getInstance();}
+
     synchronized public List<Plug> getPlugsList() {
         return getInstance().plugsList;
     }
@@ -149,11 +151,13 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return uiIndexRes;
     }
 
-    public void RefreshUiIndexes() {
+    synchronized public void RefreshUiIndexes() {
         int i = 0;
-        for (Plug plug : plugsList) {
-            plug.updateUiIndex(i);
-            i++;
+        for (int j = 0; j < MAX_PLUGS; j++) {
+            if (GetPlugAccordingToUiIndex(j) != null) {
+                GetPlugAccordingToUiIndex(j).updateUiIndex(i);
+                i++;
+            }
         }
         UpdateAllPlugsInDB();
     }
@@ -168,9 +172,9 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         removePlugFromAllModeLists(plug);
         indexesFreeList.set(internalIndex, true);
 
+        RemovePlugFromDB(plug);
+        plugsList.remove(plug);
         if (i_WithRefreshUiIndexes) {
-            plugsList.remove(plug);
-            RemovePlugFromDB(plug);
             RefreshUiIndexes();
         }
     }
@@ -303,8 +307,8 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     //************************* Requests to the plug *************************/
     public String sendTurnOnOrOffRequestToPlug(int i_Port, boolean i_TurnOn) {
         String getResponse;
-        //String endPoint = "http://172.31.82.219:" + i_Port + "/workshop/plug/turnOnOrOff";
-        String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
+        String endPoint = "http://172.31.82.219:" + i_Port + "/workshop/plug/turnOnOrOff";
+        //String endPoint = "http://localhost:" + i_Port + "/workshop/plug/turnOnOrOff";
         HttpUrl.Builder urlBuilder = HttpUrl.parse(endPoint).newBuilder();
         urlBuilder.addQueryParameter("TrueOrFalse", String.valueOf(i_TurnOn));
         Request request = new Request.Builder()

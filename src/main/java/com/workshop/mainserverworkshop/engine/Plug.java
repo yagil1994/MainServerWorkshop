@@ -44,7 +44,7 @@ public class Plug implements IModeListener {
         fakePlug = i_UiIndex != 10;
         internalPlugIndex = i_InternalIndex;
         UiIndex = i_UiIndex;
-        electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt);
+        electricityStorage = new ElectricityStorage(i_minElectricityVolt, i_maxElectricityVolt,plugsMediator);
     }
 
     public void initTimerAndElectricityConsumption(){
@@ -91,7 +91,7 @@ public class Plug implements IModeListener {
             {
                 if(status){
                     electricityStorage.UpdateElectricityUsage(isInvalidPlug);
-                    oldUnitsCounter = ((oldUnitsCounter +1)) % unitsToGetOld;
+                    oldUnitsCounter = (oldUnitsCounter +1) % unitsToGetOld;
                     if(oldUnitsCounter == 0)//every 50 times the timer works the device gets older
                     {
                         electricityStorage.LearnMoreAfterSomeTimePassed();
