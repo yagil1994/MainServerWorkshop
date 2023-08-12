@@ -158,7 +158,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         UpdateAllPlugsInDB();
     }
 
-    public void RemovePlug(int i_UiIndex, boolean i_WithRefreshUiIndexes) {
+    synchronized public void RemovePlug(int i_UiIndex, boolean i_WithRefreshUiIndexes) {
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
         int internalIndex = plug.getInternalPlugIndex();
         plug.stopTimer();
@@ -168,17 +168,18 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         removePlugFromAllModeLists(plug);
         indexesFreeList.set(internalIndex, true);
 
+        RemovePlugFromDB(plug);
+        plugsList.remove(plug);
+
         if (i_WithRefreshUiIndexes) {
-            plugsList.remove(plug);
-            RemovePlugFromDB(plug);
             RefreshUiIndexes();
         }
     }
 
    synchronized public void RemoveAllPlugs() {
         for (int i = 0; i < MAX_PLUGS; i++) {
-            if (GetPlugAccordingToUiIndex(i) != null) {
-                RemovePlug(i, true);
+            if (GetPlugAccordingToUiIndex(0) != null) {
+                RemovePlug(0, true);
             }
         }
     }

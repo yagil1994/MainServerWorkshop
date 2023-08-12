@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @RestController
 public class StatisticsScreen {
@@ -86,8 +87,8 @@ public class StatisticsScreen {
         return response;
     }
 
-    @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
-     public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs() {
+    @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugsOld")
+     public ResponseEntity<String> SimulateAnnualElectricityForAllPlugsOld() {
         ResponseEntity<String> result = null;
         float[] res = new float[12];
         try {
@@ -133,6 +134,38 @@ public class StatisticsScreen {
 
         return result;
     }
+
+    @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
+    public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs() {
+        ResponseEntity<String> result = null;
+        float[] monthsConsumption = new float[12];
+        try {
+            Plug plug = uiMediator.getPlugsMediator().getPlugsList().get(new Random().nextInt(uiMediator.getPlugsMediator().getPlugsList().size()));
+            monthsConsumption = plug.SimulateAnnualElectricityConsumption();
+            for (int i=0 ; i<monthsConsumption.length ; i++){
+                monthsConsumption[i] *= (uiMediator.getPlugsMediator().getPlugsList().size());
+            }
+
+            result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
+
+        } catch (Exception err) {
+            try {
+                result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
+                System.out.println("annual: the error is : " + err);
+                System.out.println("annual: the error message is : " + err.getMessage());
+            } catch (Exception err2) {
+                System.out.println("annual:  the error2 is : " + err2);
+                System.out.println("annual:  err2 = " + err2.getMessage());
+            }
+        }
+
+        if (monthsConsumption == null) {
+            System.out.println("annual: result is null");
+        }
+
+        return result;
+    }
+
 
     @GetMapping("/workshop/statisticsScreen/SimulateWeeklyElectricityForAllPlugs")
     synchronized public ResponseEntity<String> SimulateWeeklyElectricityForAllPlugs() {
