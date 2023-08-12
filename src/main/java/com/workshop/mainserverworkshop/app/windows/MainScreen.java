@@ -30,7 +30,7 @@ public class MainScreen {
     }
 
     @GetMapping("/workshop/mainScreen/addNewPlug")
-    public ResponseEntity<String> addNewPlug(@RequestParam String i_Title, @RequestParam String i_Type,
+     public ResponseEntity<String> addNewPlug(@RequestParam String i_Title, @RequestParam String i_Type,
                                              @RequestParam String i_MinElectricityVolt, @RequestParam String i_MaxElectricityVolt, @RequestParam String i_UiIndex) {
 
         int minElectricityVolt = !Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MinElectricityVolt) : 220;
@@ -285,7 +285,6 @@ public class MainScreen {
             body.addProperty("max electricity volt:", plug.getMaxElectricityVolt());
             body.addProperty("index:", UiIndex);
             body.addProperty("status:", plug.getOnOffStatus());
-            //body.addProperty("internal index:", plug.getInternalPlugIndex());
         }
 
         return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
@@ -331,18 +330,24 @@ public class MainScreen {
 
     @DeleteMapping("/workshop/mainScreen/RemoveExistPlug")
     public ResponseEntity<String> RemoveExistPlug(@RequestParam String i_UiIndex) {
-        ResponseEntity<String> response;
-        int UiIndex = Integer.parseInt(i_UiIndex);
-        Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-        if(plug == null){
-            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+        synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+            ResponseEntity<String> response = null;
+            try {
+                int UiIndex = Integer.parseInt(i_UiIndex);
+                Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
+                if (plug == null) {
+                    response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+                } else {
+                    uiMediator.getPlugsMediator().RemovePlug(UiIndex, true);
+                    response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getPlugTitle() + " on index " + i_UiIndex + " removed"));
+                }
+            }
+            catch (Exception error) {
+                System.out.println("RemoveExistPlug: " + error);
+                System.out.println("RemoveExistPlug: " + error.getMessage());
+            }
+            return response;
         }
-        else {
-            uiMediator.getPlugsMediator().RemovePlug(UiIndex, true);
-            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getPlugTitle() + " on index "+ i_UiIndex + " removed"));
-        }
-
-        return response;
     }
 
     @DeleteMapping("/workshop/mainScreen/RemoveAllFakePlugs")
@@ -430,17 +435,17 @@ public class MainScreen {
         return uiMediator.getPlugsMediator().getPlugsThatRegisteredForMode(i_ModeType);
     }
 
-    synchronized private int getMaxPortAccordingToPlugsList(){
-        int maxPort = PORT_INIT;
-        for (Plug plug:this.uiMediator.getPlugsMediator().getPlugsList()) {
-            int currentPlugPort = plug.getPort();
-            if(currentPlugPort > maxPort)
-            {
-                maxPort = currentPlugPort;
+     private int getMaxPortAccordingToPlugsList(){
+        synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+            int maxPort = PORT_INIT;
+            for (Plug plug : this.uiMediator.getPlugsMediator().getPlugsList()) {
+                int currentPlugPort = plug.getPort();
+                if (currentPlugPort > maxPort) {
+                    maxPort = currentPlugPort;
+                }
             }
+
+            return maxPort;
         }
-
-        return maxPort;
     }
-
 }

@@ -80,14 +80,14 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return res;
     }
 
-    public static PlugsMediator getInstance() {
+   synchronized public static PlugsMediator getInstance() {
         if (instance == null) {
             instance = new PlugsMediator();
         }
         return instance;
     }
 
-    public Plug GetPlugAccordingToUiIndex(int i_UiIndex) {
+   synchronized public Plug GetPlugAccordingToUiIndex(int i_UiIndex) {
         AtomicReference<Plug> res = new AtomicReference<>();
         boolean found = false;
         for (Plug p : getPlugsList()) {
@@ -100,7 +100,9 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return found ? res.get() : null;
     }
 
-    public List<Plug> getPlugsList() {
+    synchronized public PlugsMediator GetInstance(){ return getInstance();}
+
+    synchronized public List<Plug> getPlugsList() {
         return getInstance().plugsList;
     }
 
@@ -149,16 +151,18 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return uiIndexRes;
     }
 
-    public void RefreshUiIndexes() {
+    synchronized public void RefreshUiIndexes() {
         int i = 0;
-        for (Plug plug : plugsList) {
-            plug.updateUiIndex(i);
-            i++;
+        for (int j = 0; j < MAX_PLUGS; j++) {
+            if (GetPlugAccordingToUiIndex(j) != null) {
+                GetPlugAccordingToUiIndex(j).updateUiIndex(i);
+                i++;
+            }
         }
         UpdateAllPlugsInDB();
     }
 
-    public void RemovePlug(int i_UiIndex, boolean i_WithRefreshUiIndexes) {
+    synchronized public void RemovePlug(int i_UiIndex, boolean i_WithRefreshUiIndexes) {
         Plug plug = GetPlugAccordingToUiIndex(i_UiIndex);
         int internalIndex = plug.getInternalPlugIndex();
         plug.stopTimer();
@@ -168,14 +172,14 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         removePlugFromAllModeLists(plug);
         indexesFreeList.set(internalIndex, true);
 
+        RemovePlugFromDB(plug);
+        plugsList.remove(plug);
         if (i_WithRefreshUiIndexes) {
-            plugsList.remove(plug);
-            RemovePlugFromDB(plug);
             RefreshUiIndexes();
         }
     }
 
-   synchronized public void RemoveAllPlugs() {
+    synchronized public void RemoveAllPlugs() {
         for (int i = 0; i < MAX_PLUGS; i++) {
             if (GetPlugAccordingToUiIndex(i) != null) {
                 RemovePlug(i, true);
