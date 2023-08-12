@@ -130,6 +130,39 @@ public class StatisticsScreen {
         }
     }
 
+    /*
+    @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
+    public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs() {
+        ResponseEntity<String> result = null;
+        float[] monthsConsumption = new float[12];
+        try {
+            Plug plug = uiMediator.getPlugsMediator().getPlugsList().get(new Random().nextInt(uiMediator.getPlugsMediator().getPlugsList().size()));
+            monthsConsumption = plug.SimulateAnnualElectricityConsumption();
+            for (int i=0 ; i<monthsConsumption.length ; i++){
+                monthsConsumption[i] *= (uiMediator.getPlugsMediator().getPlugsList().size());
+            }
+
+            result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
+
+        } catch (Exception err) {
+            try {
+                result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
+                System.out.println("annual: the error is : " + err);
+                System.out.println("annual: the error message is : " + err.getMessage());
+            } catch (Exception err2) {
+                System.out.println("annual:  the error2 is : " + err2);
+                System.out.println("annual:  err2 = " + err2.getMessage());
+            }
+        }
+
+        if (monthsConsumption == null) {
+            System.out.println("annual: result is null");
+        }
+
+        return result;
+    }
+     */
+
     @GetMapping("/workshop/statisticsScreen/SimulateWeeklyElectricityForAllPlugs")
     public ResponseEntity<String> SimulateWeeklyElectricityForAllPlugs() {
         synchronized (uiMediator.getPlugsMediator().GetInstance()) {
