@@ -9,7 +9,6 @@ import okhttp3.*;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,11 +115,11 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         UpdateAllPlugsInDB();
     }
 
-    private void removePlugFromAllModeLists(Plug i_Plug) {
+    synchronized private void removePlugFromAllModeLists(Plug i_Plug) {
         signedUpPlugsForModesList.forEach(list -> list.remove(i_Plug));
     }
 
-    public void fireEventMode(GenericMode i_EventMode, int i_ModeType) {
+    synchronized public void fireEventMode(GenericMode i_EventMode, int i_ModeType) {
         signedUpPlugsForModesList.get(i_ModeType).forEach(genericEvent -> genericEvent.handleMode(i_EventMode));
     }
 
@@ -224,7 +223,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return res;
     }
 
-    public List<Plug> getPlugsThatRegisteredForMode(int i_ModeType) {
+   synchronized public List<Plug> getPlugsThatRegisteredForMode(int i_ModeType) {
         List<Plug> plugList = new ArrayList<>();
         for (IModeListener listener : getPlugsThatSignedUpForMode(i_ModeType)) {
             plugList.add((Plug) listener);
@@ -243,19 +242,19 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return new PlugSave(plug, registeredToSleepMode, registeredToSafeMode);
     }
 
-    public void SavePlugToDB(Plug plug) {
+    synchronized public void SavePlugToDB(Plug plug) {
         plugRepoController.SavePlugToDB(createPlugSave(plug));
     }
 
-    public void RemovePlugFromDB(Plug plug) {
+    synchronized public void RemovePlugFromDB(Plug plug) {
         plugRepoController.RemovePlugFromDB(createPlugSave(plug));
     }
 
-    public void UpdateAllPlugsInDB() {
+    synchronized   public void UpdateAllPlugsInDB() {
         plugsList.forEach(this::SavePlugToDB);
     }
 
-    public void RemoveAllPlugsFromDB() {
+    synchronized public void RemoveAllPlugsFromDB() {
         List<PlugSave> plugsFromDB = FetchPlugsFromDB();
         List<Plug> plugList = convertPlugSaveListToPlugList(plugsFromDB);
         plugList.forEach(this::RemovePlugFromDB);
@@ -282,7 +281,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return convertPlugSaveListToPlugList(plugSavesOnlyInDB);
     }
 
-    public void AddPlugsFromDB() {
+    synchronized public void AddPlugsFromDB() {
         List<Plug> plugListToAdd = getPlugsInDBAndNotOnList();
         if (plugListToAdd != null) {
             plugListToAdd.forEach(Plug::initTimerAndElectricityConsumption);

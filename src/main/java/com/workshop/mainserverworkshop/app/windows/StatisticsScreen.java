@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @RestController
 public class StatisticsScreen {
@@ -105,7 +107,6 @@ public class StatisticsScreen {
                     i++;
                 }
 
-
                 for (int month = 0; month < 12; month++) {
                     float monthSum = 0;
                     for (int p = 0; p < connectedPlugs; p++) {
@@ -118,6 +119,11 @@ public class StatisticsScreen {
 
             } catch (Exception err) {
                 result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                for (StackTraceElement element : stackTrace) {
+                    Logger theLogger = Logger.getLogger(MainScreen.class.getName());
+                    theLogger.log(Level.INFO, "Thread: {0}, Stack Trace: {1}:{2}", new Object[] { Thread.currentThread().getName(), element.getClassName(), element.getMethodName() });
+                }
                 System.out.println("annual: the error is : " + err);
                 System.out.println("annual: the error message is : " + err.getMessage());
             }
@@ -188,6 +194,11 @@ public class StatisticsScreen {
                 result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
             } catch (Exception err) {
                 result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                for (StackTraceElement element : stackTrace) {
+                    Logger theLogger = Logger.getLogger(MainScreen.class.getName());
+                    theLogger.log(Level.INFO, "Thread: {0}, Stack Trace: {1}:{2}", new Object[] { Thread.currentThread().getName(), element.getClassName(), element.getMethodName() });
+                }
                 System.out.println("weekly: the error is : " + err);
                 System.out.println("weekly: the error message is : " + err.getMessage());
             }
