@@ -135,7 +135,7 @@ public class Plug implements IModeListener {
 
      public float[] SimulateAnnualElectricityConsumption() {
         float[] annualElectricityConsumption = electricityStorage.SimulateAnnualElectricityStatisticsAndGetMonthList();
-        plugsMediator.SavePlugToDB(this);
+         plugsMediator.SavePlugToDB(this);
         return annualElectricityConsumption;
     }
 

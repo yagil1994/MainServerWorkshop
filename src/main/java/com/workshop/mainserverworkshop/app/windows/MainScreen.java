@@ -11,10 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import java.util.*;
+import java.util.logging.Level;
 
 @RestController
 public class MainScreen {
@@ -32,51 +33,55 @@ public class MainScreen {
     @GetMapping("/workshop/mainScreen/addNewPlug")
      public ResponseEntity<String> addNewPlug(@RequestParam String i_Title, @RequestParam String i_Type,
                                              @RequestParam String i_MinElectricityVolt, @RequestParam String i_MaxElectricityVolt, @RequestParam String i_UiIndex) {
-
-        int minElectricityVolt = !Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MinElectricityVolt) : 220;
-        int maxElectricityVolt =!Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MaxElectricityVolt) : 240;
-        int UiIndex = Integer.parseInt(i_UiIndex);
-        boolean fakePlug = UiIndex != 10;
-
-        JsonObject body = new JsonObject();
-        HttpStatus responseStatus = HttpStatus.OK;
-        Process process = null;
-
-        if(fakePlug)
-        {
+        ResponseEntity<String> response = null;
+        synchronized (uiMediator.getPlugsMediator().GetInstance()) {
             try {
-                process = uiMediator.getPlugsMediator().CreateProcess(port);
-            } catch (Exception ex) {
-                System.out.println(Arrays.toString(ex.getStackTrace()));
-            }
-        }
-        if(uiMediator.getPlugsMediator().CheckIfPlugTitleAlreadyExist(i_Title)){
-            body.addProperty("result:", "failed to add new plug. title already exist");
-            responseStatus=HttpStatus.BAD_REQUEST;
-        }
-        else if(uiMediator.getPlugsMediator().CheckIfPlugUiIndexAlreadyExist(UiIndex)){
-            body.addProperty("result:", "failed to add new plug. index already exist");
-            responseStatus=HttpStatus.BAD_REQUEST;
-        }
-        else {
-            boolean plugAdded = uiMediator.getPlugsMediator().AddNewPlug(process, port, i_Title, UiIndex, i_Type, minElectricityVolt, maxElectricityVolt);
-            if (plugAdded) {
-                if(fakePlug)
-                {
-                    body.addProperty("result:", "new plug added in port: " + port);
+                int minElectricityVolt = !Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MinElectricityVolt) : 220;
+                int maxElectricityVolt = !Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MaxElectricityVolt) : 240;
+                int UiIndex = Integer.parseInt(i_UiIndex);
+                boolean fakePlug = UiIndex != 10;
+                JsonObject body = new JsonObject();
+                HttpStatus responseStatus = HttpStatus.OK;
+                Process process = null;
+
+                if (fakePlug) {
+                    try {
+                        process = uiMediator.getPlugsMediator().CreateProcess(port);
+                    } catch (Exception ex) {
+                        System.out.println(Arrays.toString(ex.getStackTrace()));
+                    }
                 }
-                else{
-                    body.addProperty("result:", "real plug added!!");
+                if (uiMediator.getPlugsMediator().CheckIfPlugTitleAlreadyExist(i_Title)) {
+                    body.addProperty("result:", "failed to add new plug. title already exist");
+                    responseStatus = HttpStatus.BAD_REQUEST;
+                } else if (uiMediator.getPlugsMediator().CheckIfPlugUiIndexAlreadyExist(UiIndex)) {
+                    body.addProperty("result:", "failed to add new plug. index already exist");
+                    responseStatus = HttpStatus.BAD_REQUEST;
+                } else {
+                    boolean plugAdded = uiMediator.getPlugsMediator().AddNewPlug(process, port, i_Title, UiIndex, i_Type, minElectricityVolt, maxElectricityVolt);
+                    if (plugAdded) {
+                        if (fakePlug) {
+                            body.addProperty("result:", "new plug added in port: " + port);
+                        } else {
+                            body.addProperty("result:", "real plug added!!");
+                        }
+
+                        port++;
+                    } else {
+                        body.addProperty("result:", "failed to add new plug. reached to maximum plugs");
+                        responseStatus = HttpStatus.BAD_REQUEST;
+                    }
                 }
 
-                port++;
-            } else {
-                body.addProperty("result:", "failed to add new plug. reached to maximum plugs");
-                responseStatus = HttpStatus.BAD_REQUEST;
+                response = ResponseEntity.status(responseStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+            }
+            catch (Exception error)
+            {
+                System.out.println("addNewPlug: " + error);
+                System.out.println("addNewPlug: " + error.getMessage());
             }
         }
-
-        return ResponseEntity.status(responseStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+        return response;
     }
 
     @GetMapping("/workshop/mainScreen/SeePlugsAtDB")
@@ -342,7 +347,13 @@ public class MainScreen {
                     response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plug.getPlugTitle() + " on index " + i_UiIndex + " removed"));
                 }
             }
-            catch (Exception error) {
+            catch (ConcurrentModificationException error) {
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                for (StackTraceElement element : stackTrace) {
+                   Logger theLogger = Logger.getLogger(MainScreen.class.getName());
+                    theLogger.log(Level.INFO, "Thread: {0}, Stack Trace: {1}:{2}", new Object[] { Thread.currentThread().getName(), element.getClassName(), element.getMethodName() });
+                }
+
                 System.out.println("RemoveExistPlug: " + error);
                 System.out.println("RemoveExistPlug: " + error.getMessage());
             }
