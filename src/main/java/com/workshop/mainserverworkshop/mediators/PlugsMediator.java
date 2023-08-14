@@ -127,7 +127,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return signedUpPlugsForModesList.get(i_ModeType);
     }
 
-    public int GetRandomActivePlugIndexAndMakeInvalidIfAnyDeviceExist() //returns -1 is not found any
+    synchronized public int GetRandomActivePlugIndexAndMakeInvalidIfAnyDeviceExist() //returns -1 is not found any
     {
         List<Integer> activePlugsIndexesList = this.plugsList.stream()
                 .filter((t) -> t.getOnOffStatus().equals("on"))
@@ -137,17 +137,22 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
                 activePlugsIndexesList.get(new Random().nextInt(activePlugsIndexesList.size()))
                 : -1;
 
-        int uiIndexRes = -1;
-        if (index != -1) {
-            for (Plug plug : plugsList) {
-                if (plug.getInternalPlugIndex() == index) {
-                    plug.setFalseToInvalidAndTrueToValidThePlug(false);
-                    uiIndexRes = plug.getUiIndex();
-                }
-            }
+        if(index != -1){
+            GetPlugAccordingToUiIndex(index).setFalseToInvalidAndTrueToValidThePlug(false);
         }
 
-        return uiIndexRes;
+//        int uiIndexRes = -1;
+//        if (index != -1) {
+//            for (Plug plug : plugsList) {
+//                if (plug.getInternalPlugIndex() == index) {
+//                    plug.setFalseToInvalidAndTrueToValidThePlug(false);
+//                    uiIndexRes = plug.getUiIndex();
+//                }
+//            }
+//        }
+       // return uiIndexRes;
+
+        return index;
     }
 
     synchronized public void RefreshUiIndexes() {
