@@ -86,13 +86,13 @@ public class OnOffScreen  {
     @GetMapping("/workshop/on_off_screen/getInfoAboutOverTimeElectricityConsumers")
     public ResponseEntity<String> GetInfoAboutOverTimeElectricityConsumers(){
         List<String> indexes = new ArrayList<>();
-       this.uiMediator.getPlugsMediator().getPlugsList().forEach((p) ->{
-           if(checkIfThisPlugIsInOverTimeConsumption(p))
-           {
-               indexes.add(String.valueOf(p.getUiIndex()));
-           }
-               });
-
+        synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+            this.uiMediator.getPlugsMediator().getPlugsList().forEach((p) -> {
+                if (checkIfThisPlugIsInOverTimeConsumption(p)) {
+                    indexes.add(String.valueOf(p.getUiIndex()));
+                }
+            });
+        }
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(indexes));
     }
 
@@ -176,12 +176,15 @@ public class OnOffScreen  {
         return plug.isOverTimeFlag() &&
                 (plug.getPlugType().equalsIgnoreCase("a.c") ||
                         plug.getPlugType().equalsIgnoreCase("ac") ||
-                        plug.getPlugType().equalsIgnoreCase("aircondition") ||
+                        plug.getPlugType().equalsIgnoreCase("air-Conditioner") ||
                         plug.getPlugType().equalsIgnoreCase("air condition") ||
-                                plug.getPlugType().equalsIgnoreCase("airConditioner") ||
+                        plug.getPlugType().equalsIgnoreCase("airConditioner") ||
                         plug.getPlugType().equalsIgnoreCase("tv")||
                         plug.getPlugType().equalsIgnoreCase("t.v")||
-                        plug.getPlugType().equalsIgnoreCase("television")
+                        plug.getPlugType().equalsIgnoreCase("television")||
+                        plug.getPlugType().equalsIgnoreCase("lamp")||
+                        plug.getPlugType().equalsIgnoreCase("oven")||
+                        plug.getPlugType().equalsIgnoreCase("stove")
                 );
     }
 }

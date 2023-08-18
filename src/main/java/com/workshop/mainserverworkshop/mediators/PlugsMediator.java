@@ -141,17 +141,6 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             GetPlugAccordingToUiIndex(index).setFalseToInvalidAndTrueToValidThePlug(false);
         }
 
-//        int uiIndexRes = -1;
-//        if (index != -1) {
-//            for (Plug plug : plugsList) {
-//                if (plug.getInternalPlugIndex() == index) {
-//                    plug.setFalseToInvalidAndTrueToValidThePlug(false);
-//                    uiIndexRes = plug.getUiIndex();
-//                }
-//            }
-//        }
-       // return uiIndexRes;
-
         return index;
     }
 
@@ -185,8 +174,8 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
     synchronized public void RemoveAllPlugs() {
         for (int i = 0; i < MAX_PLUGS; i++) {
-            if (GetPlugAccordingToUiIndex(i) != null) {
-                RemovePlug(i, true);
+            if (GetPlugAccordingToUiIndex(0) != null) {
+                RemovePlug(0, true);
             }
         }
     }
