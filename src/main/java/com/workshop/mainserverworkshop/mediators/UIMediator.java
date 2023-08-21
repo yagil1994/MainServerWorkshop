@@ -10,5 +10,5 @@ public class UIMediator { //this mediator gets http requests from the ui(the mai
         return instance;
     }
 
-    public PlugsMediator getPlugsMediator(){return PlugsMediator.getInstance();}
+    public PlugsMediator getPlugsMediator(){return PlugsMediator.getStaticInstance();}
 }

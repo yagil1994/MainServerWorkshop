@@ -87,7 +87,7 @@ public class OnOffScreen  {
     public ResponseEntity<String> GetInfoAboutOverTimeElectricityConsumers(){
         List<String> indexes = new ArrayList<>();
         synchronized (uiMediator.getPlugsMediator().GetInstance()) {
-            this.uiMediator.getPlugsMediator().getPlugsList().forEach((p) -> {
+            this.uiMediator.getPlugsMediator().getPlugsList().forEach(p -> {
                 if (checkIfThisPlugIsInOverTimeConsumption(p)) {
                     indexes.add(String.valueOf(p.getUiIndex()));
                 }

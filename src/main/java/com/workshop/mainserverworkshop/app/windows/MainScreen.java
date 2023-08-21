@@ -13,9 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-
 import java.util.*;
-import java.util.logging.Level;
+
 
 @RestController
 public class MainScreen {
@@ -34,7 +33,6 @@ public class MainScreen {
      public ResponseEntity<String> addNewPlug(@RequestParam String i_Title, @RequestParam String i_Type,
                                              @RequestParam String i_MinElectricityVolt, @RequestParam String i_MaxElectricityVolt, @RequestParam String i_UiIndex) {
         ResponseEntity<String> response = null;
-        synchronized (uiMediator.getPlugsMediator().GetInstance()) {
             try {
                 int minElectricityVolt = !Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MinElectricityVolt) : 220;
                 int maxElectricityVolt = !Objects.equals(i_MinElectricityVolt, "") ? Integer.parseInt(i_MaxElectricityVolt) : 240;
@@ -80,7 +78,6 @@ public class MainScreen {
                 System.out.println("addNewPlug: " + error);
                 System.out.println("addNewPlug: " + error.getMessage());
             }
-        }
         return response;
     }
 
@@ -335,7 +332,6 @@ public class MainScreen {
 
     @DeleteMapping("/workshop/mainScreen/RemoveExistPlug")
     public ResponseEntity<String> RemoveExistPlug(@RequestParam String i_UiIndex) {
-        synchronized (uiMediator.getPlugsMediator().GetInstance()) {
             ResponseEntity<String> response = null;
             try {
                 int UiIndex = Integer.parseInt(i_UiIndex);
@@ -358,7 +354,6 @@ public class MainScreen {
                 System.out.println("RemoveExistPlug: " + error.getMessage());
             }
             return response;
-        }
     }
 
     @DeleteMapping("/workshop/mainScreen/RemoveAllFakePlugs")
@@ -455,7 +450,6 @@ public class MainScreen {
                     maxPort = currentPlugPort;
                 }
             }
-
             return maxPort;
         }
     }
