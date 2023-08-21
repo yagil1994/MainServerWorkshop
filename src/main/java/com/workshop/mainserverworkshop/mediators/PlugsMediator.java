@@ -246,7 +246,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return new PlugSave(plug, registeredToSleepMode, registeredToSafeMode);
     }
 
-     public void SavePlugToDB(Plug plug) { //todo check from here if there're threads problems
+    synchronized public void SavePlugToDB(Plug plug) { //todo check from here if there're threads problems - there is
         plugRepoController.SavePlugToDB(createPlugSave(plug));
     }
 
