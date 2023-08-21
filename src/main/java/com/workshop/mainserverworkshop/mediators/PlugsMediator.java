@@ -9,6 +9,7 @@ import okhttp3.*;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,30 +80,35 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return res;
     }
 
-   synchronized public static PlugsMediator getInstance() {
+    synchronized public static PlugsMediator getStaticInstance() {
         if (instance == null) {
             instance = new PlugsMediator();
         }
         return instance;
     }
 
-   synchronized public Plug GetPlugAccordingToUiIndex(int i_UiIndex) {
+    public Plug GetPlugAccordingToUiIndex(int i_UiIndex) {
         AtomicReference<Plug> res = new AtomicReference<>();
         boolean found = false;
-        for (Plug p : getPlugsList()) {
-            if (p.getUiIndex() == i_UiIndex) {
-                res.set(p);
-                found = true;
-                break;
+        synchronized (this) {
+            for (Plug p : getPlugsList()) {
+                if (p.getUiIndex() == i_UiIndex) {
+                    res.set(p);
+                    found = true;
+                    break;
+                }
             }
         }
+
         return found ? res.get() : null;
     }
 
-    synchronized public PlugsMediator GetInstance(){ return getInstance();}
+    synchronized public PlugsMediator GetInstance() {
+        return getStaticInstance();
+    }
 
-    synchronized public List<Plug> getPlugsList() {
-        return getInstance().plugsList;
+    public List<Plug> getPlugsList() {
+        return getStaticInstance().plugsList;
     }
 
     public void addModeListener(IModeListener i_ModeListener, int i_ModeType) {
@@ -127,17 +133,21 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return signedUpPlugsForModesList.get(i_ModeType);
     }
 
-    synchronized public int GetRandomActivePlugIndexAndMakeInvalidIfAnyDeviceExist() //returns -1 is not found any
+    public int GetRandomActivePlugIndexAndMakeInvalidIfAnyDeviceExist() //returns -1 is not found any
     {
-        List<Integer> activePlugsIndexesList = this.plugsList.stream()
-                .filter((t) -> t.getOnOffStatus().equals("on"))
-                .map(Plug::getInternalPlugIndex).toList();
+        List<Integer> activePlugsIndexesList;
+
+        synchronized (this) {
+            activePlugsIndexesList = this.plugsList.stream()
+                    .filter(t-> t.getOnOffStatus().equals("on"))
+                    .map(Plug::getInternalPlugIndex).toList();
+        }
 
         int index = !activePlugsIndexesList.isEmpty() ?
                 activePlugsIndexesList.get(new Random().nextInt(activePlugsIndexesList.size()))
                 : -1;
 
-        if(index != -1){
+        if (index != -1) {
             GetPlugAccordingToUiIndex(index).setFalseToInvalidAndTrueToValidThePlug(false);
         }
 
@@ -152,6 +162,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
                 i++;
             }
         }
+
         UpdateAllPlugsInDB();
     }
 
@@ -164,7 +175,6 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
         removePlugFromAllModeLists(plug);
         indexesFreeList.set(internalIndex, true);
-
         RemovePlugFromDB(plug);
         plugsList.remove(plug);
         if (i_WithRefreshUiIndexes) {
@@ -178,11 +188,6 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
                 RemovePlug(0, true);
             }
         }
-    }
-
-    public void CancelRegisteredPlugs() {
-        signedUpPlugsForModesList.remove(SLEEP_MODE_LIST);
-        signedUpPlugsForModesList.remove(SAFE_MODE_LIST);
     }
 
     public void closeProcess(int i_UiIndex) {
@@ -217,10 +222,14 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return res;
     }
 
-   synchronized public List<Plug> getPlugsThatRegisteredForMode(int i_ModeType) {
+     public List<Plug> getPlugsThatRegisteredForMode(int i_ModeType) {
         List<Plug> plugList = new ArrayList<>();
-        for (IModeListener listener : getPlugsThatSignedUpForMode(i_ModeType)) {
-            plugList.add((Plug) listener);
+
+        synchronized (this)
+        {
+            for (IModeListener listener : getPlugsThatSignedUpForMode(i_ModeType)) {
+                plugList.add((Plug) listener);
+            }
         }
 
         return plugList;
@@ -233,22 +242,23 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         List<Plug> plugsRegisteredToSafeModeList = getPlugsThatRegisteredForMode(SAFE_MODE_LIST);
         boolean registeredToSleepMode = plugsRegisteredToSleepModeList.contains(plug);
         boolean registeredToSafeMode = plugsRegisteredToSafeModeList.contains(plug);
+
         return new PlugSave(plug, registeredToSleepMode, registeredToSafeMode);
     }
 
-    synchronized public void SavePlugToDB(Plug plug) {
+     public void SavePlugToDB(Plug plug) { //todo check from here if there're threads problems
         plugRepoController.SavePlugToDB(createPlugSave(plug));
     }
 
-    synchronized public void RemovePlugFromDB(Plug plug) {
+     public void RemovePlugFromDB(Plug plug) {
         plugRepoController.RemovePlugFromDB(createPlugSave(plug));
     }
 
-    synchronized   public void UpdateAllPlugsInDB() {
+     public void UpdateAllPlugsInDB() {
         plugsList.forEach(this::SavePlugToDB);
     }
 
-    synchronized public void RemoveAllPlugsFromDB() {
+     public void RemoveAllPlugsFromDB() {
         List<PlugSave> plugsFromDB = FetchPlugsFromDB();
         List<Plug> plugList = convertPlugSaveListToPlugList(plugsFromDB);
         plugList.forEach(this::RemovePlugFromDB);
@@ -256,11 +266,6 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
 
     public List<PlugSave> FetchPlugsFromDB() {
         return plugRepoController.GetAllPlugsFromDB();
-    }
-
-    private boolean checkIfPlugIsInDB(Plug plug) {
-        List<PlugSave> plugSaveList = FetchPlugsFromDB();
-        return plugSaveList.stream().anyMatch(plugSave -> plugSave.getPlugTitle().equals(plug.getPlugTitle()));
     }
 
     private List<Plug> getPlugsInDBAndNotOnList() {
@@ -275,12 +280,14 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return convertPlugSaveListToPlugList(plugSavesOnlyInDB);
     }
 
-    synchronized public void AddPlugsFromDB() {
+     public void AddPlugsFromDB() {
         List<Plug> plugListToAdd = getPlugsInDBAndNotOnList();
         if (plugListToAdd != null) {
-            plugListToAdd.forEach(Plug::initTimerAndElectricityConsumption);
-            plugsList.addAll(plugListToAdd);
-
+            synchronized (this)
+            {
+                plugListToAdd.forEach(Plug::initTimerAndElectricityConsumption);
+                plugsList.addAll(plugListToAdd);
+            }
         } else {
             System.out.println("error: plugListToAdd is null in AddPlugsFromDB function");
         }
