@@ -296,14 +296,12 @@ public class MainScreen {
     public void clickedOnSleepButton() {
         int currentMode = uiMediator.getPlugsMediator().SLEEP_MODE_LIST;
         this.uiMediator.getPlugsMediator().fireEventMode(new GenericMode(this.uiMediator.getPlugsMediator(), "fell asleep..."), currentMode);
-        //removeAllPlugsFromMode(uiMediator.getPlugsMediator().SLEEP_MODE_LIST);//yes or maybe not on this case?
     }
 
     @GetMapping("/workshop/mainScreen/clickedOnExitAreaButton")
     public void clickedOnExitAreaButton() {
         int currentMode = uiMediator.getPlugsMediator().SAFE_MODE_LIST;
         this.uiMediator.getPlugsMediator().fireEventMode(new GenericMode(this.uiMediator.getPlugsMediator(), "exit area..."), currentMode);
-        //removeAllPlugsFromMode(uiMediator.getPlugsMediator().SAFE_MODE_LIST); //yes or maybe not on this case?
     }
 
     @GetMapping("/workshop/mainScreen/SimulateInvalidElectricityConsumption")
