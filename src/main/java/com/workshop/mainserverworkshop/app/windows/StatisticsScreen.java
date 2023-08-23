@@ -29,32 +29,50 @@ public class StatisticsScreen {
 
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForPlug")
     public ResponseEntity<String> SimulateAnnualElectricityForPlug(@RequestParam String i_UiIndex) {
-        ResponseEntity<String> response;
-        int UiIndex = Integer.parseInt(i_UiIndex);
-        Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-        if (plug == null) {
-            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
-        } else {
-            float[] monthsConsumption = plug.SimulateAnnualElectricityConsumption();
-            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
+        try {
+            ResponseEntity<String> response;
+            int UiIndex = Integer.parseInt(i_UiIndex);
+            Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
+            if (plug == null) {
+                response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+            } else {
+                float[] monthsConsumption = plug.SimulateAnnualElectricityConsumption();
+                response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
+            }
+
+            return response;
+        }
+        catch (Exception error)
+        {
+            System.out.println("error at SimulateAnnualElectricityForPlug: " + error);
+            System.out.println("error SimulateAnnualElectricityForPlug: " + error.getMessage());
         }
 
-        return response;
+        return null;
     }
 
     @GetMapping("/workshop/statisticsScreen/SimulateWeeklyElectricityForPlug")
     public ResponseEntity<String> SimulateWeeklyElectricityForPlug(@RequestParam String i_UiIndex) {
-        ResponseEntity<String> response;
-        int UiIndex = Integer.parseInt(i_UiIndex);
-        Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-        if (plug == null) {
-            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
-        } else {
-            float[] weeklyConsumption = plug.SimulateWeeklyElectricityConsumption();
-            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(weeklyConsumption));
+        try {
+            ResponseEntity<String> response;
+            int UiIndex = Integer.parseInt(i_UiIndex);
+            Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
+            if (plug == null) {
+                response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+            } else {
+                float[] weeklyConsumption = plug.SimulateWeeklyElectricityConsumption();
+                response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(weeklyConsumption));
+            }
+
+            return response;
+        }
+        catch (Exception error)
+        {
+            System.out.println("error at SimulateWeeklyElectricityForPlug: " + error);
+            System.out.println("error SimulateWeeklyElectricityForPlug: " + error.getMessage());
         }
 
-        return response;
+        return null;
     }
 
     @GetMapping("/workshop/statisticsScreen/GetLastElectricityUsageForPlugByType")
@@ -172,27 +190,45 @@ public class StatisticsScreen {
 
     @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionTillNow")
     public ResponseEntity<String> GetElectricityUsageTillNow(@RequestParam String i_UiIndex) {
-        ResponseEntity<String> response;
-        int plugIndex = Integer.parseInt(i_UiIndex);
-        Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
-        if (plug == null) {
-            response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
-        } else {
-            float electricityConsumptionTillNow = plug.GetElectricityConsumptionTillNow();
-            response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(electricityConsumptionTillNow));
+        try {
+            ResponseEntity<String> response;
+            int plugIndex = Integer.parseInt(i_UiIndex);
+            Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
+            if (plug == null) {
+                response = ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("Index doesn't exist"));
+            } else {
+                float electricityConsumptionTillNow = plug.GetElectricityConsumptionTillNow();
+                response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(electricityConsumptionTillNow));
+            }
+
+            return response;
+        }
+        catch (Exception error)
+        {
+            System.out.println("error at GetElectricityUsageTillNow: " + error);
+            System.out.println("error GetElectricityUsageTillNow: " + error.getMessage());
         }
 
-        return response;
+        return null;
     }
 
     @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionForAllDevicesTogether")
     public ResponseEntity<String> GetElectricityConsumptionForAllDevicesTogether() {
-        List<IndexAndElectricityConsumptionContainer> indexAndStatisticsList = new ArrayList<>();
+        try {
+            List<IndexAndElectricityConsumptionContainer> indexAndStatisticsList = new ArrayList<>();
 
-        for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
-            indexAndStatisticsList.add(new IndexAndElectricityConsumptionContainer(String.valueOf(plug.getInternalPlugIndex()), String.valueOf(plug.GetElectricityConsumptionTillNow())));
+            for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
+                indexAndStatisticsList.add(new IndexAndElectricityConsumptionContainer(String.valueOf(plug.getInternalPlugIndex()), String.valueOf(plug.GetElectricityConsumptionTillNow())));
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(indexAndStatisticsList));
+        }
+        catch (Exception error)
+        {
+            System.out.println("error at GetElectricityConsumptionForAllDevicesTogether: " + error);
+            System.out.println("error GetElectricityConsumptionForAllDevicesTogether: " + error.getMessage());
         }
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(indexAndStatisticsList));
+        return null;
     }
 }
