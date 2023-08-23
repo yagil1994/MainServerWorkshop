@@ -11,9 +11,7 @@ import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -111,13 +109,19 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return getStaticInstance().plugsList;
     }
 
-    public void addModeListener(IModeListener i_ModeListener, int i_ModeType) {
-        signedUpPlugsForModesList.get(i_ModeType).add(i_ModeListener);
+     public void addModeListener(IModeListener i_ModeListener, int i_ModeType) {
+        synchronized (this)
+        {
+            signedUpPlugsForModesList.get(i_ModeType).add(i_ModeListener);
+        }
         UpdateAllPlugsInDB();
     }
 
-    public void removeModeListener(IModeListener i_ModeListener, int i_ModeType) {
-        signedUpPlugsForModesList.get(i_ModeType).remove(i_ModeListener);
+     public void removeModeListener(IModeListener i_ModeListener, int i_ModeType) {
+        synchronized (this)
+        {
+            signedUpPlugsForModesList.get(i_ModeType).remove(i_ModeListener);
+        }
         UpdateAllPlugsInDB();
     }
 
@@ -250,11 +254,12 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         plugRepoController.SavePlugToDB(createPlugSave(plug));
     }
 
-     public void RemovePlugFromDB(Plug plug) {
+    synchronized public void RemovePlugFromDB(Plug plug) {
         plugRepoController.RemovePlugFromDB(createPlugSave(plug));
     }
 
-     public void UpdateAllPlugsInDB() {
+    synchronized public void UpdateAllPlugsInDB() {
+         Collections.sort(plugsList);
         plugsList.forEach(this::SavePlugToDB);
     }
 
@@ -264,7 +269,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         plugList.forEach(this::RemovePlugFromDB);
     }
 
-    public List<PlugSave> FetchPlugsFromDB() {
+    synchronized public List<PlugSave> FetchPlugsFromDB() {
         return plugRepoController.GetAllPlugsFromDB();
     }
 
