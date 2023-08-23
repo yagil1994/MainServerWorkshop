@@ -1,7 +1,9 @@
 package com.workshop.mainserverworkshop;
 import com.workshop.mainserverworkshop.DB.PlugRepoController;
 import com.workshop.mainserverworkshop.DB.PlugRepository;
+import com.workshop.mainserverworkshop.app.windows.MainScreen;
 import com.workshop.mainserverworkshop.mediators.PlugsMediator;
+import com.workshop.mainserverworkshop.mediators.UIMediator;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -24,6 +26,7 @@ public class Main {
         staticPlugRepository = plugRepository;
         this.plugRepoController = new PlugRepoController(staticPlugRepository);
         PlugsMediator.UpdatePlugController(plugRepoController);
+        UIMediator.getInstance().getPlugsMediator().AddPlugsFromDB();
     }
 
     public static void main(String[] args) {

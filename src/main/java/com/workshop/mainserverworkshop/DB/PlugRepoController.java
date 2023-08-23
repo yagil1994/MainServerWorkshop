@@ -23,6 +23,7 @@ public class PlugRepoController {
 
      public List<PlugSave> GetAllPlugsFromDB(){
         List<PlugSave> plugSaveList;
+
         if(plugRepository.count() == 0){
             plugSaveList = new ArrayList<>();
         }

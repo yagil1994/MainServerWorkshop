@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Plug implements IModeListener {
+public class Plug implements IModeListener, Comparable<Plug> {
     private Process process;
     private boolean status, overTimeFlag, isInvalidPlug;
     private String plugType, plugTitle;
@@ -23,7 +23,8 @@ public class Plug implements IModeListener {
     public Plug(Process i_Process, int i_port, String i_PlugTitle, String i_PlugType, PlugsMediator i_PlugsMediator, int i_InternalIndex, int i_UiIndex, int i_minElectricityVolt, int i_maxElectricityVolt) {
         starter(i_Process, i_port, i_PlugTitle, i_PlugType, i_PlugsMediator, i_InternalIndex, i_UiIndex, i_minElectricityVolt, i_maxElectricityVolt);
         initTimerAndElectricityConsumption();
-        plugsMediator.SavePlugToDB(this);
+        //plugsMediator.SavePlugToDB(this);
+        plugsMediator.UpdateAllPlugsInDB();
     }
 
     //form PlugSave
@@ -112,12 +113,15 @@ public class Plug implements IModeListener {
             isInvalidPlug = !i_Value;
         }
 
-        plugsMediator.SavePlugToDB(this);
+        //plugsMediator.SavePlugToDB(this);
+        plugsMediator.UpdateAllPlugsInDB();
     }
 
     public float GetElectricityConsumptionTillNow() {
         float res = electricityStorage.getElectricityUsageTillNow();
-        plugsMediator.SavePlugToDB(this);
+        //plugsMediator.SavePlugToDB(this);
+        plugsMediator.UpdateAllPlugsInDB();
+
         return res;
     }
 
@@ -132,19 +136,22 @@ public class Plug implements IModeListener {
     public void updateUiIndex(int i_NewUiIndex) {
         if (isFakePlug()) {
             UiIndex = i_NewUiIndex;
-            plugsMediator.SavePlugToDB(this);
+            //plugsMediator.SavePlugToDB(this);
+            plugsMediator.UpdateAllPlugsInDB();
         }
     }
 
     public float[] SimulateAnnualElectricityConsumption() {
         float[] annualElectricityConsumption = electricityStorage.SimulateAnnualElectricityStatisticsAndGetMonthList();
-        plugsMediator.SavePlugToDB(this);
+        //plugsMediator.SavePlugToDB(this);
+        plugsMediator.UpdateAllPlugsInDB();
         return annualElectricityConsumption;
     }
 
     public float[] SimulateWeeklyElectricityConsumption() {
         float[] weeklyElectricityConsumption = electricityStorage.SimulateWeeklyElectricityStatisticsAndGetDayList();
-        plugsMediator.SavePlugToDB(this);
+        //plugsMediator.SavePlugToDB(this);
+        plugsMediator.UpdateAllPlugsInDB();
         return weeklyElectricityConsumption;
     }
 
@@ -159,7 +166,8 @@ public class Plug implements IModeListener {
             res = plugsMediator.sendTurnOnOrOffRequestToPlug(port, false);
         }
 
-        plugsMediator.SavePlugToDB(this);
+        //plugsMediator.SavePlugToDB(this);
+        plugsMediator.UpdateAllPlugsInDB();
 
         return res;
     }
@@ -179,11 +187,13 @@ public class Plug implements IModeListener {
             public void run() {
                 overTimeTimer.cancel();
                 overTimeFlag = true;
-                plugsMediator.SavePlugToDB(plugsMediator.GetPlugAccordingToUiIndex(UiIndex));
+                //plugsMediator.SavePlugToDB(plugsMediator.GetPlugAccordingToUiIndex(UiIndex));
+                plugsMediator.UpdateAllPlugsInDB();
             }
         }, 5000, 5000);
 
-        plugsMediator.SavePlugToDB(this);
+        //plugsMediator.SavePlugToDB(this);
+        plugsMediator.UpdateAllPlugsInDB();
 
         return res;
     }
@@ -191,7 +201,8 @@ public class Plug implements IModeListener {
     public void OverTimeAndDoNotTurnOff() {
         overTimeTimer.cancel();
         overTimeFlag = false;
-        plugsMediator.SavePlugToDB(this);
+        //plugsMediator.SavePlugToDB(this);
+        plugsMediator.UpdateAllPlugsInDB();
     }
 
 
@@ -213,7 +224,9 @@ public class Plug implements IModeListener {
 
     public void updateStatus(boolean newStatus) {
         status = newStatus;
-        plugsMediator.SavePlugToDB(this);
+        //plugsMediator.SavePlugToDB(this);
+        plugsMediator.UpdateAllPlugsInDB();
+
     }
 
     public String getOnOffStatus() {
@@ -278,5 +291,14 @@ public class Plug implements IModeListener {
         electricityStorage.setLearningUsages(learningUsages);
         electricityStorage.setLearningTimes(learningTimes);
         electricityStorage.setFinishedElectricityUsageLearning(finishedElectricityUsageLearning);
+    }
+
+    @Override
+    public int compareTo(Plug other) {
+        if (this.getUiIndex() < other.getUiIndex())
+            return -1;
+        else if (this.getUiIndex() > other.getUiIndex())
+            return 1;
+        return 0;
     }
 }
