@@ -30,7 +30,7 @@ public class StatisticsScreen {
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForPlug")
     public ResponseEntity<String> SimulateAnnualElectricityForPlug(@RequestParam String i_UiIndex) {
         try {
-            System.out.println("Func: " +"SimulateAnnualElectricityForPlug " + "thread: " + Thread.currentThread().getName() + "\n");
+            System.out.println("Func: " + "SimulateAnnualElectricityForPlug " + "thread: " + Thread.currentThread().getName() + "\n");
             ResponseEntity<String> response;
             int UiIndex = Integer.parseInt(i_UiIndex);
             Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
@@ -41,10 +41,12 @@ public class StatisticsScreen {
                 response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
             }
 
+            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+            }
+
             return response;
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at SimulateAnnualElectricityForPlug: " + error);
             System.out.println("error SimulateAnnualElectricityForPlug: " + error.getMessage());
         }
@@ -55,7 +57,7 @@ public class StatisticsScreen {
     @GetMapping("/workshop/statisticsScreen/SimulateWeeklyElectricityForPlug")
     public ResponseEntity<String> SimulateWeeklyElectricityForPlug(@RequestParam String i_UiIndex) {
         try {
-            System.out.println("Func: " +"SimulateWeeklyElectricityForPlug " + "thread: " + Thread.currentThread().getName() + "\n");
+            System.out.println("Func: " + "SimulateWeeklyElectricityForPlug " + "thread: " + Thread.currentThread().getName() + "\n");
             ResponseEntity<String> response;
             int UiIndex = Integer.parseInt(i_UiIndex);
             Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
@@ -66,10 +68,12 @@ public class StatisticsScreen {
                 response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(weeklyConsumption));
             }
 
+            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+            }
+
             return response;
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at SimulateWeeklyElectricityForPlug: " + error);
             System.out.println("error SimulateWeeklyElectricityForPlug: " + error.getMessage());
         }
@@ -79,7 +83,7 @@ public class StatisticsScreen {
 
     @GetMapping("/workshop/statisticsScreen/GetLastElectricityUsageForPlugByType")
     public ResponseEntity<String> GetLastElectricityUsageForPlugByType(@RequestParam String i_UiIndex, @RequestParam String i_StatisticsType) {
-        System.out.println("Func: " +"GetLastElectricityUsageForPlugByType " + "thread: " + Thread.currentThread().getName() + "\n");
+        System.out.println("Func: " + "GetLastElectricityUsageForPlugByType " + "thread: " + Thread.currentThread().getName() + "\n");
         ResponseEntity<String> response = null;
         int UiIndex = Integer.parseInt(i_UiIndex);
         Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
@@ -111,19 +115,20 @@ public class StatisticsScreen {
 
     @GetMapping("/workshop/statisticsScreen/SimulateAnnualElectricityForAllPlugs")
     public ResponseEntity<String> SimulateAnnualElectricityForAllPlugs() {
-        System.out.println("Func: " +"SimulateAnnualElectricityForAllPlugs " + "thread: " + Thread.currentThread().getName() + "\n");
-        ResponseEntity<String> result = null;
+        System.out.println("Func: " + "SimulateAnnualElectricityForAllPlugs " + "thread: " + Thread.currentThread().getName() + "\n");
+        ResponseEntity<String> result;
         float[] res = new float[12];
         try {
-            List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
-            int i = 0, connectedPlugs = plugs.size();
-            float[][] monthsConsumption = new float[connectedPlugs][12];
+            List<Plug> plugs = null;
+            int i = 0, connectedPlugs;
+            float[][] monthsConsumption;
 
-            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
-                for (Plug plug : plugs) {
-                    monthsConsumption[i] = plug.SimulateAnnualElectricityConsumption();
-                    i++;
-                }
+            plugs = uiMediator.getPlugsMediator().getPlugsList();
+            connectedPlugs = plugs.size();
+            monthsConsumption = new float[connectedPlugs][12];
+            for (Plug plug : plugs) {
+                monthsConsumption[i] = plug.SimulateAnnualElectricityConsumption();
+                i++;
             }
 
             for (int month = 0; month < 12; month++) {
@@ -133,6 +138,10 @@ public class StatisticsScreen {
                 }
 
                 res[month] = monthSum;
+            }
+
+            synchronized (this.uiMediator.getPlugsMediator().GetInstance()) {
+                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
             }
             result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
 
@@ -156,31 +165,32 @@ public class StatisticsScreen {
 
     @GetMapping("/workshop/statisticsScreen/SimulateWeeklyElectricityForAllPlugs")
     public ResponseEntity<String> SimulateWeeklyElectricityForAllPlugs() {
-        System.out.println("Func: " +"SimulateWeeklyElectricityForAllPlugs " + "thread: " + Thread.currentThread().getName() + "\n");
+        System.out.println("Func: " + "SimulateWeeklyElectricityForAllPlugs " + "thread: " + Thread.currentThread().getName() + "\n");
         ResponseEntity<String> result;
         float[] res = new float[7];
         try {
-            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
-                List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
-                int i = 0, connectedPlugs = plugs.size();
-                float[][] dailyConsumption = new float[connectedPlugs][7];
-                for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
-                    dailyConsumption[i] = plug.SimulateWeeklyElectricityConsumption();
-                    i++;
-                }
-
-                for (int day = 0; day < 7; day++) {
-                    float daySum = 0;
-                    for (int p = 0; p < connectedPlugs; p++) {
-                        daySum += dailyConsumption[p][day];
-                    }
-
-                    res[day] = daySum;
-                }
-                result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+            List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
+            int i = 0, connectedPlugs = plugs.size();
+            float[][] dailyConsumption = new float[connectedPlugs][7];
+            for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
+                dailyConsumption[i] = plug.SimulateWeeklyElectricityConsumption();
+                i++;
             }
-        }
-        catch (Exception err) {
+
+            for (int day = 0; day < 7; day++) {
+                float daySum = 0;
+                for (int p = 0; p < connectedPlugs; p++) {
+                    daySum += dailyConsumption[p][day];
+                }
+
+                res[day] = daySum;
+            }
+
+            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+            }
+            result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
+        } catch (Exception err) {
             result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             for (StackTraceElement element : stackTrace) {
@@ -197,7 +207,7 @@ public class StatisticsScreen {
     @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionTillNow")
     public ResponseEntity<String> GetElectricityUsageTillNow(@RequestParam String i_UiIndex) {
         try {
-            System.out.println("Func: " +"GetElectricityUsageTillNow " + "thread: " + Thread.currentThread().getName() + "\n");
+            System.out.println("Func: " + "GetElectricityUsageTillNow " + "thread: " + Thread.currentThread().getName() + "\n");
             ResponseEntity<String> response;
             int plugIndex = Integer.parseInt(i_UiIndex);
             Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
@@ -209,9 +219,7 @@ public class StatisticsScreen {
             }
 
             return response;
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at GetElectricityUsageTillNow: " + error);
             System.out.println("error GetElectricityUsageTillNow: " + error.getMessage());
         }
@@ -222,7 +230,7 @@ public class StatisticsScreen {
     @GetMapping("/workshop/statisticsScreen/GetElectricityConsumptionForAllDevicesTogether")
     public ResponseEntity<String> GetElectricityConsumptionForAllDevicesTogether() {
         try {
-            System.out.println("Func: " +"GetElectricityConsumptionForAllDevicesTogether " + "thread: " + Thread.currentThread().getName() + "\n");
+            System.out.println("Func: " + "GetElectricityConsumptionForAllDevicesTogether " + "thread: " + Thread.currentThread().getName() + "\n");
             List<IndexAndElectricityConsumptionContainer> indexAndStatisticsList = new ArrayList<>();
 
             for (Plug plug : uiMediator.getPlugsMediator().getPlugsList()) {
@@ -230,9 +238,7 @@ public class StatisticsScreen {
             }
 
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(indexAndStatisticsList));
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at GetElectricityConsumptionForAllDevicesTogether: " + error);
             System.out.println("error GetElectricityConsumptionForAllDevicesTogether: " + error.getMessage());
         }

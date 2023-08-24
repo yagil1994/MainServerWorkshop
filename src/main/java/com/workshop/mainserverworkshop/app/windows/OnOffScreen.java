@@ -1,4 +1,5 @@
 package com.workshop.mainserverworkshop.app.windows;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.workshop.mainserverworkshop.containers.IndexesContainer;
@@ -16,20 +17,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-public class OnOffScreen  {
+public class OnOffScreen {
     private final UIMediator uiMediator;
-    private final Gson gson ;
+    private final Gson gson;
 
-    public OnOffScreen()
-    {
+    public OnOffScreen() {
         gson = new Gson();
         uiMediator = UIMediator.getInstance();
     }
 
     @GetMapping("/workshop/on_off_screen/getOnOffScreen")
-    public ResponseEntity<String> GetPlugsStatus()
-    {
-        System.out.println("Func: " +"GetPlugsStatus " + "thread: " + Thread.currentThread().getName() + "\n");
+    public ResponseEntity<String> GetPlugsStatus() {
+        System.out.println("Func: " + "GetPlugsStatus " + "thread: " + Thread.currentThread().getName() + "\n");
         try {
             JsonObject body = new JsonObject();
             List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
@@ -43,9 +42,7 @@ public class OnOffScreen  {
             }
 
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(plugInfoContainerList));
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at GetPlugsStatus: " + error);
             System.out.println("error GetPlugsStatus: " + error.getMessage());
         }
@@ -54,32 +51,33 @@ public class OnOffScreen  {
     }
 
     @GetMapping("/workshop/plugMediator/flipPlugModeAccordingToIndex")
-    public ResponseEntity<String> flipPlugMode(@RequestParam String i_UiIndex){
-        System.out.println("Func: " +"flipPlugMode " + "thread: " + Thread.currentThread().getName() + "\n");
+    public ResponseEntity<String> flipPlugMode(@RequestParam String i_UiIndex) {
+        System.out.println("Func: " + "flipPlugMode " + "thread: " + Thread.currentThread().getName() + "\n");
         try {
             HttpStatus httpStatus = HttpStatus.OK;
             JsonObject body = new JsonObject();
             int UiIndex = Integer.parseInt(i_UiIndex);
-            synchronized (this.uiMediator.getPlugsMediator().GetInstance()) {
-                Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
-                if (plug == null) {
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    body.addProperty("Error: ", "Index doesn't exist");
-                } else {
-                    boolean wasOn = plug.flipModeAndReturnPreviousMode();
-                    String translateTrueToOnOrFalseToOff = wasOn ? "on" : "off";
-                    String OppositeTranslateTrueToOnOrFalseToOff = !wasOn ? "on" : "off";
-                    String title = plug.getPlugTitle();
-                    body.addProperty("Main serer side: ", title + " is going to change plug mode soon.. ");
-                    body.addProperty("Main serer side", title + "  mode was before: " + translateTrueToOnOrFalseToOff + " and it's " + OppositeTranslateTrueToOnOrFalseToOff);
-                    String responseFromPlug = wasOn ? plug.off() : plug.on();
-                    body.addProperty("Plug response: ", responseFromPlug);
-                }
-            return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+            Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(UiIndex);
+            if (plug == null) {
+                httpStatus = HttpStatus.BAD_REQUEST;
+                body.addProperty("Error: ", "Index doesn't exist");
+            } else {
+                boolean wasOn = plug.flipModeAndReturnPreviousMode();
+                String translateTrueToOnOrFalseToOff = wasOn ? "on" : "off";
+                String OppositeTranslateTrueToOnOrFalseToOff = !wasOn ? "on" : "off";
+                String title = plug.getPlugTitle();
+                body.addProperty("Main serer side: ", title + " is going to change plug mode soon.. ");
+                body.addProperty("Main serer side", title + "  mode was before: " + translateTrueToOnOrFalseToOff + " and it's " + OppositeTranslateTrueToOnOrFalseToOff);
+                String responseFromPlug = wasOn ? plug.off() : plug.on();
+                body.addProperty("Plug response: ", responseFromPlug);
             }
-        }
-        catch (Exception error)
-        {
+
+            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+            }
+
+            return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+        } catch (Exception error) {
             System.out.println("error at flipPlugMode: " + error);
             System.out.println("error flipPlugMode: " + error.getMessage());
         }
@@ -88,8 +86,8 @@ public class OnOffScreen  {
     }
 
     @GetMapping("/workshop/on_off_screen/getPlugStatus")
-    public ResponseEntity<String> GetPlugStatus(@RequestParam String i_UiIndex){
-        System.out.println("Func: " +"GetPlugStatus " + "thread: " + Thread.currentThread().getName() + "\n");
+    public ResponseEntity<String> GetPlugStatus(@RequestParam String i_UiIndex) {
+        System.out.println("Func: " + "GetPlugStatus " + "thread: " + Thread.currentThread().getName() + "\n");
         try {
             ResponseEntity<String> response;
             int plugIndex = Integer.parseInt(i_UiIndex);
@@ -101,9 +99,7 @@ public class OnOffScreen  {
             }
 
             return response;
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at GetPlugStatus: " + error);
             System.out.println("error GetPlugStatus: " + error.getMessage());
         }
@@ -112,8 +108,8 @@ public class OnOffScreen  {
     }
 
     @GetMapping("/workshop/on_off_screen/getInfoAboutOverTimeElectricityConsumers")
-    public ResponseEntity<String> GetInfoAboutOverTimeElectricityConsumers(){
-        System.out.println("Func: " +"GetInfoAboutOverTimeElectricityConsumers " + "thread: " + Thread.currentThread().getName() + "\n");
+    public ResponseEntity<String> GetInfoAboutOverTimeElectricityConsumers() {
+        System.out.println("Func: " + "GetInfoAboutOverTimeElectricityConsumers " + "thread: " + Thread.currentThread().getName() + "\n");
         try {
             List<String> indexes = new ArrayList<>();
             synchronized (uiMediator.getPlugsMediator().GetInstance()) {
@@ -124,9 +120,7 @@ public class OnOffScreen  {
                 });
             }
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(indexes));
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at GetInfoAboutOverTimeElectricityConsumers: " + error);
             System.out.println("error GetInfoAboutOverTimeElectricityConsumers: " + error.getMessage());
         }
@@ -135,9 +129,8 @@ public class OnOffScreen  {
     }
 
     @GetMapping("/workshop/on_off_screen/getAllOnPlugs")
-    public ResponseEntity<String> GetAllOnPlugs()
-    {
-        System.out.println("Func: " +"GetAllOnPlugs " + "thread: " + Thread.currentThread().getName() + "\n");
+    public ResponseEntity<String> GetAllOnPlugs() {
+        System.out.println("Func: " + "GetAllOnPlugs " + "thread: " + Thread.currentThread().getName() + "\n");
         try {
             JsonObject body = new JsonObject();
             List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
@@ -157,9 +150,7 @@ public class OnOffScreen  {
             indexesContainer.setJsonArguments(onPlugsIndexes.toArray(array));
 
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(array));
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at GetAllOnPlugs: " + error);
             System.out.println("error GetAllOnPlugs: " + error.getMessage());
         }
@@ -168,9 +159,8 @@ public class OnOffScreen  {
     }
 
     @GetMapping("/workshop/on_off_screen/getAllInvalidPlugs")
-    public ResponseEntity<String> GetAllInvalidPlugs()
-    {
-        System.out.println("Func: " +"GetAllInvalidPlugs " + "thread: " + Thread.currentThread().getName() + "\n");
+    public ResponseEntity<String> GetAllInvalidPlugs() {
+        System.out.println("Func: " + "GetAllInvalidPlugs " + "thread: " + Thread.currentThread().getName() + "\n");
         try {
             JsonObject body = new JsonObject();
             List<Plug> plugs = uiMediator.getPlugsMediator().getPlugsList();
@@ -189,9 +179,7 @@ public class OnOffScreen  {
             indexesContainer.setJsonArguments(onPlugsIndexes.toArray(array));
 
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(array));
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at GetAllInvalidPlugs: " + error);
             System.out.println("error GetAllInvalidPlugs: " + error.getMessage());
         }
@@ -200,9 +188,9 @@ public class OnOffScreen  {
     }
 
     @GetMapping("/workshop/on_off_screen/doNotTurnOffAfterOverTimeOrInvalidConsumption")
-    public ResponseEntity<String> DoNotTurnOffAfterOverTimeOrInvalidConsumption(@RequestParam String i_UiIndex,@RequestParam String  i_Type) {
+    public ResponseEntity<String> DoNotTurnOffAfterOverTimeOrInvalidConsumption(@RequestParam String i_UiIndex, @RequestParam String i_Type) {
         try {
-            System.out.println("Func: " +"DoNotTurnOffAfterOverTimeOrInvalidConsumption " + "thread: " + Thread.currentThread().getName() + "\n");
+            System.out.println("Func: " + "DoNotTurnOffAfterOverTimeOrInvalidConsumption " + "thread: " + Thread.currentThread().getName() + "\n");
             ResponseEntity<String> response;
             int plugIndex = Integer.parseInt(i_UiIndex);
             Plug plug = uiMediator.getPlugsMediator().GetPlugAccordingToUiIndex(plugIndex);
@@ -227,9 +215,7 @@ public class OnOffScreen  {
             }
 
             return response;
-        }
-        catch (Exception error)
-        {
+        } catch (Exception error) {
             System.out.println("error at DoNotTurnOffAfterOverTimeOrInvalidConsumption: " + error);
             System.out.println("error DoNotTurnOffAfterOverTimeOrInvalidConsumption: " + error.getMessage());
         }
@@ -239,26 +225,24 @@ public class OnOffScreen  {
 
     private Boolean checkIfThisPlugIsInOverTimeConsumption(Plug plug) {
         try {
-            System.out.println("Func: " +"checkIfThisPlugIsInOverTimeConsumption " + "thread: " + Thread.currentThread().getName() + "\n");
-        return plug.isOverTimeFlag() &&
-                (plug.getPlugType().equalsIgnoreCase("a.c") ||
-                        plug.getPlugType().equalsIgnoreCase("ac") ||
-                        plug.getPlugType().equalsIgnoreCase("air-Conditioner") ||
-                        plug.getPlugType().equalsIgnoreCase("air condition") ||
-                        plug.getPlugType().equalsIgnoreCase("airConditioner") ||
-                        plug.getPlugType().equalsIgnoreCase("tv") ||
-                        plug.getPlugType().equalsIgnoreCase("t.v") ||
-                        plug.getPlugType().equalsIgnoreCase("television") ||
-                        plug.getPlugType().equalsIgnoreCase("lamp") ||
-                        plug.getPlugType().equalsIgnoreCase("oven") ||
-                        plug.getPlugType().equalsIgnoreCase("stove")
-                );
-    }
-    catch (Exception error)
-    {
-        System.out.println("error at checkIfThisPlugIsInOverTimeConsumption: " + error);
-        System.out.println("error checkIfThisPlugIsInOverTimeConsumption: " + error.getMessage());
-    }
+            System.out.println("Func: " + "checkIfThisPlugIsInOverTimeConsumption " + "thread: " + Thread.currentThread().getName() + "\n");
+            return plug.isOverTimeFlag() &&
+                    (plug.getPlugType().equalsIgnoreCase("a.c") ||
+                            plug.getPlugType().equalsIgnoreCase("ac") ||
+                            plug.getPlugType().equalsIgnoreCase("air-Conditioner") ||
+                            plug.getPlugType().equalsIgnoreCase("air condition") ||
+                            plug.getPlugType().equalsIgnoreCase("airConditioner") ||
+                            plug.getPlugType().equalsIgnoreCase("tv") ||
+                            plug.getPlugType().equalsIgnoreCase("t.v") ||
+                            plug.getPlugType().equalsIgnoreCase("television") ||
+                            plug.getPlugType().equalsIgnoreCase("lamp") ||
+                            plug.getPlugType().equalsIgnoreCase("oven") ||
+                            plug.getPlugType().equalsIgnoreCase("stove")
+                    );
+        } catch (Exception error) {
+            System.out.println("error at checkIfThisPlugIsInOverTimeConsumption: " + error);
+            System.out.println("error checkIfThisPlugIsInOverTimeConsumption: " + error.getMessage());
+        }
 
         return null;
     }
