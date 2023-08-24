@@ -62,6 +62,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             plugsList.add(availableInternalIndex, newPlug);
             SavePlugToDB(newPlug);
             res = true;
+            System.out.println("new plug added: plug name: " + i_PlugTitle + " internal index: " + availableInternalIndex + " uiIndex: " + i_UiIndex + " port: "+ i_Port + "\n");
         }
 
         return res;
@@ -144,8 +145,9 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         synchronized (this) {
             activePlugsIndexesList = this.plugsList.stream()
                     .filter(t-> t.getOnOffStatus().equals("on"))
-                    .map(Plug::getInternalPlugIndex).toList();
-        }
+                    .map(Plug::getUiIndex).toList();
+          }
+
 
         int index = !activePlugsIndexesList.isEmpty() ?
                 activePlugsIndexesList.get(new Random().nextInt(activePlugsIndexesList.size()))
