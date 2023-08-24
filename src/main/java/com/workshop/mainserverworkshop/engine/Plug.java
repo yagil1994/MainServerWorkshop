@@ -143,15 +143,11 @@ public class Plug implements IModeListener, Comparable<Plug> {
 
     public float[] SimulateAnnualElectricityConsumption() {
         float[] annualElectricityConsumption = electricityStorage.SimulateAnnualElectricityStatisticsAndGetMonthList();
-        //plugsMediator.SavePlugToDB(this);
-        plugsMediator.UpdateAllPlugsInDB();
         return annualElectricityConsumption;
     }
 
     public float[] SimulateWeeklyElectricityConsumption() {
         float[] weeklyElectricityConsumption = electricityStorage.SimulateWeeklyElectricityStatisticsAndGetDayList();
-        //plugsMediator.SavePlugToDB(this);
-        plugsMediator.UpdateAllPlugsInDB();
         return weeklyElectricityConsumption;
     }
 
@@ -192,9 +188,6 @@ public class Plug implements IModeListener, Comparable<Plug> {
             }
         }, 5000, 5000);
 
-        //plugsMediator.SavePlugToDB(this);
-        plugsMediator.UpdateAllPlugsInDB();
-
         return res;
     }
 
@@ -224,9 +217,6 @@ public class Plug implements IModeListener, Comparable<Plug> {
 
     public void updateStatus(boolean newStatus) {
         status = newStatus;
-        //plugsMediator.SavePlugToDB(this);
-        plugsMediator.UpdateAllPlugsInDB();
-
     }
 
     public String getOnOffStatus() {
