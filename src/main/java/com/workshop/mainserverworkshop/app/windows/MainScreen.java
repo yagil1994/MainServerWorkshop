@@ -121,7 +121,7 @@ public class MainScreen {
                 }
                 uiMediator.getPlugsMediator().AddPlugsFromDB();
                 int tmpPort = getMaxPortAccordingToPlugsList();
-                port = uiMediator.getPlugsMediator().getPlugsList().size() == 0 ? PORT_INIT : (tmpPort + 1);
+                port = uiMediator.getPlugsMediator().getPlugsList().isEmpty() ? PORT_INIT : (tmpPort + 1);
             }
 
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plugs from DB have been fetched"));
