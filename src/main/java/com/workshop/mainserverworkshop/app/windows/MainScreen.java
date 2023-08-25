@@ -86,9 +86,8 @@ public class MainScreen {
     public ResponseEntity<String> SeePlugsAtDB(){
         System.out.println("Func: " +"SeePlugsAtDB " + "thread: " + Thread.currentThread().getName() + "\n");
         JsonObject body = new JsonObject();
-
         try {
-            List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().FetchPlugsFromDB();
+            List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().MedFetchPlugsFromDB();
             List<ConnectedPlugsDetailsContainer> connectedPlugsDetailsContainer = new ArrayList<>();
             if (plugSaveList.isEmpty()) {
                 body.addProperty("result: ", "no plugs are connected yet!");
@@ -115,7 +114,7 @@ public class MainScreen {
         JsonObject body = new JsonObject();
         try {
             synchronized (this.uiMediator.getPlugsMediator().GetInstance()) {
-                List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().FetchPlugsFromDB();
+                List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().MedFetchPlugsFromDB();
                 if (plugSaveList.isEmpty()) {
                     body.addProperty("result: ", "there are no plugs in DB");
                 }

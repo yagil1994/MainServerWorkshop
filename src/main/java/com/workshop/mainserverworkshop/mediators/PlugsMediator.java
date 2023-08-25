@@ -27,6 +27,8 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     private final List<List<IModeListener>> signedUpPlugsForModesList;
     private static PlugRepoController plugRepoController;
 
+    private final Object DB_Lock = new Object();
+
     public static void UpdatePlugController(PlugRepoController plugRepoController) {
         PlugsMediator.plugRepoController = plugRepoController;
     }
@@ -261,23 +263,31 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         plugRepoController.RemovePlugFromDB(createPlugSave(plug));
     }
 
-    synchronized public void UpdateAllPlugsInDB() {
-        Collections.sort(plugsList);
-        plugsList.forEach(this::SavePlugToDB);
+     public void UpdateAllPlugsInDB() {
+
+//         synchronized (this)
+//        {
+//            Collections.sort(plugsList);
+//        }
+         synchronized(DB_Lock)
+         {
+             plugsList.forEach(this::SavePlugToDB);
+         }
     }
 
     public void RemoveAllPlugsFromDB() {
-        List<PlugSave> plugsFromDB = FetchPlugsFromDB();
+        List<PlugSave> plugsFromDB = MedFetchPlugsFromDB();
         List<Plug> plugList = convertPlugSaveListToPlugList(plugsFromDB);
         plugList.forEach(this::RemovePlugFromDB);
     }
 
-    synchronized public List<PlugSave> FetchPlugsFromDB() {
+    synchronized public List<PlugSave> MedFetchPlugsFromDB() {
+
         return plugRepoController.GetAllPlugsFromDB();
     }
 
     private List<Plug> getPlugsInDBAndNotOnList() {
-        List<PlugSave> plugSaveList = FetchPlugsFromDB();
+        List<PlugSave> plugSaveList = MedFetchPlugsFromDB();
         List<PlugSave> plugSavesOnlyInDB = new ArrayList<>();
         for (PlugSave plugSave : plugSaveList) {
             if (!plugsList.stream().anyMatch(plug -> plug.getPlugTitle().equals(plugSave.getPlugTitle()))) {
