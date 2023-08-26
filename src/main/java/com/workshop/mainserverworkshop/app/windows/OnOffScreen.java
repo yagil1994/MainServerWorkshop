@@ -72,9 +72,9 @@ public class OnOffScreen {
                 body.addProperty("Plug response: ", responseFromPlug);
             }
 
-            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
-                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
-            }
+//            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+//                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+//            }
 
             return ResponseEntity.status(httpStatus).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
         } catch (Exception error) {

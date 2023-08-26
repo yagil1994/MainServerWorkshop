@@ -26,7 +26,7 @@ public class Main {
         staticPlugRepository = plugRepository;
         this.plugRepoController = new PlugRepoController(staticPlugRepository);
         PlugsMediator.UpdatePlugController(plugRepoController);
-        UIMediator.getInstance().getPlugsMediator().AddPlugsFromDB();
+        //UIMediator.getInstance().getPlugsMediator().AddPlugsFromDB();
     }
 
     public static void main(String[] args) {

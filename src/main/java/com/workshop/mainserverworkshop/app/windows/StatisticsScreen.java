@@ -41,9 +41,9 @@ public class StatisticsScreen {
                 response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(monthsConsumption));
             }
 
-            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
-                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
-            }
+//            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+//                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+//            }
 
             return response;
         } catch (Exception error) {
@@ -68,9 +68,9 @@ public class StatisticsScreen {
                 response = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(weeklyConsumption));
             }
 
-            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
-                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
-            }
+//            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+//                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+//            }
 
             return response;
         } catch (Exception error) {
@@ -140,9 +140,9 @@ public class StatisticsScreen {
                 res[month] = monthSum;
             }
 
-            synchronized (this.uiMediator.getPlugsMediator().GetInstance()) {
-                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
-            }
+//            synchronized (this.uiMediator.getPlugsMediator().GetInstance()) {
+//                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+//            }
             result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
 
         } catch (Exception err) {
@@ -186,9 +186,9 @@ public class StatisticsScreen {
                 res[day] = daySum;
             }
 
-            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
-                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
-            }
+//            synchronized (uiMediator.getPlugsMediator().GetInstance()) {
+//                uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+//            }
             result = ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
         } catch (Exception err) {
             result = ResponseEntity.status(321).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(res));
