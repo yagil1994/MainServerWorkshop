@@ -24,7 +24,8 @@ public class Plug implements IModeListener, Comparable<Plug> {
         starter(i_Process, i_port, i_PlugTitle, i_PlugType, i_PlugsMediator, i_InternalIndex, i_UiIndex, i_minElectricityVolt, i_maxElectricityVolt);
         initTimerAndElectricityConsumption();
         //plugsMediator.SavePlugToDB(this);
-        plugsMediator.UpdateAllPlugsInDB();
+        //plugsMediator.UpdateAllPlugsInDB();
+        System.out.println("finish init plug in Plug (Fake)\n");
     }
 
     //form PlugSave
@@ -53,6 +54,7 @@ public class Plug implements IModeListener, Comparable<Plug> {
         electricityConsumptionTimer = new Timer();
         overTimeTimer = new Timer();
         consumeElectricity();
+        System.out.println("finish init overTimeTimer in initTimerAndElectricityConsumption\n");
     }
 
     public float getInvalidUsageVolt() {
@@ -114,13 +116,13 @@ public class Plug implements IModeListener, Comparable<Plug> {
         }
 
         //plugsMediator.SavePlugToDB(this);
-        plugsMediator.UpdateAllPlugsInDB();
+        //plugsMediator.UpdateAllPlugsInDB();
     }
 
     public float GetElectricityConsumptionTillNow() {
         float res = electricityStorage.getElectricityUsageTillNow();
         //plugsMediator.SavePlugToDB(this);
-        plugsMediator.UpdateAllPlugsInDB();
+        //plugsMediator.UpdateAllPlugsInDB();
 
         return res;
     }
@@ -137,7 +139,7 @@ public class Plug implements IModeListener, Comparable<Plug> {
         if (isFakePlug()) {
             UiIndex = i_NewUiIndex;
             //plugsMediator.SavePlugToDB(this);
-            plugsMediator.UpdateAllPlugsInDB();
+            //plugsMediator.UpdateAllPlugsInDB();
         }
     }
 
@@ -154,7 +156,10 @@ public class Plug implements IModeListener, Comparable<Plug> {
     public String off() {
         String res = "turned off";
         status = false;
-        overTimeTimer.cancel();
+        if(overTimeTimer != null){
+            overTimeTimer.cancel();
+            System.out.println("overTimeTimer canceled from Off");
+        }
         overTimeFlag = false;
         if (!fakePlug) {
             plugsMediator.RealPlugOnOrOff("off");
@@ -163,7 +168,7 @@ public class Plug implements IModeListener, Comparable<Plug> {
         }
 
         //plugsMediator.SavePlugToDB(this);
-        plugsMediator.UpdateAllPlugsInDB();
+        //plugsMediator.UpdateAllPlugsInDB();
 
         return res;
     }
@@ -172,6 +177,7 @@ public class Plug implements IModeListener, Comparable<Plug> {
         String res = "turned on";
         status = true;
         overTimeTimer = new Timer();
+        System.out.println("init overTimeTimer in On func\n");
         if (!fakePlug) {
             plugsMediator.RealPlugOnOrOff("on");
         } else if (process.isAlive()) {
@@ -181,10 +187,13 @@ public class Plug implements IModeListener, Comparable<Plug> {
         overTimeTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                overTimeTimer.cancel();
+                if(overTimeTimer != null){
+                    overTimeTimer.cancel();
+                    System.out.println("overTimeTimer canceled from On");
+                }
                 overTimeFlag = true;
                 //plugsMediator.SavePlugToDB(plugsMediator.GetPlugAccordingToUiIndex(UiIndex));
-                plugsMediator.UpdateAllPlugsInDB();
+                //plugsMediator.UpdateAllPlugsInDB();
             }
         }, 5000, 5000);
 
@@ -195,7 +204,7 @@ public class Plug implements IModeListener, Comparable<Plug> {
         overTimeTimer.cancel();
         overTimeFlag = false;
         //plugsMediator.SavePlugToDB(this);
-        plugsMediator.UpdateAllPlugsInDB();
+        //plugsMediator.UpdateAllPlugsInDB();
     }
 
 

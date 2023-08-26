@@ -26,8 +26,9 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     private final OkHttpClient httpClient;
     private final List<List<IModeListener>> signedUpPlugsForModesList;
     private static PlugRepoController plugRepoController;
+    private Timer DBTimer;
 
-    public static void UpdatePlugController(PlugRepoController plugRepoController) {
+        public static void UpdatePlugController(PlugRepoController plugRepoController) {
         PlugsMediator.plugRepoController = plugRepoController;
     }
 
@@ -38,6 +39,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         signedUpPlugsForModesList.add(new ArrayList<>());   //for sleep list
         httpClient = new OkHttpClient();
         indexesFreeList = new ArrayList<>(MAX_PLUGS);
+        DBTimer = new Timer();
         for (int i = 0; i < MAX_PLUGS; i++) {
             indexesFreeList.add(true);
         }
@@ -60,7 +62,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
             indexesFreeList.set(availableInternalIndex, false);
             Plug newPlug = new Plug(i_Process, i_Port, i_PlugTitle, i_PlugType, this, availableInternalIndex, i_UiIndex, i_MinElectricityVolt, i_MaxElectricityVolt);
             plugsList.add(availableInternalIndex, newPlug);
-            SavePlugToDB(newPlug);
+            //SavePlugToDB(newPlug);
             res = true;
             System.out.println("new plug added: plug name: " + i_PlugTitle + " internal index: " + availableInternalIndex + " uiIndex: " + i_UiIndex + " port: " + i_Port + "\n");
         }
@@ -112,14 +114,14 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         synchronized (this) {
             signedUpPlugsForModesList.get(i_ModeType).add(i_ModeListener);
         }
-        UpdateAllPlugsInDB();
+        //UpdateAllPlugsInDB();
     }
 
     public void removeModeListener(IModeListener i_ModeListener, int i_ModeType) {
         synchronized (this) {
             signedUpPlugsForModesList.get(i_ModeType).remove(i_ModeListener);
         }
-        UpdateAllPlugsInDB();
+        //UpdateAllPlugsInDB();
     }
 
      private void removePlugFromAllModeLists(Plug i_Plug) {
@@ -179,11 +181,11 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         synchronized (this){
             removePlugFromAllModeLists(plug);
             indexesFreeList.set(internalIndex, true);
-            RemovePlugFromDB(plug);
+            //RemovePlugFromDB(plug);
             plugsList.remove(plug);
             if (i_WithRefreshUiIndexes) {
                 RefreshUiIndexes();
-                UpdateAllPlugsInDB();
+                //UpdateAllPlugsInDB();
             }
         }
     }
@@ -242,7 +244,23 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return plugList;
     }
 
+    public void cancelDBTimer() {
+        if (DBTimer != null) {
+            DBTimer.cancel();
+        }
+    }
+
     //************************* Data Base *************************/
+
+    public void launchDBTimer() {
+        class Helper extends TimerTask {
+            public void run() {
+                RemoveAndSaveAllPlugsInDB();
+            }
+        }
+        TimerTask removeAndSaveAllPlugsOnDB = new Helper();
+        DBTimer.schedule(removeAndSaveAllPlugsOnDB, 1000, 5000);
+    }
 
     private PlugSave createPlugSave(Plug plug) {
         List<Plug> plugsRegisteredToSleepModeList = getPlugsThatRegisteredForMode(SLEEP_MODE_LIST);
@@ -253,7 +271,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return new PlugSave(plug, registeredToSleepMode, registeredToSafeMode);
     }
 
-    synchronized public void SavePlugToDB(Plug plug) { //todo check from here if there're threads problems - there is
+    synchronized public void SavePlugToDB(Plug plug) {
         plugRepoController.SavePlugToDB(createPlugSave(plug));
     }
 
@@ -261,23 +279,36 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         plugRepoController.RemovePlugFromDB(createPlugSave(plug));
     }
 
-    synchronized public void UpdateAllPlugsInDB() {
-        Collections.sort(plugsList);
-        plugsList.forEach(this::SavePlugToDB);
+     public void UpdateAllPlugsInDB() { //todo sort needed?
+//         synchronized (this)
+//        {
+//            Collections.sort(plugsList);
+//        }
+             plugsList.forEach(this::SavePlugToDB);
+    }
+
+    public void RemoveAndSaveAllPlugsInDB(){
+        //System.out.println("Func: " +"RemoveAndSaveAllPlugsInDB " + "thread: " + Thread.currentThread().getName() + "\n");
+        RemoveAllPlugsFromDB();
+        synchronized (this){
+            plugsList.forEach(this::SavePlugToDB);
+        }
     }
 
     public void RemoveAllPlugsFromDB() {
-        List<PlugSave> plugsFromDB = FetchPlugsFromDB();
-        List<Plug> plugList = convertPlugSaveListToPlugList(plugsFromDB);
-        plugList.forEach(this::RemovePlugFromDB);
+       // System.out.println("Func: " +"RemoveAllPlugsFromDB " + "thread: " + Thread.currentThread().getName() + "\n");
+        List<PlugSave> plugsFromDB = MedFetchPlugsFromDB();
+        List<Plug> convertedPlugList = convertPlugSaveListToPlugList(plugsFromDB);
+        convertedPlugList.forEach(this::RemovePlugFromDB);
     }
 
-    synchronized public List<PlugSave> FetchPlugsFromDB() {
+    synchronized public List<PlugSave> MedFetchPlugsFromDB() {
+        //System.out.println("Func: " +"MedFetchPlugsFromDB " + "thread: " + Thread.currentThread().getName() + "\n");
         return plugRepoController.GetAllPlugsFromDB();
     }
 
     private List<Plug> getPlugsInDBAndNotOnList() {
-        List<PlugSave> plugSaveList = FetchPlugsFromDB();
+        List<PlugSave> plugSaveList = MedFetchPlugsFromDB();
         List<PlugSave> plugSavesOnlyInDB = new ArrayList<>();
         for (PlugSave plugSave : plugSaveList) {
             if (!plugsList.stream().anyMatch(plug -> plug.getPlugTitle().equals(plugSave.getPlugTitle()))) {
@@ -289,6 +320,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
     }
 
     public void AddPlugsFromDB() {
+        System.out.println("Func: " +"AddPlugsFromDB " + "thread: " + Thread.currentThread().getName() + "\n");
         List<Plug> plugListToAdd = getPlugsInDBAndNotOnList();
         if (plugListToAdd != null) {
             synchronized (this) {

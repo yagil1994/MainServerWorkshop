@@ -86,9 +86,8 @@ public class MainScreen {
     public ResponseEntity<String> SeePlugsAtDB(){
         System.out.println("Func: " +"SeePlugsAtDB " + "thread: " + Thread.currentThread().getName() + "\n");
         JsonObject body = new JsonObject();
-
         try {
-            List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().FetchPlugsFromDB();
+            List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().MedFetchPlugsFromDB();
             List<ConnectedPlugsDetailsContainer> connectedPlugsDetailsContainer = new ArrayList<>();
             if (plugSaveList.isEmpty()) {
                 body.addProperty("result: ", "no plugs are connected yet!");
@@ -110,12 +109,12 @@ public class MainScreen {
     }
 
     @GetMapping("/workshop/mainScreen/FetchPlugsFromDB")
-    public ResponseEntity<String> FetchPlugsFromDB(){
+    public ResponseEntity<String> FetchPlugsFromDBAndStartDBTimer(){
         System.out.println("Func: " +"FetchPlugsFromDB " + "thread: " + Thread.currentThread().getName() + "\n");
         JsonObject body = new JsonObject();
         try {
             synchronized (this.uiMediator.getPlugsMediator().GetInstance()) {
-                List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().FetchPlugsFromDB();
+                List<PlugSave> plugSaveList = uiMediator.getPlugsMediator().MedFetchPlugsFromDB();
                 if (plugSaveList.isEmpty()) {
                     body.addProperty("result: ", "there are no plugs in DB");
                 }
@@ -123,7 +122,7 @@ public class MainScreen {
                 int tmpPort = getMaxPortAccordingToPlugsList();
                 port = uiMediator.getPlugsMediator().getPlugsList().isEmpty() ? PORT_INIT : (tmpPort + 1);
             }
-
+            uiMediator.getPlugsMediator().launchDBTimer();
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson("plugs from DB have been fetched"));
         }
         catch (Exception error)
@@ -166,7 +165,7 @@ public class MainScreen {
                 uiMediator.getPlugsMediator().closeProcess(index);
             }
 
-            uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
+            //uiMediator.getPlugsMediator().UpdateAllPlugsInDB();
             body.addProperty("result: ", "all processes have been removed!");
             //port = PORT_INIT;
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
@@ -178,6 +177,25 @@ public class MainScreen {
         }
         return null;
     }
+
+    @GetMapping("/workshop/mainScreen/safeCloseServer")
+    public ResponseEntity<String> safeCloseServer() {
+        System.out.println("Func: " +"safeCloseServer " + "thread: " + Thread.currentThread().getName() + "\n");
+        try {
+            JsonObject body = new JsonObject();
+            uiMediator.getPlugsMediator().cancelDBTimer();
+            body.addProperty("result: ", "you can close server safely now!");
+
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(gson.toJson(body));
+        }
+        catch (Exception error)
+        {
+            System.out.println("error at safeCloseServer: " + error);
+            System.out.println("error safeCloseServer: " + error.getMessage());
+        }
+        return null;
+    }
+
 
     @PostMapping("/workshop/mainScreen/RegisterToSleepMode")
     public ResponseEntity<String> RegisterToSleepMode(@RequestBody String i_JsonArguments) {
