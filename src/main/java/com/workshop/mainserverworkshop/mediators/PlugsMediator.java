@@ -248,11 +248,15 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         if (DBTimer != null) {
             DBTimer.cancel();
         }
+        else {
+            System.out.println("DBTimer is null\n");
+        }
     }
 
     //************************* Data Base *************************/
 
     public void launchDBTimer() {
+            try{
         class Helper extends TimerTask {
             public void run() {
                 RemoveAndSaveAllPlugsInDB();
@@ -260,6 +264,10 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         }
         TimerTask removeAndSaveAllPlugsOnDB = new Helper();
         DBTimer.schedule(removeAndSaveAllPlugsOnDB, 1000, 5000);
+            }catch (Exception exception){
+                System.out.println("launchDBTimer: " + exception);
+                System.out.println("launchDBTimer: " + exception.getMessage());
+            }
     }
 
     private PlugSave createPlugSave(Plug plug) {
@@ -271,7 +279,7 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         return new PlugSave(plug, registeredToSleepMode, registeredToSafeMode);
     }
 
-    synchronized public void SavePlugToDB(Plug plug) {
+    public void SavePlugToDB(Plug plug) {
         plugRepoController.SavePlugToDB(createPlugSave(plug));
     }
 
@@ -279,23 +287,20 @@ public class PlugsMediator { //this mediator sends http requests to the plugs(th
         plugRepoController.RemovePlugFromDB(createPlugSave(plug));
     }
 
-     public void UpdateAllPlugsInDB() { //todo sort needed?
-//         synchronized (this)
-//        {
-//            Collections.sort(plugsList);
-//        }
-             plugsList.forEach(this::SavePlugToDB);
-    }
-
-    public void RemoveAndSaveAllPlugsInDB(){
-        //System.out.println("Func: " +"RemoveAndSaveAllPlugsInDB " + "thread: " + Thread.currentThread().getName() + "\n");
+    synchronized public void RemoveAndSaveAllPlugsInDB(){
+        //System.out.println("*(START)Func: " +"RemoveAndSaveAllPlugsInDB " + "thread: " + Thread.currentThread().getName() + "\n");
         RemoveAllPlugsFromDB();
-        synchronized (this){
+        //synchronized (this){
             plugsList.forEach(this::SavePlugToDB);
-        }
+        //System.out.println("**(FIN)Func: " +"RemoveAndSaveAllPlugsInDB " + "thread: " + Thread.currentThread().getName() + "\n");
+        //}
     }
 
     public void RemoveAllPlugsFromDB() {
+        plugRepoController.RemoveAllPlugsFromDB();
+    }
+
+    public void RemoveAllPlugsFromDBOld() {
        // System.out.println("Func: " +"RemoveAllPlugsFromDB " + "thread: " + Thread.currentThread().getName() + "\n");
         List<PlugSave> plugsFromDB = MedFetchPlugsFromDB();
         List<Plug> convertedPlugList = convertPlugSaveListToPlugList(plugsFromDB);

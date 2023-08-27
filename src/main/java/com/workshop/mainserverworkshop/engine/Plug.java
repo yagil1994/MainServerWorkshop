@@ -90,6 +90,7 @@ public class Plug implements IModeListener, Comparable<Plug> {
     }
 
     private void consumeElectricity() {
+        try{
         class Helper extends TimerTask {
             public void run() {
                 if (status) {
@@ -104,6 +105,10 @@ public class Plug implements IModeListener, Comparable<Plug> {
         }
         TimerTask updateElectricityUsageTimerTask = new Helper();
         electricityConsumptionTimer.schedule(updateElectricityUsageTimerTask, 1000, 1000);
+        } catch (Exception exception){
+            System.out.println("consumeElectricity: " + exception);
+            System.out.println("consumeElectricity: " + exception.getMessage());
+        }
     }
 
     public boolean isInvalidPlug() {
